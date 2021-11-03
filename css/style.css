@@ -1,0 +1,10 @@
+.liens {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+}
+.contenu {
+  position: absolute;
+  right: 50%;
+  bottom: 50%;
+}
