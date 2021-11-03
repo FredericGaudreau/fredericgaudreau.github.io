@@ -8,3 +8,18 @@
   right: 50%;
   bottom: 50%;
 }
+.apropos {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 40%;
+}
+.header{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+a:link {
+    color: black;
+    text-decoration: none;
+  }
