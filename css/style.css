@@ -4,9 +4,9 @@
   right: 10px;
 }
 .contenu {
-  position: absolute;
+  /* position: absolute;
   right: 50%;
-  bottom: 50%;
+  bottom: 50%; */
 }
 .apropos {
   position: absolute;
@@ -14,15 +14,22 @@
   right: 10%;
   bottom: 40%;
 }
-.header{
-    position: fixed;
-    top: 10px;
-    right: 10px;
+.header {
+  position: fixed;
+  top: 10px;
+  right: 10px;
 }
 a:link {
-    color: black;
-    text-decoration: none;
-  }
-  a:visited {
-    color: black;
-    text-decoration: none;  }
+  color: black;
+  text-decoration: none;
+}
+a:visited {
+  color: black;
+  text-decoration: none;
+}
+
+canvas {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+}
