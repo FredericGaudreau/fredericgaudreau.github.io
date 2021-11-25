@@ -6,21 +6,30 @@ var g;
 var b;
 
 function setup() {
-  createCanvas(500, 500);
-
-  x = width / 2;
-  y = width / 2;
+  createCanvas(windowWidth - 20, windowHeight - 100); // create canvas with window width and height as dimensions
+  // cnv.style("display", "block"); // make canvas visible
+  // x = width / 2; // set starting x position
+  // y = width / 2; // set starting y position
+  x = width / 20; // set starting x position
+  y = width / 20; // set starting y position
 
   r = random(0, 255);
   g = random(0, 255);
   b = random(0, 255);
 
-  background(32);
+  background(300); // uncomment pour avoir un fond blanc
+  // background(32);
+
+  // speed(200); // set speed
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
   // randomly move line
-  var randomValue = random();
+  var randomValue = random(); // random value between 0 and 1
   if (randomValue < 0.25) {
     x--;
   } else if (randomValue < 0.5) {
@@ -55,7 +64,7 @@ function draw() {
   g = constrain(g, 0, 255);
   b = constrain(b, 0, 255);
 
-  stroke(r, g, b);
+  stroke(r, g, b); // set stroke color
 
-  point(x, y);
+  point(x, y); // draw point
 }
