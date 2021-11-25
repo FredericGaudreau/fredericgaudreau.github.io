@@ -7,10 +7,10 @@ var b;
 
 function setup() {
   createCanvas(windowWidth - 20, windowHeight - 100); // create canvas with window width and height as dimensions
-  // cnv.style("display", "block"); // make canvas visible
-  // x = width / 2; // set starting x position
-  // y = width / 2; // set starting y position
-  x = width / 20; // set starting x position
+  
+  // x = width / 2; // set starting x position - center of canvas
+  // y = width / 2; // set starting y position - center of canvas
+  x = width / 20; // set starting x position 
   y = width / 20; // set starting y position
 
   r = random(0, 255);
@@ -18,9 +18,9 @@ function setup() {
   b = random(0, 255);
 
   background(300); // uncomment pour avoir un fond blanc
-  // background(32);
+  // background(32); // uncomment pour avoir un fond noir
 
-  // speed(200); // set speed
+  // speed(200); // set speed - ne fonctionne pas
 }
 
 function windowResized() {

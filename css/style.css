@@ -9,8 +9,17 @@
 /* z-index ne fonctionne pas */
 
 .contenu {
-  position: relative;
-  z-index: 1;
+ position: absolute;
+  right: 50%;
+  bottom: 50%;
+    z-index: 1;
+  
+}
+.apropos {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 40%;
 }
 .header {
   position: fixed;
