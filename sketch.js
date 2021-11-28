@@ -6,7 +6,7 @@ var g;
 var b;
 
 function setup() {
-  createCanvas(windowWidth - 20, windowHeight - 100); // create canvas with window width and height as dimensions
+  createCanvas(windowWidth-10, windowHeight-20); // create canvas with window width and height as dimensions
   
   // x = width / 2; // set starting x position - center of canvas
   // y = width / 2; // set starting y position - center of canvas
@@ -20,7 +20,7 @@ function setup() {
   background(300); // uncomment pour avoir un fond blanc
   // background(32); // uncomment pour avoir un fond noir
 
-  // speed(200); // set speed - ne fonctionne pas
+  // speed(2); // set speed - ne fonctionne pas
 }
 
 function windowResized() {

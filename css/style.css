@@ -9,18 +9,19 @@
 /* z-index ne fonctionne pas */
 
 .contenu {
- position: absolute;
-  right: 50%;
+  position: absolute;
+  left: 20%;
   bottom: 50%;
-    z-index: 1;
-  
+  right: 20%;
+  /* z-index: 1; */
 }
-.apropos {
+/* n'est plus nécessaire */
+/* .apropos {
   position: absolute;
   left: 10%;
   right: 10%;
   bottom: 40%;
-}
+} */
 .header {
   position: fixed;
   top: 10px;
