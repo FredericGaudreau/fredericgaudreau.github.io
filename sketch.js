@@ -6,14 +6,16 @@ var g;
 var b;
 
 function setup() {
-  createCanvas(windowWidth-10, windowHeight-20); // create canvas with window width and height as dimensions
+  createCanvas(windowWidth*.99, windowHeight*.97); // create canvas with window width and height as dimensions
   
   // x = width / 2; // set starting x position - center of canvas
   // y = width / 2; // set starting y position - center of canvas
   // x = width / 20; // set starting x position - left side of canvas
   // y = width / 20; // set starting y position - upper side of canvas
-  x= random(width);
-  y= random(height);
+  x= random(0,windowWidth*.99); // set starting x position - random
+  y= random(0,windowHeight*.97); // set starting y position - random
+  // y= random(windowWidth); // set starting y position - random
+  // x= random(windowHeight); // set starting x position - random
 
   r = random(0, 255); // set starting red value
   g = random(0, 255); // set starting green value
@@ -24,7 +26,7 @@ function setup() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth-10, windowHeight-20); // resize canvas to window width and height
+  resizeCanvas(windowWidth*.99, windowHeight*.97); // resize canvas to window width and height
 }
 
 function draw() {
