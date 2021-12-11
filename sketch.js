@@ -10,8 +10,10 @@ function setup() {
   
   // x = width / 2; // set starting x position - center of canvas
   // y = width / 2; // set starting y position - center of canvas
-  x = width / 20; // set starting x position 
-  y = width / 20; // set starting y position
+  // x = width / 20; // set starting x position 
+  // y = width / 20; // set starting y position
+  x= random(width);
+  y= random(height);
 
   r = random(0, 255);
   g = random(0, 255);
@@ -19,8 +21,6 @@ function setup() {
 
   background(300); // uncomment pour avoir un fond blanc
   // background(32); // uncomment pour avoir un fond noir
-
-  // speed(2); // set speed - ne fonctionne pas
 }
 
 function windowResized() {
@@ -67,4 +67,5 @@ function draw() {
   stroke(r, g, b); // set stroke color
 
   point(x, y); // draw point
+  point(y, x); // draw point (mirrored)
 }
