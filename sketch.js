@@ -10,21 +10,21 @@ function setup() {
   
   // x = width / 2; // set starting x position - center of canvas
   // y = width / 2; // set starting y position - center of canvas
-  // x = width / 20; // set starting x position 
-  // y = width / 20; // set starting y position
+  // x = width / 20; // set starting x position - left side of canvas
+  // y = width / 20; // set starting y position - upper side of canvas
   x= random(width);
   y= random(height);
 
-  r = random(0, 255);
-  g = random(0, 255);
-  b = random(0, 255);
+  r = random(0, 255); // set starting red value
+  g = random(0, 255); // set starting green value
+  b = random(0, 255); // set starting blue value
 
   background(300); // uncomment pour avoir un fond blanc
   // background(32); // uncomment pour avoir un fond noir
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth-10, windowHeight-20); // resize canvas to window width and height
 }
 
 function draw() {
