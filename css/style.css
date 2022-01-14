@@ -1,5 +1,7 @@
 * {
   font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden; 
+  /* // Hides the overflow of the page .. en théorie*/
 }
 .liens {
   position: fixed;
@@ -10,6 +12,7 @@
 /* z-index ne fonctionne pas */
 
 .contenu {
+  
   position: absolute;
   left: 20%;
   bottom: 50%;
@@ -40,6 +43,7 @@ a:visited {
 /* z-index ne fonctionne pas */
 /* https://github.com/processing/p5.js/wiki/Positioning-your-canvas */
 canvas {
+  
   position: relative;
   z-index: -1;
 }

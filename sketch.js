@@ -6,14 +6,14 @@ var g;
 var b;
 
 function setup() {
-  createCanvas(windowWidth * 0.99, windowHeight * 0.98); // create canvas with window width and height as dimensions
+  createCanvas(windowWidth, windowHeight); // create canvas with window width and height as dimensions
 
-  // x = width / 2; // set starting x position - center of canvas
-  // y = width / 2; // set starting y position - center of canvas
+  x = windowWidth / 2; // set starting x position - center of canvas
+  y = windowHeight / 2; // set starting y position - center of canvas
   // x = width / 20; // set starting x position - left side of canvas
   // y = width / 20; // set starting y position - upper side of canvas
-  x = random(0, windowWidth * 0.99); // set starting x position - random
-  y = random(0, windowHeight * 0.97); // set starting y position - random
+  // x = random(0, windowWidth * 0.99); // set starting x position - random
+  // y = random(0, windowHeight * 0.97); // set starting y position - random
 
   r = random(0, 255); // set starting red value
   g = random(0, 255); // set starting green value
@@ -24,7 +24,7 @@ function setup() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth * 0.99, windowHeight * 0.98); // resize canvas to window width and height
+  resizeCanvas(windowWidth, windowHeight); // resize canvas to window width and height
 }
 
 function draw() {
@@ -67,10 +67,14 @@ function draw() {
   stroke(r, g, b); // set stroke color
 
   point(x, y); // draw point
-  point(y, x); // draw point (mirrored)
+  // point(y, x); // draw point (mirrored)
 
   // nuage de points randoms
 
-  point(random(0, windowWidth), random(0, windowHeight)); // draw point (random)
-  point(random(0, windowHeight), random(0, windowWidth)); // draw point (random)
+  // for (var i = 0; i < 100; i++) {
+  //   point(random(0, windowWidth), random(0, windowHeight)); // draw point (random)
+  //   // point(random(0, windowWidth), random(0, windowHeight)); // draw point (random)
+  // }
+ 
+  // point(random(0, windowHeight), random(0, windowWidth)); // draw point (random)
 }
