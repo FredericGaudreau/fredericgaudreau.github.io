@@ -8,9 +8,6 @@ var b;
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-
-  // createCanvas(windowWidth, windowHeight); // create canvas with window width and height as dimensions
-
   // x = windowWidth / 2; // set starting x position - center of canvas
   // y = windowHeight / 2; // set starting y position - center of canvas
   // x = width / 20; // set starting x position - left side of canvas
@@ -22,9 +19,8 @@ function setup() {
   g = random(0, 255); // set starting green value
   b = random(0, 255); // set starting blue value
 
-  background(300); // uncomment pour avoir un fond blanc
-  // background(32); // uncomment pour avoir un fond noir
-
+  background(255); // uncomment pour avoir un fond blanc
+  // background(0); // uncomment pour avoir un fond noir
 }
 
 function windowResized() {
@@ -63,8 +59,6 @@ function draw() {
   g += random(-1, 1);
   b += random(-1, 1);
 
-
-
   // don't let values go outside 0-255 range
   r = constrain(r, 0, 255);
   g = constrain(g, 0, 255);
@@ -75,20 +69,15 @@ function draw() {
     r = random(0, 255);
     g = random(0, 255);
     b = random(0, 255);
+    // noStroke();
+    // fill(r, g, b);
   }
+
   stroke(r, g, b); // set stroke color
+  // strokeWeight(100); // set stroke weight
+  // noStroke();
 
-  // ellipse(x, y, 10, 10); // draw point
-
-  // point(y, x); // draw point (mirrored)
-
-  // nuage de points randoms
-
-  // for (var i = 0; i < 100; i++) {
-  //   point(random(0, windowWidth), random(0, windowHeight)); // draw point (random)
-  //   // point(random(0, windowWidth), random(0, windowHeight)); // draw point (random)
-  // }
-
-  ellipse(random(windowHeight), random(windowWidth), 10, 10); // draw point (random)
-  ellipse(mouseX, mouseY, 10, 10); // draw point (mouse)
+  // draw circles
+  circle(random(windowWidth), random(windowHeight), 10); // draw point (random)
+  circle(mouseX, mouseY, 10); // draw point (mouse)
 }
