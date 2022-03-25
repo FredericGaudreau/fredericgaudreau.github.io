@@ -79,5 +79,5 @@ function draw() {
 
   // draw circles
   circle(random(windowWidth), random(windowHeight), 10); // draw point (random)
-  circle(mouseX, mouseY, 10); // draw point (mouse)
+  // circle(mouseX, mouseY, 10); // draw point (mouse)
 }
