@@ -1,7 +1,11 @@
 * {
   font-family: Arial, Helvetica, sans-serif;
-  overflow: hidden; 
-  /* // Hides the overflow of the page .. en théorie*/
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 .liens {
   position: fixed;
@@ -9,23 +13,13 @@
   right: 10px;
   font-size: 20px;
 }
-/* z-index ne fonctionne pas */
 
 .contenu {
-  
   position: absolute;
   left: 20%;
-  bottom: 50%;
-  right: 20%;
-  /* z-index: 1; */
-}
-/* n'est plus nécessaire */
-/* .apropos {
-  position: absolute;
-  left: 10%;
-  right: 10%;
   bottom: 40%;
-} */
+  right: 20%;
+}
 .header {
   position: fixed;
   top: 10px;
@@ -40,10 +34,7 @@ a:visited {
   color: black;
   text-decoration: none;
 }
-/* z-index ne fonctionne pas */
-/* https://github.com/processing/p5.js/wiki/Positioning-your-canvas */
 canvas {
-  
   position: relative;
   z-index: -1;
 }
