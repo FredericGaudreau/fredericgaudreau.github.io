@@ -1,4 +1,4 @@
-## Repo pour site personnel
+# Site personnel statique
 
 Ce site est hébergé en utilisant les possibilités de [GitHub Pages](https://pages.github.com/).
 

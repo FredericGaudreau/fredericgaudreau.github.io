@@ -15,9 +15,10 @@ body {
 }
 .contenu {
   position: absolute;
-  left: 20%;
-  bottom: 40%;
-  right: 20%;
+  /* top:15%; */
+  left: 15%;
+  bottom: 25%;
+  right: 15%;
 }
 .header {
   position: fixed;
