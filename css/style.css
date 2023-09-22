@@ -1,18 +1,20 @@
 * {
   font-family: Arial, Helvetica, sans-serif;
 }
+
 html,
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
-.liens {
+
+.header {
   position: fixed;
-  bottom: 10px;
+  top: 10px;
   right: 10px;
-  font-size: 20px;
 }
+
 .contenu {
   position: absolute;
   /* top:15%; */
@@ -20,20 +22,25 @@ body {
   bottom: 25%;
   right: 15%;
 }
-.header {
+
+.liens {
   position: fixed;
-  top: 10px;
+  bottom: 10px;
   right: 10px;
+  font-size: 20px;
 }
+
 a:link {
   color: black;
   text-decoration: none;
   font-weight: bold;
 }
+
 a:visited {
   color: black;
   text-decoration: none;
 }
+
 canvas {
   position: relative;
   z-index: -1;
