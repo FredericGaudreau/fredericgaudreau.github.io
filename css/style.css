@@ -1,47 +1,40 @@
 * {
-  font-family: Arial, Helvetica, sans-serif;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
-.header {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-}
-
-.contenu {
-  position: absolute;
-  /* top:15%; */
-  left: 15%;
-  bottom: 25%;
-  right: 15%;
-}
-
-.liens {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  font-size: 20px;
-}
-
-a:link {
-  color: black;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-a:visited {
-  color: black;
-  text-decoration: none;
-}
-
-canvas {
+header {
   position: relative;
-  z-index: -1;
+  top: 0;
+  justify-content: right;
+  display: flex;
+  width: 100%;
+}
+
+
+/* Media query for small screens */
+@media (max-width: 768px) {
+  header {
+    position: relative;
+    justify-content: space-between;
+    align-items: center;
+    top: 0;
+    display: flex;
+    width: 100%;
+  }
+
+
+}
+
+
+a {
+  text-decoration: none;
+  color: darkgray;
 }
