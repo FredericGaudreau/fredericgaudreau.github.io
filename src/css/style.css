@@ -18,23 +18,37 @@ header {
   width: 100%;
 }
 
+footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  justify-content: right;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: darkgray;
+}
 
 /* Media query for small screens */
 @media (max-width: 768px) {
   header {
     position: relative;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     top: 0;
     display: flex;
     width: 100%;
   }
 
-
-}
-
-
-a {
-  text-decoration: none;
-  color: darkgray;
+  footer {
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    width: 100%;
+  }
 }
