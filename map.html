@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Carte interactive pour ajouter et visualiser des points d'intérêt avec météo en temps réel."
+    />
+    <title>Carte interactive - Points d'intérêt</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --gap: 1rem;
+        --controls-max: 640px;
+        --border: #eee;
+        --primary: #0366d6;
+        --error: #ff4444;
+        --shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        --transition: all 0.2s ease;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      #map {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        min-width: 320px;
+        border: none;
+      }
+
+      #bottom-controls {
+        max-width: var(--controls-max);
+        margin: 0 auto;
+      }
+
+      #data-form {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 1.25rem;
+        z-index: 1101;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 0.75rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        max-width: var(--controls-max);
+        backdrop-filter: blur(4px);
+        border: 1px solid var(--border);
+        opacity: 0;
+        pointer-events: none;
+        transition: var(--transition);
+      }
+
+      #data-form.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #data-form input[type="text"] {
+        min-width: 200px;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+      }
+
+      #add {
+        padding: 0.5rem 1rem;
+        border: 0;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      #add:hover {
+        background: #025aa5;
+      }
+
+      #name-popup-close {
+        background: none;
+        border: 0;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0 0.5rem;
+      }
+
+      #points-section {
+        position: fixed;
+        right: 1rem;
+        top: 1rem;
+        width: 320px;
+        max-height: calc(100vh - 2rem);
+        overflow: auto;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        z-index: 1000;
+        display: none;
+      }
+
+      #points-section h3 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+      }
+
+      #points-close {
+        background: none;
+        border: 0;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #666;
+      }
+
+      #points-ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      #points-ul li {
+        background: #fafafa;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        word-break: break-word;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 0.5rem;
+        align-items: start;
+      }
+
+      #points-ul li:hover .point-delete {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      a.point-link {
+        color: var(--primary);
+        text-decoration: none;
+        word-break: break-word;
+        display: block;
+        grid-column: 1;
+        grid-row: 1;
+        font-weight: 500;
+      }
+
+      .point-delete {
+        background: var(--error);
+        color: #fff;
+        border: 0;
+        padding: 0.35rem 0.6rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: var(--transition);
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-self: start;
+      }
+
+      .point-delete:hover {
+        background: #cc0000;
+      }
+
+      .point-meteo {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      #footer {
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+        z-index: 999;
+      }
+
+      #about-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        color: #666;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+        font-weight: 500;
+      }
+
+      #about-link:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: scale(1.1);
+      }
+
+      #toggle-points {
+        display: none;
+        position: fixed;
+        right: 1rem;
+        top: 1rem;
+        z-index: 1001;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      #toggle-points:hover {
+        transform: scale(1.1);
+      }
+
+      #locate-me {
+        position: fixed;
+        bottom: 1rem;
+        left: 3.5rem;
+        z-index: 1001;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      #locate-me:hover {
+        transform: scale(1.1);
+      }
+
+      @media (max-width: 768px) {
+        #points-section {
+          width: 90%;
+          max-width: 90%;
+          margin: 1rem auto;
+          max-height: 50vh;
+          border-radius: 8px;
+          border: none;
+          border-bottom: 1px solid var(--border);
+        }
+
+        #data-form {
+          bottom: 0.75rem;
+          max-width: calc(100% - 2rem);
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          align-items: flex-end;
+          padding: 0.5rem;
+        }
+
+        #data-form input[type="text"] {
+          min-width: auto;
+          flex: 1;
+          min-width: 0;
+          padding: 0.4rem;
+        }
+
+        #add {
+          order: 2;
+          flex-shrink: 0;
+          padding: 0.4rem 0.75rem;
+        }
+
+        #name-popup-close {
+          order: 3;
+          flex-shrink: 0;
+          padding: 0 0.25rem;
+        }
+
+        #points-ul li {
+          padding: 0.5rem;
+          gap: 0.3rem;
+        }
+
+        a.point-link {
+          font-size: 0.9rem;
+        }
+
+        .point-delete {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.7rem;
+        }
+
+        #footer {
+          bottom: 0.5rem;
+          left: 0.5rem;
+        }
+
+        #about-link {
+          width: 28px;
+          height: 28px;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="bottom-controls">
+      <form id="data-form">
+        <label for="point-name">Nom :</label>
+        <input
+          type="text"
+          id="point-name"
+          required
+          placeholder="Nom du point"
+        />
+        <button type="submit" id="add">Ajouter</button>
+        <button id="name-popup-close" aria-label="Fermer">×</button>
+      </form>
+    </div>
+    <section id="points-section">
+      <h3>
+        Points ajoutés
+        <button id="points-close" aria-label="Fermer">×</button>
+      </h3>
+      <ul id="points-ul"></ul>
+    </section>
+    <div id="footer">
+      <a
+        href="https://FredericGaudreau.github.io/carte.html"
+        id="about-link"
+        aria-label="À propos"
+        title="À propos de cette carte"
+        target="_blank"
+      >
+        ?
+      </a>
+    </div>
+    <button
+      id="toggle-points"
+      aria-label="Afficher les points"
+      style="
+        display: none;
+        position: fixed;
+        right: 1rem;
+        top: 1rem;
+        z-index: 1001;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-weight: bold;
+        cursor: pointer;
+      "
+    >
+      <i class="fas fa-list" aria-hidden="true"></i>
+    </button>
+    <button
+      id="locate-me"
+      aria-label="Me localiser"
+      style="
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1001;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-weight: bold;
+        cursor: pointer;
+      "
+      title="Me localiser"
+    >
+      <i class="fas fa-location-arrow" aria-hidden="true"></i>
+    </button>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      // Initialisation de la carte
+      const map = L.map("map").setView([45.8924, -74.1546], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+      }).addTo(map);
+
+      // Éléments DOM
+      const form = document.getElementById("data-form");
+      const nameInput = document.getElementById("point-name");
+      const pointsSection = document.getElementById("points-section");
+      const pointsUl = document.getElementById("points-ul");
+      const togglePointsBtn = document.getElementById("toggle-points");
+      const locateMeBtn = document.getElementById("locate-me");
+
+      // Variables globales
+      const points = [];
+      let previewMarker = null;
+      const weatherCache = new Map();
+
+      // Gestion du redimensionnement
+      function debounce(func, wait) {
+        let timeout;
+        return function () {
+          const context = this,
+            args = arguments;
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => map.invalidateSize(), 100);
+        loadPoints();
+      });
+      window.addEventListener(
+        "resize",
+        debounce(() => map.invalidateSize(), 250),
+      );
+
+      // Clic sur la carte
+      map.on("click", (e) => {
+        const { lat, lng } = e.latlng;
+        if (previewMarker) previewMarker.remove();
+        previewMarker = L.marker([lat, lng]).addTo(map);
+        form.classList.add("visible");
+        nameInput.value = "";
+        nameInput.placeholder = `Nom du point (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+        nameInput.focus();
+      });
+
+      // Soumission du formulaire
+      form.addEventListener("submit", (ev) => {
+        ev.preventDefault();
+        if (!previewMarker) return;
+        const name = nameInput.value.trim() || "Sans nom";
+        const { lat, lng } = previewMarker.getLatLng();
+        const marker = L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(
+            `<b>${escapeHtml(name)}</b><br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
+          );
+        points.push({ name, lat, lng, marker });
+        previewMarker.remove();
+        previewMarker = null;
+        form.reset();
+        form.classList.remove("visible");
+        updatePointsList();
+        savePoints();
+      });
+
+      // Conversion des codes météo en texte
+      function weatherCodeToText(code) {
+        const codes = {
+          0: "Ciel dégagé",
+          1: "Principalement ensoleillé",
+          2: "Partiellement nuageux",
+          3: "Couvert",
+          45: "Brouillard",
+          48: "Brouillard givrant",
+          51: "Bruine légère",
+          53: "Bruine modérée",
+          55: "Bruine dense",
+          61: "Pluie légère",
+          63: "Pluie modérée",
+          65: "Pluie forte",
+          71: "Neige légère",
+          73: "Neige modérée",
+          75: "Fortes chutes de neige",
+          80: "Averses légères",
+          81: "Averses modérées",
+          82: "Averses violentes",
+          95: "Orages",
+          96: "Orages avec grêle légère",
+          99: "Orages avec grêle forte",
+        };
+        return codes[code] || "Inconnu";
+      }
+
+      // Affichage de la météo
+      async function showWeather(lat, lng, container) {
+        const cacheKey = `${lat},${lng}`;
+        if (weatherCache.has(cacheKey)) {
+          container.innerHTML = weatherCache.get(cacheKey);
+          return;
+        }
+        container.innerHTML =
+          "<div><i class='fas fa-spinner fa-spin'></i> Chargement météo...</div>";
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&timezone=auto`;
+          const resp = await fetch(url);
+          const data = await resp.json();
+          if (data && data.current_weather) {
+            const w = data.current_weather;
+            const desc = weatherCodeToText(w.weathercode);
+            const weatherHTML = `
+              <div><i class="fas fa-thermometer-half"></i> <strong>${w.temperature}°C</strong> — ${desc}</div>
+              <div><i class="fas fa-wind"></i> ${w.windspeed} km/h · ${Math.round(w.winddirection)}°</div>
+              <div style="font-size:.75rem;color:#666">Mesure: ${new Date(w.time).toLocaleString()}</div>
+            `;
+            container.innerHTML = weatherHTML;
+            weatherCache.set(cacheKey, weatherHTML);
+          } else {
+            container.innerHTML =
+              "<div><i class='fas fa-exclamation-triangle'></i> Aucune donnée météo disponible.</div>";
+          }
+        } catch (e) {
+          container.innerHTML =
+            "<div><i class='fas fa-exclamation-triangle'></i> Erreur de chargement de la météo.</div>";
+        }
+      }
+
+      // Mise à jour de la liste des points
+      function updatePointsList() {
+        pointsUl.innerHTML = "";
+        if (points.length === 0) {
+          pointsSection.style.display = "none";
+          togglePointsBtn.style.display = "none";
+          return;
+        }
+        if (pointsSection.style.display !== "block") {
+          togglePointsBtn.style.display = "block";
+        }
+        points.forEach((pt, idx) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = "#";
+          a.className = "point-link";
+          a.textContent = `${pt.name} (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)})`;
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            map.setView([pt.lat, pt.lng], 16);
+            pt.marker.openPopup();
+          });
+
+          const meteo = document.createElement("div");
+          meteo.className = "point-meteo";
+          showWeather(pt.lat, pt.lng, meteo);
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "point-delete";
+          deleteBtn.innerHTML = "<i class='fas fa-trash'></i> Supprimer";
+          deleteBtn.addEventListener("click", () => {
+            pt.marker.remove();
+            points.splice(idx, 1);
+            updatePointsList();
+            savePoints();
+          });
+
+          li.appendChild(a);
+          li.appendChild(meteo);
+          li.appendChild(deleteBtn);
+          pointsUl.appendChild(li);
+        });
+      }
+
+      // Fermeture des popups
+      document.getElementById("points-close").addEventListener("click", () => {
+        pointsSection.style.display = "none";
+        togglePointsBtn.style.display = "block";
+      });
+
+      document
+        .getElementById("name-popup-close")
+        .addEventListener("click", () => {
+          nameInput.value = "";
+          form.classList.remove("visible");
+          if (previewMarker) previewMarker.remove();
+          previewMarker = null;
+        });
+
+      // Fermeture avec Échap
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && form.classList.contains("visible")) {
+          nameInput.value = "";
+          form.classList.remove("visible");
+          if (previewMarker) previewMarker.remove();
+          previewMarker = null;
+        }
+      });
+
+      // Sauvegarder les points dans localStorage
+      function savePoints() {
+        localStorage.setItem(
+          "mapPoints",
+          JSON.stringify(
+            points.map(({ name, lat, lng }) => ({ name, lat, lng })),
+          ),
+        );
+      }
+
+      // Charger les points depuis localStorage
+      function loadPoints() {
+        const savedPoints = localStorage.getItem("mapPoints");
+        if (savedPoints) {
+          JSON.parse(savedPoints).forEach((pt) => {
+            const marker = L.marker([pt.lat, pt.lng])
+              .addTo(map)
+              .bindPopup(
+                `<b>${escapeHtml(pt.name)}</b><br>Lat: ${pt.lat.toFixed(5)}, Lng: ${pt.lng.toFixed(5)}`,
+              );
+            points.push({ ...pt, marker });
+          });
+          updatePointsList();
+        }
+      }
+
+      // Géolocalisation
+      locateMeBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("La géolocalisation n'est pas supportée par votre navigateur.");
+          return;
+        }
+        locateMeBtn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            map.setView([latitude, longitude], 15);
+            L.marker([latitude, longitude])
+              .addTo(map)
+              .bindPopup("Vous êtes ici !")
+              .openPopup();
+            locateMeBtn.innerHTML = "<i class='fas fa-location-arrow'></i>";
+          },
+          (error) => {
+            alert(`Erreur de géolocalisation: ${error.message}`);
+            locateMeBtn.innerHTML = "<i class='fas fa-location-arrow'></i>";
+          },
+        );
+      });
+
+      // Ajouter un contrôle de couches
+      const baseLayers = {
+        "Carte standard": L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          {
+            attribution: "© OpenStreetMap contributors",
+          },
+        ),
+        Relief: L.tileLayer(
+          "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+          {
+            attribution: "© OpenTopoMap contributors",
+          },
+        ),
+      };
+
+      // Ajouter le contrôle à la carte
+      L.control
+        .layers(baseLayers, null, { position: "bottomright" })
+        .addTo(map);
+
+      // Échappement HTML
+      function escapeHtml(s) {
+        return s.replace(
+          /[&<>\"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      // Gestion du bouton "!"
+      togglePointsBtn.addEventListener("click", () => {
+        pointsSection.style.display = "block";
+        togglePointsBtn.style.display = "none";
+      });
+    </script>
+  </body>
+</html>

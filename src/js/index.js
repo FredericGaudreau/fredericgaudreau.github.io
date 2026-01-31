@@ -1,5 +1,6 @@
 // index.js
 
+// load header and footer
 async function includeHTML(id, file) {
   const element = document.getElementById(id);
   const response = await fetch(file);
