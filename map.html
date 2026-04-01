@@ -3,74 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
     <meta
       name="description"
-      content="Carte interactive pour ajouter et visualiser des points d'intérêt avec météo en temps réel."
+      content="Carte interactive avec météo et informations géographiques."
     />
-    <title>Carte interactive - Points d'intérêt</title>
+    <title>Carte Interactive</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      :root {
-        --gap: 1rem;
-        --controls-max: 640px;
-        --border: #eee;
-        --primary: #0366d6;
-        --error: #ff4444;
-        --shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-        --transition: all 0.2s ease;
-      }
-
-      html,
-      body {
-        height: 100%;
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --success: #10b981;
+        --error: #ef4444;
+        --border: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --bg-glass: rgba(255, 255, 255, 0.95);
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --radius: 12px;
+        --radius-lg: 20px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       body {
-        font-family:
-          system-ui,
-          Segoe UI,
-          Roboto,
-          Helvetica,
-          Arial,
-          sans-serif;
-        line-height: 1.5;
+        font-family: "Outfit", sans-serif;
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden;
       }
 
       #map {
         position: fixed;
         inset: 0;
-        width: 100%;
-        min-width: 320px;
-        border: none;
       }
 
-      #bottom-controls {
-        max-width: var(--controls-max);
-        margin: 0 auto;
-      }
-
+      /* Formulaire d'ajout */
       #data-form {
-        position: absolute;
+        position: fixed;
         left: 50%;
+        bottom: 1.5rem;
         transform: translateX(-50%);
-        bottom: 1.25rem;
-        z-index: 1101;
+        z-index: 1001;
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
         align-items: center;
-        background: rgba(255, 255, 255, 0.98);
-        padding: 0.75rem;
-        border-radius: 8px;
+        background: var(--bg-glass);
+        padding: 1rem 1.25rem;
+        border-radius: 16px;
         box-shadow: var(--shadow);
-        max-width: var(--controls-max);
-        backdrop-filter: blur(4px);
-        border: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        border: 2px solid var(--border);
+        max-width: min(90%, 600px);
         opacity: 0;
         pointer-events: none;
         transition: var(--transition);
@@ -81,624 +82,608 @@
         pointer-events: auto;
       }
 
-      #data-form input[type="text"] {
-        min-width: 200px;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 1rem;
+      #data-form label {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      #data-form input {
+        flex: 1;
+        min-width: 150px;
+        padding: 0.65rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        transition: var(--transition);
+      }
+
+      #data-form input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       #add {
-        padding: 0.5rem 1rem;
+        padding: 0.65rem 1.5rem;
         border: 0;
         background: var(--primary);
-        color: #fff;
-        border-radius: 6px;
+        color: white;
+        border-radius: 10px;
+        font: inherit;
+        font-weight: 600;
         cursor: pointer;
-        font-weight: 500;
         transition: var(--transition);
+        white-space: nowrap;
       }
 
       #add:hover {
-        background: #025aa5;
+        background: var(--primary-dark);
+        transform: translateY(-2px);
       }
 
-      #name-popup-close {
+      #close-form {
         background: none;
         border: 0;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
         cursor: pointer;
-        color: #666;
         padding: 0 0.5rem;
+        transition: var(--transition);
+        line-height: 1;
       }
 
+      #close-form:hover {
+        color: var(--error);
+        transform: rotate(90deg);
+      }
+
+      /* Section des points */
       #points-section {
         position: fixed;
-        right: 1rem;
-        top: 1rem;
-        width: 320px;
-        max-height: calc(100vh - 2rem);
-        overflow: auto;
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1rem;
+        right: 1.25rem;
+        top: 1.25rem;
+        width: 420px;
+        max-width: calc(100vw - 2.5rem);
+        max-height: calc(100vh - 2.5rem);
+        overflow-y: auto;
+        background: var(--bg-glass);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-lg);
         box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
         z-index: 1000;
         display: none;
+        scrollbar-width: thin;
+        /* scrollbar-color: var(--primary) var(--border); */
+      }
+
+      #points-section::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #points-section::-webkit-scrollbar-track {
+        background: var(--border);
+        border-radius: var(--radius-lg);
+      }
+
+      #points-section::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
       }
 
       #points-section h3 {
+        position: sticky;
+        top: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 0 0 1rem;
-        font-size: 1.1rem;
+        padding: 1.5rem;
+        font-size: 1.3rem;
+        border-bottom: 2px solid var(--border);
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 18px 18px 0 0;
+        z-index: 1;
       }
 
-      #points-close {
+      #close-points {
         background: none;
         border: 0;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
         cursor: pointer;
-        color: #666;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      #points-ul {
+      #close-points:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+      }
+
+      #points-list {
         list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .point-card {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .point-card:hover,
+      .point-card.active {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .point-header {
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         gap: 0.75rem;
       }
 
-      #points-ul li {
-        background: #fafafa;
-        padding: 0.75rem;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        word-break: break-word;
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
-        gap: 0.5rem;
-        align-items: start;
-      }
-
-      #points-ul li:hover .point-delete {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      a.point-link {
+      .point-title {
         color: var(--primary);
         text-decoration: none;
-        word-break: break-word;
-        display: block;
-        grid-column: 1;
-        grid-row: 1;
-        font-weight: 500;
-      }
-
-      .point-delete {
-        background: var(--error);
-        color: #fff;
-        border: 0;
-        padding: 0.35rem 0.6rem;
-        border-radius: 4px;
+        font-weight: 600;
+        font-size: 1.05rem;
         cursor: pointer;
-        font-size: 0.8rem;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
+        transition: color 0.3s;
+        word-break: break-word;
+      }
+
+      .point-title:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+      }
+
+      .point-coords {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+        font-family: monospace;
+      }
+
+      .delete-btn {
+        background: var(--error);
+        color: white;
+        border: 0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
         transition: var(--transition);
-        grid-column: 2;
-        grid-row: 1 / 3;
-        align-self: start;
+        white-space: nowrap;
       }
 
-      .point-delete:hover {
-        background: #cc0000;
+      .delete-btn:hover {
+        background: #dc2626;
+        transform: scale(1.05);
       }
 
-      .point-meteo {
-        grid-column: 1;
-        grid-row: 2;
+      .point-info {
+        padding: 1rem;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        background: none;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .tab:hover {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary);
+      }
+
+      .tab.active {
+        color: var(--primary);
+        background: rgba(37, 99, 235, 0.1);
+      }
+
+      .tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: -0.6rem;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 2px;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .info-item {
+        margin-bottom: 0.25rem;
         font-size: 0.9rem;
-        color: #555;
+        line-height: 1.5;
+        word-break: break-word;
       }
 
+      .info-item i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+        width: 20px;
+        display: inline-block;
+      }
+
+      .info-item strong {
+        font-weight: 600;
+      }
+
+      .weather-badge,
+      .air-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .loading i {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-msg {
+        color: var(--error);
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      .leaflet-popup-content-wrapper {
+        border-radius: 14px;
+        border: 2px solid var(--border);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      }
+
+      .leaflet-popup-content {
+        font-family: "Outfit", sans-serif;
+        font-size: 0.84rem;
+        color: var(--text-primary);
+        line-height: 1.35;
+        max-width: 220px;
+        padding: 0.75rem 0.8rem;
+      }
+
+      .popup-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .popup-title {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 0.95rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .popup-coords {
+        font-family: monospace;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+
+      .popup-hint {
+        font-size: 0.73rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+      }
+
+      .popup-extra {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+
+      /* Boutons flottants */
       #footer {
         position: fixed;
         bottom: 1rem;
         left: 1rem;
         z-index: 999;
+        display: flex;
+        gap: 0.75rem;
       }
 
-      #about-link {
+      .round-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.98);
-        border: 1px solid var(--border);
+        width: 44px;
+        height: 44px;
+        border: none;
         border-radius: 50%;
-        color: #666;
-        text-decoration: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
         transition: var(--transition);
-        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+      }
+
+      #about-link {
+        background: var(--bg-glass);
+        border: 2px solid var(--border);
+        color: var(--text-primary);
+        text-decoration: none;
+        backdrop-filter: blur(12px);
       }
 
       #about-link:hover {
         background: var(--primary);
-        color: #fff;
+        color: white;
+        transform: scale(1.15) rotate(15deg);
+      }
+
+      #locate-btn {
+        background: var(--primary);
+      }
+
+      #locate-btn:hover {
+        background: var(--primary-dark);
         transform: scale(1.1);
       }
 
       #toggle-points {
-        display: none;
         position: fixed;
-        right: 1rem;
-        top: 1rem;
+        right: 1.25rem;
+        top: 1.25rem;
         z-index: 1001;
         background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: var(--transition);
+        display: none;
       }
 
       #toggle-points:hover {
         transform: scale(1.1);
       }
 
-      #locate-me {
-        position: fixed;
-        bottom: 1rem;
-        left: 3.5rem;
-        z-index: 1001;
-        background: var(--primary);
+      /* Badge de compteur */
+      .counter-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--error);
         color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: var(--transition);
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        text-align: center;
       }
 
-      #locate-me:hover {
-        transform: scale(1.1);
-      }
-
+      /* Responsive */
       @media (max-width: 768px) {
         #points-section {
-          width: 90%;
-          max-width: 90%;
-          margin: 1rem auto;
-          max-height: 50vh;
-          border-radius: 8px;
-          border: none;
-          border-bottom: 1px solid var(--border);
+          width: calc(100% - 2rem);
+          right: 1rem;
+          left: 1rem;
+          max-height: 70vh;
         }
 
         #data-form {
-          bottom: 0.75rem;
-          max-width: calc(100% - 2rem);
           flex-wrap: wrap;
-          gap: 0.4rem;
-          align-items: flex-end;
-          padding: 0.5rem;
+          padding: 0.75rem;
+          gap: 0.5rem;
         }
 
-        #data-form input[type="text"] {
-          min-width: auto;
-          flex: 1;
+        #data-form label {
+          width: 100%;
+        }
+
+        #data-form input {
           min-width: 0;
-          padding: 0.4rem;
         }
 
-        #add {
-          order: 2;
-          flex-shrink: 0;
-          padding: 0.4rem 0.75rem;
-        }
-
-        #name-popup-close {
-          order: 3;
-          flex-shrink: 0;
-          padding: 0 0.25rem;
-        }
-
-        #points-ul li {
-          padding: 0.5rem;
-          gap: 0.3rem;
-        }
-
-        a.point-link {
-          font-size: 0.9rem;
-        }
-
-        .point-delete {
-          padding: 0.25rem 0.5rem;
-          font-size: 0.7rem;
+        .round-btn {
+          width: 40px;
+          height: 40px;
         }
 
         #footer {
-          bottom: 0.5rem;
-          left: 0.5rem;
-        }
-
-        #about-link {
-          width: 28px;
-          height: 28px;
-          font-size: 0.9rem;
+          gap: 0.5rem;
         }
       }
     </style>
   </head>
   <body>
     <div id="map"></div>
-    <div id="bottom-controls">
-      <form id="data-form">
-        <label for="point-name">Nom :</label>
-        <input
-          type="text"
-          id="point-name"
-          required
-          placeholder="Nom du point"
-        />
-        <button type="submit" id="add">Ajouter</button>
-        <button id="name-popup-close" aria-label="Fermer">×</button>
-      </form>
-    </div>
+
+    <!-- Formulaire d'ajout -->
+    <form id="data-form">
+      <label for="point-name">📍 Nom :</label>
+      <input
+        type="text"
+        id="point-name"
+        placeholder="Nom du point"
+        required
+        autocomplete="off"
+      />
+      <button type="submit" id="add">Ajouter</button>
+      <button type="button" id="close-form" aria-label="Fermer">×</button>
+    </form>
+
+    <!-- Section des points -->
     <section id="points-section">
       <h3>
-        Points ajoutés
-        <button id="points-close" aria-label="Fermer">×</button>
+        📌 Points ajoutés
+        <button id="close-points" aria-label="Fermer">×</button>
       </h3>
-      <ul id="points-ul"></ul>
+      <ul id="points-list"></ul>
     </section>
+
+    <!-- Boutons flottants -->
     <div id="footer">
       <a
         href="https://FredericGaudreau.github.io/carte.html"
         id="about-link"
-        aria-label="À propos"
-        title="À propos de cette carte"
+        class="round-btn"
+        title="À propos"
         target="_blank"
+        rel="noopener"
+        >?</a
       >
-        ?
-      </a>
+      <button
+        id="locate-btn"
+        class="round-btn"
+        title="Me localiser"
+        aria-label="Me localiser"
+      >
+        <i class="fas fa-location-arrow"></i>
+      </button>
     </div>
+
     <button
       id="toggle-points"
+      class="round-btn"
       aria-label="Afficher les points"
-      style="
-        display: none;
-        position: fixed;
-        right: 1rem;
-        top: 1rem;
-        z-index: 1001;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        font-weight: bold;
-        cursor: pointer;
-      "
     >
-      <i class="fas fa-list" aria-hidden="true"></i>
-    </button>
-    <button
-      id="locate-me"
-      aria-label="Me localiser"
-      style="
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        z-index: 1001;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        font-weight: bold;
-        cursor: pointer;
-      "
-      title="Me localiser"
-    >
-      <i class="fas fa-location-arrow" aria-hidden="true"></i>
+      <i class="fas fa-list"></i>
+      <span class="counter-badge" style="display: none">0</span>
     </button>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-      // Initialisation de la carte
-      const map = L.map("map").setView([45.8924, -74.1546], 13);
+      "use strict";
+
+      // === CONFIGURATION ===
+      const CONFIG = {
+        defaultCenter: [45.8924, -74.1546],
+        defaultZoom: 13,
+        focusZoom: 16,
+        storageKey: "mapPoints",
+        cacheExpiry: 3600000, // 1 heure en ms
+      };
+
+      // === INITIALISATION ===
+      const map = L.map("map").setView(
+        CONFIG.defaultCenter,
+        CONFIG.defaultZoom,
+      );
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 19,
       }).addTo(map);
 
-      // Éléments DOM
-      const form = document.getElementById("data-form");
-      const nameInput = document.getElementById("point-name");
-      const pointsSection = document.getElementById("points-section");
-      const pointsUl = document.getElementById("points-ul");
-      const togglePointsBtn = document.getElementById("toggle-points");
-      const locateMeBtn = document.getElementById("locate-me");
-
-      // Variables globales
-      const points = [];
-      let previewMarker = null;
-      const weatherCache = new Map();
-
-      // Gestion du redimensionnement
-      function debounce(func, wait) {
-        let timeout;
-        return function () {
-          const context = this,
-            args = arguments;
-          clearTimeout(timeout);
-          timeout = setTimeout(() => func.apply(context, args), wait);
-        };
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => map.invalidateSize(), 100);
-        loadPoints();
-      });
-      window.addEventListener(
-        "resize",
-        debounce(() => map.invalidateSize(), 250),
-      );
-
-      // Clic sur la carte
-      map.on("click", (e) => {
-        const { lat, lng } = e.latlng;
-        if (previewMarker) previewMarker.remove();
-        previewMarker = L.marker([lat, lng]).addTo(map);
-        form.classList.add("visible");
-        nameInput.value = "";
-        nameInput.placeholder = `Nom du point (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-        nameInput.focus();
-      });
-
-      // Soumission du formulaire
-      form.addEventListener("submit", (ev) => {
-        ev.preventDefault();
-        if (!previewMarker) return;
-        const name = nameInput.value.trim() || "Sans nom";
-        const { lat, lng } = previewMarker.getLatLng();
-        const marker = L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup(
-            `<b>${escapeHtml(name)}</b><br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
-          );
-        points.push({ name, lat, lng, marker });
-        previewMarker.remove();
-        previewMarker = null;
-        form.reset();
-        form.classList.remove("visible");
-        updatePointsList();
-        savePoints();
-      });
-
-      // Conversion des codes météo en texte
-      function weatherCodeToText(code) {
-        const codes = {
-          0: "Ciel dégagé",
-          1: "Principalement ensoleillé",
-          2: "Partiellement nuageux",
-          3: "Couvert",
-          45: "Brouillard",
-          48: "Brouillard givrant",
-          51: "Bruine légère",
-          53: "Bruine modérée",
-          55: "Bruine dense",
-          61: "Pluie légère",
-          63: "Pluie modérée",
-          65: "Pluie forte",
-          71: "Neige légère",
-          73: "Neige modérée",
-          75: "Fortes chutes de neige",
-          80: "Averses légères",
-          81: "Averses modérées",
-          82: "Averses violentes",
-          95: "Orages",
-          96: "Orages avec grêle légère",
-          99: "Orages avec grêle forte",
-        };
-        return codes[code] || "Inconnu";
-      }
-
-      // Affichage de la météo
-      async function showWeather(lat, lng, container) {
-        const cacheKey = `${lat},${lng}`;
-        if (weatherCache.has(cacheKey)) {
-          container.innerHTML = weatherCache.get(cacheKey);
-          return;
-        }
-        container.innerHTML =
-          "<div><i class='fas fa-spinner fa-spin'></i> Chargement météo...</div>";
-        try {
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&timezone=auto`;
-          const resp = await fetch(url);
-          const data = await resp.json();
-          if (data && data.current_weather) {
-            const w = data.current_weather;
-            const desc = weatherCodeToText(w.weathercode);
-            const weatherHTML = `
-              <div><i class="fas fa-thermometer-half"></i> <strong>${w.temperature}°C</strong> — ${desc}</div>
-              <div><i class="fas fa-wind"></i> ${w.windspeed} km/h · ${Math.round(w.winddirection)}°</div>
-              <div style="font-size:.75rem;color:#666">Mesure: ${new Date(w.time).toLocaleString()}</div>
-            `;
-            container.innerHTML = weatherHTML;
-            weatherCache.set(cacheKey, weatherHTML);
-          } else {
-            container.innerHTML =
-              "<div><i class='fas fa-exclamation-triangle'></i> Aucune donnée météo disponible.</div>";
-          }
-        } catch (e) {
-          container.innerHTML =
-            "<div><i class='fas fa-exclamation-triangle'></i> Erreur de chargement de la météo.</div>";
-        }
-      }
-
-      // Mise à jour de la liste des points
-      function updatePointsList() {
-        pointsUl.innerHTML = "";
-        if (points.length === 0) {
-          pointsSection.style.display = "none";
-          togglePointsBtn.style.display = "none";
-          return;
-        }
-        if (pointsSection.style.display !== "block") {
-          togglePointsBtn.style.display = "block";
-        }
-        points.forEach((pt, idx) => {
-          const li = document.createElement("li");
-          const a = document.createElement("a");
-          a.href = "#";
-          a.className = "point-link";
-          a.textContent = `${pt.name} (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)})`;
-          a.addEventListener("click", (e) => {
-            e.preventDefault();
-            map.setView([pt.lat, pt.lng], 16);
-            pt.marker.openPopup();
-          });
-
-          const meteo = document.createElement("div");
-          meteo.className = "point-meteo";
-          showWeather(pt.lat, pt.lng, meteo);
-
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "point-delete";
-          deleteBtn.innerHTML = "<i class='fas fa-trash'></i> Supprimer";
-          deleteBtn.addEventListener("click", () => {
-            pt.marker.remove();
-            points.splice(idx, 1);
-            updatePointsList();
-            savePoints();
-          });
-
-          li.appendChild(a);
-          li.appendChild(meteo);
-          li.appendChild(deleteBtn);
-          pointsUl.appendChild(li);
-        });
-      }
-
-      // Fermeture des popups
-      document.getElementById("points-close").addEventListener("click", () => {
-        pointsSection.style.display = "none";
-        togglePointsBtn.style.display = "block";
-      });
-
-      document
-        .getElementById("name-popup-close")
-        .addEventListener("click", () => {
-          nameInput.value = "";
-          form.classList.remove("visible");
-          if (previewMarker) previewMarker.remove();
-          previewMarker = null;
-        });
-
-      // Fermeture avec Échap
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && form.classList.contains("visible")) {
-          nameInput.value = "";
-          form.classList.remove("visible");
-          if (previewMarker) previewMarker.remove();
-          previewMarker = null;
-        }
-      });
-
-      // Sauvegarder les points dans localStorage
-      function savePoints() {
-        localStorage.setItem(
-          "mapPoints",
-          JSON.stringify(
-            points.map(({ name, lat, lng }) => ({ name, lat, lng })),
-          ),
-        );
-      }
-
-      // Charger les points depuis localStorage
-      function loadPoints() {
-        const savedPoints = localStorage.getItem("mapPoints");
-        if (savedPoints) {
-          JSON.parse(savedPoints).forEach((pt) => {
-            const marker = L.marker([pt.lat, pt.lng])
-              .addTo(map)
-              .bindPopup(
-                `<b>${escapeHtml(pt.name)}</b><br>Lat: ${pt.lat.toFixed(5)}, Lng: ${pt.lng.toFixed(5)}`,
-              );
-            points.push({ ...pt, marker });
-          });
-          updatePointsList();
-        }
-      }
-
-      // Géolocalisation
-      locateMeBtn.addEventListener("click", () => {
-        if (!navigator.geolocation) {
-          alert("La géolocalisation n'est pas supportée par votre navigateur.");
-          return;
-        }
-        locateMeBtn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            map.setView([latitude, longitude], 15);
-            L.marker([latitude, longitude])
-              .addTo(map)
-              .bindPopup("Vous êtes ici !")
-              .openPopup();
-            locateMeBtn.innerHTML = "<i class='fas fa-location-arrow'></i>";
-          },
-          (error) => {
-            alert(`Erreur de géolocalisation: ${error.message}`);
-            locateMeBtn.innerHTML = "<i class='fas fa-location-arrow'></i>";
-          },
-        );
-      });
-
-      // Ajouter un contrôle de couches
+      // Couches de carte
       const baseLayers = {
-        "Carte standard": L.tileLayer(
+        Standard: L.tileLayer(
           "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          {
-            attribution: "© OpenStreetMap contributors",
-          },
+          { maxZoom: 19 },
         ),
         Relief: L.tileLayer(
           "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-          {
-            attribution: "© OpenTopoMap contributors",
-          },
+          { maxZoom: 17 },
+        ),
+        Satellite: L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 19 },
         ),
       };
-
-      // Ajouter le contrôle à la carte
       L.control
         .layers(baseLayers, null, { position: "bottomright" })
         .addTo(map);
 
-      // Échappement HTML
-      function escapeHtml(s) {
-        return s.replace(
-          /[&<>\"']/g,
+      // === VARIABLES GLOBALES ===
+      const points = [];
+      let previewMarker = null;
+      const cache = new Map();
+
+      // === ÉLÉMENTS DOM ===
+      const $ = (id) => document.getElementById(id);
+      const form = $("data-form");
+      const nameInput = $("point-name");
+      const pointsSection = $("points-section");
+      const pointsList = $("points-list");
+      const toggleBtn = $("toggle-points");
+      const locateBtn = $("locate-btn");
+      const counterBadge = toggleBtn.querySelector(".counter-badge");
+
+      // === UTILITAIRES ===
+      const escapeHtml = (str) =>
+        str.replace(
+          /[&<>"']/g,
           (c) =>
             ({
               "&": "&amp;",
@@ -708,12 +693,581 @@
               "'": "&#39;",
             })[c],
         );
+
+      const debounce = (fn, delay) => {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn(...args), delay);
+        };
+      };
+
+      const formatCoords = (lat, lng) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+      const formatDate = (dateStr) =>
+        new Date(dateStr).toLocaleString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "short",
+        });
+
+      const formatTime = (dateStr) =>
+        new Date(dateStr).toLocaleTimeString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+      // Mise à jour du badge de compteur
+      const updateCounter = () => {
+        const count = points.length;
+        if (count > 0) {
+          counterBadge.textContent = count;
+          counterBadge.style.display = "block";
+        } else {
+          counterBadge.style.display = "none";
+        }
+      };
+
+      // === DONNÉES MÉTÉO ===
+      const WEATHER_CODES = {
+        0: { text: "Ciel dégagé", emoji: "☀️" },
+        1: { text: "Principalement ensoleillé", emoji: "🌤️" },
+        2: { text: "Partiellement nuageux", emoji: "⛅" },
+        3: { text: "Couvert", emoji: "☁️" },
+        45: { text: "Brouillard", emoji: "🌫️" },
+        48: { text: "Brouillard givrant", emoji: "🌫️" },
+        51: { text: "Bruine légère", emoji: "🌦️" },
+        53: { text: "Bruine modérée", emoji: "🌦️" },
+        55: { text: "Bruine dense", emoji: "🌧️" },
+        61: { text: "Pluie légère", emoji: "🌧️" },
+        63: { text: "Pluie modérée", emoji: "🌧️" },
+        65: { text: "Pluie forte", emoji: "⛈️" },
+        71: { text: "Neige légère", emoji: "🌨️" },
+        73: { text: "Neige modérée", emoji: "❄️" },
+        75: { text: "Fortes chutes de neige", emoji: "❄️" },
+        80: { text: "Averses légères", emoji: "🌦️" },
+        81: { text: "Averses modérées", emoji: "🌧️" },
+        82: { text: "Averses violentes", emoji: "⛈️" },
+        95: { text: "Orages", emoji: "⛈️" },
+        96: { text: "Orages avec grêle", emoji: "⛈️" },
+        99: { text: "Orages violents", emoji: "⛈️" },
+      };
+
+      const getWeather = (code) =>
+        WEATHER_CODES[code] || { text: "Inconnu", emoji: "🌍" };
+
+      const AQI_LEVELS = [
+        { max: 50, label: "Bon", emoji: "✅", color: "#10b981" },
+        { max: 100, label: "Modéré", emoji: "⚠️", color: "#f59e0b" },
+        { max: 150, label: "Sensible", emoji: "😷", color: "#f97316" },
+        { max: 200, label: "Mauvais", emoji: "🚫", color: "#ef4444" },
+        { max: 300, label: "Très mauvais", emoji: "☢️", color: "#b91c1c" },
+        { max: Infinity, label: "Dangereux", emoji: "☠️", color: "#7f1d1d" },
+      ];
+
+      const getAQILevel = (aqi) => AQI_LEVELS.find((l) => aqi <= l.max);
+
+      // === API ===
+      async function fetchData(url, cacheKey) {
+        const cached = cache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < CONFIG.cacheExpiry) {
+          return cached.data;
+        }
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          cache.set(cacheKey, { data, timestamp: Date.now() });
+          return data;
+        } catch (error) {
+          console.error(`Erreur API (${cacheKey}):`, error);
+          return null;
+        }
       }
 
-      // Gestion du bouton "!"
-      togglePointsBtn.addEventListener("click", () => {
+      const getWeatherData = (lat, lng) =>
+        fetchData(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&daily=sunrise,sunset&timezone=auto`,
+          `weather_${lat}_${lng}`,
+        );
+
+      const getGeoData = (lat, lng) =>
+        fetchData(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+          `geo_${lat}_${lng}`,
+        );
+
+      const getAirQualityData = (lat, lng) =>
+        fetchData(
+          `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi,pm10,pm2_5`,
+          `air_${lat}_${lng}`,
+        );
+
+      const getElevationData = (lat, lng) =>
+        fetchData(
+          `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`,
+          `elevation_${lat}_${lng}`,
+        );
+
+      // === RENDU ===
+      function renderWeather(data) {
+        if (!data?.current_weather) {
+          return '<div class="error-msg">Données météo indisponibles</div>';
+        }
+
+        const w = data.current_weather;
+        const weather = getWeather(w.weathercode);
+        const sunrise = data.daily?.sunrise?.[0]
+          ? formatTime(data.daily.sunrise[0])
+          : "N/A";
+        const sunset = data.daily?.sunset?.[0]
+          ? formatTime(data.daily.sunset[0])
+          : "N/A";
+
+        return `
+          <div class="weather-badge">${weather.emoji} ${w.temperature}°C</div>
+          <div class="info-item">
+            <i class="fas fa-cloud"></i>
+            <strong>Conditions:</strong> ${weather.text}
+          </div>
+          <div class="info-item">
+            <i class="fas fa-wind"></i>
+            <strong>Vent:</strong> ${w.windspeed} km/h · ${Math.round(w.winddirection)}°
+          </div>
+          <div class="info-item">
+            <i class="fas fa-sun"></i>
+            <strong>Lever:</strong> ${sunrise} · <strong>Coucher:</strong> ${sunset}
+          </div>
+          <div class="info-item" style="font-size:0.75rem;color:var(--text-secondary);">
+            <i class="fas fa-clock"></i>
+            Mise à jour: ${formatDate(w.time)}
+          </div>
+        `;
+      }
+
+      function renderGeoInfo(geoData, elevationData) {
+        if (!geoData?.address) {
+          return '<div class="error-msg">Informations indisponibles</div>';
+        }
+
+        const addr = geoData.address;
+        const elevation = elevationData?.results?.[0]?.elevation;
+
+        const parts = [
+          {
+            icon: "map-marker-alt",
+            label: "Adresse",
+            value: geoData.display_name,
+          },
+          { icon: "flag", label: "Pays", value: addr.country },
+          {
+            icon: "city",
+            label: "Ville",
+            value: addr.city || addr.town || addr.village,
+          },
+          { icon: "envelope", label: "Code postal", value: addr.postcode },
+          {
+            icon: "mountain",
+            label: "Altitude",
+            value: elevation ? `${elevation.toFixed(1)} m` : null,
+          },
+        ];
+
+        return parts
+          .filter((p) => p.value)
+          .map(
+            (p) =>
+              `<div class="info-item"><i class="fas fa-${p.icon}"></i><strong>${p.label}:</strong> ${escapeHtml(p.value)}</div>`,
+          )
+          .join("");
+      }
+
+      function formatPopupContent(
+        point,
+        weatherData = null,
+        geoData = null,
+        elevationData = null,
+        airData = null,
+      ) {
+        const title = `📍 ${escapeHtml(point.name)}`;
+        const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
+
+        const weather = weatherData?.current_weather
+          ? getWeather(weatherData.current_weather.weathercode)
+          : null;
+        const temp = weatherData?.current_weather?.temperature;
+
+        const city = geoData?.address
+          ? geoData.address.city ||
+            geoData.address.town ||
+            geoData.address.village
+          : null;
+        const country = geoData?.address?.country;
+        const postal = geoData?.address?.postcode;
+        const elevation = elevationData?.results?.[0]?.elevation;
+
+        const aqi = airData?.current?.us_aqi;
+        const pm25 = airData?.current?.pm2_5;
+        const pm10 = airData?.current?.pm10;
+        let airHTML = "";
+
+        if (aqi != null) {
+          const level = getAQILevel(aqi);
+          airHTML = `
+            <div class="info-item"><strong>Air:</strong> ${Math.round(aqi)} – ${level.label}</div>
+          `;
+        }
+
+        return `
+          <div class="popup-card">
+            <div class="popup-title">${title}</div>
+            
+            ${city || postal || country ? `<div class="info-item"><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
+            ${elevation != null ? `<div class="info-item"><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
+            ${weather ? `<div class="info-item"><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
+            ${airHTML}
+          </div>
+        `;
+      }
+
+      function renderAirQuality(data) {
+        if (!data?.current || data.current.us_aqi == null) {
+          return '<div class="error-msg">Données qualité de l\'air indisponibles</div>';
+        }
+
+        const aqi = data.current.us_aqi;
+        const pm25 = data.current.pm2_5;
+        const pm10 = data.current.pm10;
+        const level = getAQILevel(aqi);
+
+        return `
+          <div class="air-badge" style="background:${level.color};">
+            ${level.emoji} AQI ${Math.round(aqi)} — ${level.label}
+          </div>
+          ${pm25 != null ? `<div class="info-item"><i class="fas fa-smog"></i><strong>PM2.5:</strong> ${pm25.toFixed(1)} µg/m³</div>` : ""}
+          ${pm10 != null ? `<div class="info-item"><i class="fas fa-cloud"></i><strong>PM10:</strong> ${pm10.toFixed(1)} µg/m³</div>` : ""}
+          <div class="info-item" style="font-size:0.75rem;color:var(--text-secondary);">
+            <i class="fas fa-info-circle"></i>
+            Index de qualité de l'air américain (US AQI)
+          </div>
+        `;
+      }
+
+      // === GESTION DES POINTS ===
+      function createPointCard(point, index) {
+        const tabsId = `tabs_${index}`;
+        return `
+          <li class="point-card" data-index="${index}">
+            <div class="point-header">
+              <div style="flex:1;">
+                <div class="point-title" data-index="${index}">${escapeHtml(point.name)}</div>
+                <div class="point-coords">${formatCoords(point.lat, point.lng)}</div>
+              </div>
+              <button class="delete-btn" data-index="${index}" aria-label="Supprimer ${escapeHtml(point.name)}">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
+            <div class="point-info">
+              <div class="tabs">
+                <button class="tab active" data-tab="weather" data-id="${tabsId}">
+                  <i class="fas fa-cloud-sun"></i> Météo
+                </button>
+                <button class="tab" data-tab="info" data-id="${tabsId}">
+                  <i class="fas fa-info-circle"></i> Infos
+                </button>
+                <button class="tab" data-tab="air" data-id="${tabsId}">
+                  <i class="fas fa-wind"></i> Air
+                </button>
+              </div>
+              <div class="tab-content active" data-content="weather" data-id="${tabsId}">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+              </div>
+              <div class="tab-content" data-content="info" data-id="${tabsId}">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+              </div>
+              <div class="tab-content" data-content="air" data-id="${tabsId}">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }
+
+      async function loadPointData(point, tabsId) {
+        const { lat, lng } = point;
+
+        // Charger en parallèle pour améliorer la performance
+        const [weatherData, geoData, elevationData, airData] =
+          await Promise.all([
+            getWeatherData(lat, lng),
+            getGeoData(lat, lng),
+            getElevationData(lat, lng),
+            getAirQualityData(lat, lng),
+          ]);
+
+        const weatherEl = document.querySelector(
+          `[data-content="weather"][data-id="${tabsId}"]`,
+        );
+        if (weatherEl) weatherEl.innerHTML = renderWeather(weatherData);
+
+        const infoEl = document.querySelector(
+          `[data-content="info"][data-id="${tabsId}"]`,
+        );
+        if (infoEl) infoEl.innerHTML = renderGeoInfo(geoData, elevationData);
+
+        const airEl = document.querySelector(
+          `[data-content="air"][data-id="${tabsId}"]`,
+        );
+        if (airEl) airEl.innerHTML = renderAirQuality(airData);
+
+        if (point.marker) {
+          point.marker.setPopupContent(
+            formatPopupContent(
+              point,
+              weatherData,
+              geoData,
+              elevationData,
+              airData,
+            ),
+          );
+        }
+      }
+
+      function showPointCard(index) {
+        if (pointsSection.style.display !== "block") {
+          pointsSection.style.display = "block";
+          toggleBtn.style.display = "none";
+        }
+
+        document
+          .querySelectorAll(".point-card")
+          .forEach((card) => card.classList.remove("active"));
+        const card = pointsList.querySelector(
+          `.point-card[data-index="${index}"]`,
+        );
+        if (card) {
+          card.classList.add("active");
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+
+      function updatePointsList() {
+        pointsList.innerHTML = "";
+
+        if (points.length === 0) {
+          pointsSection.style.display = "none";
+          toggleBtn.style.display = "none";
+          updateCounter();
+          return;
+        }
+
+        if (pointsSection.style.display !== "block") {
+          toggleBtn.style.display = "block";
+        }
+
+        // Utiliser DocumentFragment pour améliorer les performances
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement("div");
+
+        points.forEach((point, index) => {
+          tempDiv.innerHTML = createPointCard(point, index);
+          fragment.appendChild(tempDiv.firstElementChild);
+          loadPointData(point, `tabs_${index}`);
+        });
+
+        pointsList.appendChild(fragment);
+        attachPointEvents();
+        updateCounter();
+      }
+
+      function attachPointEvents() {
+        // Événements pour les titres
+        pointsList.querySelectorAll(".point-title").forEach((el) => {
+          el.addEventListener("click", () => {
+            const index = parseInt(el.dataset.index);
+            const point = points[index];
+            map.setView([point.lat, point.lng], CONFIG.focusZoom);
+            point.marker.openPopup();
+          });
+        });
+
+        // Événements pour les boutons de suppression
+        pointsList.querySelectorAll(".delete-btn").forEach((el) => {
+          el.addEventListener("click", () => {
+            const index = parseInt(el.dataset.index);
+            if (confirm(`Supprimer "${points[index].name}" ?`)) {
+              points[index].marker.remove();
+              points.splice(index, 1);
+              updatePointsList();
+              savePoints();
+            }
+          });
+        });
+
+        // Événements pour les onglets
+        pointsList.querySelectorAll(".tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const tabId = tab.dataset.id;
+            const tabType = tab.dataset.tab;
+
+            document
+              .querySelectorAll(`[data-id="${tabId}"]`)
+              .forEach((el) => el.classList.remove("active"));
+            tab.classList.add("active");
+            document
+              .querySelector(`[data-content="${tabType}"][data-id="${tabId}"]`)
+              .classList.add("active");
+          });
+        });
+      }
+
+      function savePoints() {
+        try {
+          localStorage.setItem(
+            CONFIG.storageKey,
+            JSON.stringify(
+              points.map(({ name, lat, lng }) => ({ name, lat, lng })),
+            ),
+          );
+        } catch (error) {
+          console.error("Erreur de sauvegarde:", error);
+          alert("Impossible de sauvegarder les points");
+        }
+      }
+
+      function loadPoints() {
+        try {
+          const saved = localStorage.getItem(CONFIG.storageKey);
+          if (!saved) return;
+
+          JSON.parse(saved).forEach((pt) => {
+            const marker = createMarker(pt.lat, pt.lng, pt.name);
+            points.push({ ...pt, marker });
+          });
+          updatePointsList();
+        } catch (error) {
+          console.error("Erreur de chargement:", error);
+        }
+      }
+
+      function createMarker(lat, lng, name) {
+        const popupPoint = { name, lat, lng };
+        return L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(formatPopupContent(popupPoint))
+          .on("click", () => {
+            const index = points.findIndex(
+              (p) => p.lat === lat && p.lng === lng,
+            );
+            if (index !== -1) showPointCard(index);
+          });
+      }
+
+      // === ÉVÉNEMENTS ===
+      map.on("click", (e) => {
+        const { lat, lng } = e.latlng;
+        if (previewMarker) previewMarker.remove();
+
+        previewMarker = L.marker([lat, lng]).addTo(map);
+        form.classList.add("visible");
+        nameInput.value = "";
+        nameInput.placeholder = `Nom du point (${formatCoords(lat, lng)})`;
+        nameInput.focus();
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!previewMarker) return;
+
+        const name = nameInput.value.trim() || "Sans nom";
+        const { lat, lng } = previewMarker.getLatLng();
+        const marker = createMarker(lat, lng, name);
+
+        points.push({ name, lat, lng, marker });
+        previewMarker.remove();
+        previewMarker = null;
+        form.reset();
+        form.classList.remove("visible");
+        updatePointsList();
+        savePoints();
+      });
+
+      $("close-form").addEventListener("click", () => {
+        form.classList.remove("visible");
+        if (previewMarker) {
+          previewMarker.remove();
+          previewMarker = null;
+        }
+      });
+
+      $("close-points").addEventListener("click", () => {
+        pointsSection.style.display = "none";
+        toggleBtn.style.display = "block";
+      });
+
+      toggleBtn.addEventListener("click", () => {
         pointsSection.style.display = "block";
-        togglePointsBtn.style.display = "none";
+        toggleBtn.style.display = "none";
+      });
+
+      locateBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Géolocalisation non supportée par votre navigateur");
+          return;
+        }
+
+        const originalHTML = locateBtn.innerHTML;
+        locateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        locateBtn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            map.setView([latitude, longitude], 15);
+            L.marker([latitude, longitude])
+              .addTo(map)
+              .bindPopup("📍 Vous êtes ici !")
+              .openPopup();
+            locateBtn.innerHTML = originalHTML;
+            locateBtn.disabled = false;
+          },
+          (error) => {
+            const messages = {
+              1: "Permission refusée",
+              2: "Position indisponible",
+              3: "Délai d'attente dépassé",
+            };
+            alert(
+              `Erreur de géolocalisation: ${messages[error.code] || error.message}`,
+            );
+            locateBtn.innerHTML = originalHTML;
+            locateBtn.disabled = false;
+          },
+          { timeout: 10000, enableHighAccuracy: true },
+        );
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (form.classList.contains("visible")) {
+            $("close-form").click();
+          } else if (pointsSection.style.display === "block") {
+            $("close-points").click();
+          }
+        }
+      });
+
+      window.addEventListener(
+        "resize",
+        debounce(() => map.invalidateSize(), 250),
+      );
+
+      // === INITIALISATION ===
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => map.invalidateSize(), 100);
+        loadPoints();
       });
     </script>
   </body>
