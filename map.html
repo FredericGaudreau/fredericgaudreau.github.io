@@ -177,7 +177,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem;
+        padding: 1rem;
         font-size: 1.3rem;
         border-bottom: 2px solid var(--border);
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -426,6 +426,10 @@
         padding: 0.75rem 0.8rem;
       }
 
+      .leaflet-popup-close-button {
+        display: none;
+      }
+
       .popup-card {
         display: flex;
         flex-direction: column;
@@ -587,7 +591,7 @@
     <!-- Section des points -->
     <section id="points-section">
       <h3>
-        📌 Points ajoutés
+        Points ajoutés
         <button id="close-points" aria-label="Fermer">×</button>
       </h3>
       <ul id="points-list"></ul>
@@ -631,7 +635,7 @@
       const CONFIG = {
         defaultCenter: [45.8924, -74.1546],
         defaultZoom: 13,
-        focusZoom: 16,
+        focusZoom: 15,
         storageKey: "mapPoints",
         cacheExpiry: 3600000, // 1 heure en ms
       };
@@ -1255,6 +1259,8 @@
             $("close-form").click();
           } else if (pointsSection.style.display === "block") {
             $("close-points").click();
+          } else if (map._popup) {
+            map.closePopup();
           }
         }
       });
