@@ -30,7 +30,6 @@
       :root {
         --primary: #2563eb;
         --primary-dark: #1e40af;
-        --success: #10b981;
         --error: #ef4444;
         --border: #e2e8f0;
         --text-primary: #0f172a;
@@ -95,6 +94,24 @@
         border-radius: 10px;
         font: inherit;
         transition: var(--transition);
+      }
+
+      #data-form select {
+        flex: 1;
+        min-width: 150px;
+        padding: 0.65rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        background: white;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      #data-form select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       #data-form input:focus {
@@ -229,7 +246,7 @@
       }
 
       .point-header {
-        padding: 1rem;
+        padding: 0.5rem;
         background: linear-gradient(135deg, #f8fafc 0%, white 100%);
         border-bottom: 1px solid var(--border);
         display: flex;
@@ -242,7 +259,6 @@
         color: var(--primary);
         text-decoration: none;
         font-weight: 600;
-        font-size: 1.05rem;
         cursor: pointer;
         transition: color 0.3s;
         word-break: break-word;
@@ -254,9 +270,9 @@
       }
 
       .point-coords {
-        font-size: 0.75rem;
+        font-size: 0.55rem;
         color: var(--text-secondary);
-        margin-top: 0.25rem;
+        margin-top: 0.05rem;
         font-family: monospace;
       }
 
@@ -266,7 +282,7 @@
         border: 0;
         padding: 0.5rem 0.75rem;
         border-radius: 8px;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
         transition: var(--transition);
@@ -443,23 +459,6 @@
         margin-bottom: 0.2rem;
       }
 
-      .popup-coords {
-        font-family: monospace;
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-      }
-
-      .popup-hint {
-        font-size: 0.73rem;
-        color: var(--text-secondary);
-        margin-top: 0.3rem;
-      }
-
-      .popup-extra {
-        font-size: 0.82rem;
-        color: var(--text-secondary);
-      }
-
       /* Boutons flottants */
       #footer {
         position: fixed;
@@ -486,6 +485,16 @@
         box-shadow: var(--shadow-sm);
       }
 
+      #collections-toggle {
+        background: var(--primary);
+      }
+
+      #collections-toggle:hover,
+      #toggle-points:hover {
+        transform: scale(1.1);
+        background-color: var(--primary-dark);
+      }
+
       #about-link {
         background: var(--bg-glass);
         border: 2px solid var(--border);
@@ -497,7 +506,7 @@
       #about-link:hover {
         background: var(--primary);
         color: white;
-        transform: scale(1.15) rotate(15deg);
+        /* transform: scale(1.15) rotate(15deg); */
       }
 
       #locate-btn {
@@ -520,6 +529,405 @@
 
       #toggle-points:hover {
         transform: scale(1.1);
+      }
+
+      /* Toast notifications */
+      #toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 1005;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-width: 400px;
+        pointer-events: none;
+      }
+
+      .toast {
+        background: white;
+        border-left: 4px solid var(--primary);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease-out;
+        pointer-events: auto;
+        font-size: 0.95rem;
+      }
+
+      .toast.success {
+        border-left-color: #10b981;
+      }
+
+      .toast.success i {
+        color: #10b981;
+      }
+
+      .toast.error {
+        border-left-color: var(--error);
+      }
+
+      .toast.error i {
+        color: var(--error);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      .toast.remove {
+        animation: slideOut 0.3s ease-out forwards;
+      }
+
+      /* Search input */
+      #search-wrapper {
+        position: relative;
+        padding: 1rem 1rem 0 1rem;
+      }
+
+      #search-points {
+        width: 100%;
+        padding: 0.65rem 2.5rem 0.65rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        transition: var(--transition);
+        box-sizing: border-box;
+      }
+
+      #search-points:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      #clear-search {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.5rem;
+        transition: var(--transition);
+        display: none;
+        line-height: 1;
+      }
+
+      #clear-search:hover {
+        color: var(--error);
+        transform: translateY(-50%) scale(1.15);
+      }
+
+      #search-points:not(:placeholder-shown) ~ #clear-search {
+        display: block;
+      }
+
+      .point-card.hidden {
+        display: none;
+      }
+
+      /* Collections */
+      #collections-manager {
+        position: fixed;
+        left: 1rem;
+        bottom: 4.5rem;
+        z-index: 999;
+      }
+
+      #collections-dropdown {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        min-width: 250px;
+        z-index: 999;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+      }
+
+      .collection-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        text-align: left;
+        font: inherit;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .collection-btn:hover {
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--primary);
+      }
+
+      .collection-btn.active {
+        background: rgba(37, 99, 235, 0.15);
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .collection-btn.active::before {
+        content: "✓";
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .collection-badge {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .card-collection-select {
+        width: auto;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        color: var(--text-primary);
+        background: #f8fafc;
+        transition: var(--transition);
+      }
+
+      .card-collection-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .card-collection-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #f8fafc;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 0.5rem;
+        position: relative;
+      }
+
+      .card-collection-btn:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: scale(1.05);
+      }
+
+      .card-collection-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .card-collection-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+        margin-top: 0.25rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .card-collection-option {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: none;
+        background: none;
+        text-align: left;
+        font: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-collection-option:last-child {
+        border-bottom: none;
+      }
+
+      .card-collection-option:hover {
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--primary);
+      }
+
+      .card-collection-option.selected {
+        background: rgba(37, 99, 235, 0.15);
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .card-collection-option.selected::before {
+        content: "✓";
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .collection-option-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .card-collection-label {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+      }
+
+      .point-card {
+        border-left: 4px solid var(--border);
+      }
+
+      .point-card[data-collection] {
+        border-left-color: var(--collection-color, var(--primary));
+      }
+
+      /* Modal */
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.2s;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: var(--shadow);
+      }
+
+      .modal-content h3 {
+        margin-bottom: 1.5rem;
+        font-size: 1.25rem;
+        color: var(--primary);
+      }
+
+      .modal-content input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        margin-bottom: 1.5rem;
+        box-sizing: border-box;
+      }
+
+      .modal-content input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        padding: 0.65rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: var(--border);
+        color: var(--text-primary);
+      }
+
+      .btn-secondary:hover {
+        background: #d4d4d8;
+      }
+
+      .collection-delete {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+        transition: var(--transition);
+      }
+
+      .collection-delete:hover {
+        color: var(--error);
       }
 
       /* Badge de compteur */
@@ -556,7 +964,8 @@
           width: 100%;
         }
 
-        #data-form input {
+        #data-form input,
+        #data-form select {
           min-width: 0;
         }
 
@@ -567,6 +976,14 @@
 
         #footer {
           gap: 0.5rem;
+        }
+
+        #collections-dropdown {
+          max-width: calc(100vw - 3rem);
+        }
+
+        .modal-content {
+          padding: 1.5rem;
         }
       }
     </style>
@@ -584,18 +1001,75 @@
         required
         autocomplete="off"
       />
+      <select id="collection-select">
+        <option value="">--</option>
+      </select>
       <button type="submit" id="add">Ajouter</button>
       <button type="button" id="close-form" aria-label="Fermer">×</button>
     </form>
 
+    <!-- Gestion des collections -->
+    <div id="collections-manager">
+      <button
+        id="collections-toggle"
+        class="round-btn"
+        title="Gérer les collections"
+        aria-label="Gérer les collections"
+      >
+        <i class="fas fa-folder"></i>
+      </button>
+      <div id="collections-dropdown" style="display: none">
+        <button id="new-collection-btn" class="collection-btn">
+          <i class="fas fa-plus"></i> Nouvelle collection
+        </button>
+        <div id="collections-list"></div>
+      </div>
+    </div>
+
+    <!-- Modal pour créer une collection -->
+    <div id="collection-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Nouvelle collection</h3>
+        <input
+          type="text"
+          id="collection-name-input"
+          placeholder="Nom de la collection"
+          autocomplete="off"
+        />
+        <div class="modal-buttons">
+          <button id="modal-cancel" class="btn-secondary">Annuler</button>
+          <button id="modal-create" class="btn-primary">Créer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Section des points -->
     <section id="points-section">
       <h3>
-        Points ajoutés
+        Points
         <button id="close-points" aria-label="Fermer">×</button>
       </h3>
+      <div id="search-wrapper">
+        <input
+          type="text"
+          id="search-points"
+          placeholder="🔍 Rechercher un point..."
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          id="clear-search"
+          aria-label="Effacer la recherche"
+          title="Effacer"
+        >
+          ×
+        </button>
+      </div>
       <ul id="points-list"></ul>
     </section>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
 
     <!-- Boutons flottants -->
     <div id="footer">
@@ -631,16 +1105,15 @@
     <script>
       "use strict";
 
-      // === CONFIGURATION ===
       const CONFIG = {
         defaultCenter: [45.8924, -74.1546],
         defaultZoom: 13,
-        focusZoom: 15,
+        focusZoom: 14,
         storageKey: "mapPoints",
+        collectionsKey: "mapCollections",
         cacheExpiry: 3600000, // 1 heure en ms
       };
 
-      // === INITIALISATION ===
       const map = L.map("map").setView(
         CONFIG.defaultCenter,
         CONFIG.defaultZoom,
@@ -669,22 +1142,45 @@
         .layers(baseLayers, null, { position: "bottomright" })
         .addTo(map);
 
-      // === VARIABLES GLOBALES ===
       const points = [];
+      let collections = [];
+      let currentCollectionFilter = null;
       let previewMarker = null;
       const cache = new Map();
 
-      // === ÉLÉMENTS DOM ===
+      const COLLECTION_COLORS = [
+        "#3b82f6",
+        "#ef4444",
+        "#10b981",
+        "#f59e0b",
+        "#8b5cf6",
+        "#ec4899",
+        "#06b6d4",
+        "#14b8a6",
+        "#6366f1",
+        "#f97316",
+      ];
+
       const $ = (id) => document.getElementById(id);
       const form = $("data-form");
       const nameInput = $("point-name");
+      const collectionSelect = $("collection-select");
       const pointsSection = $("points-section");
       const pointsList = $("points-list");
       const toggleBtn = $("toggle-points");
       const locateBtn = $("locate-btn");
       const counterBadge = toggleBtn.querySelector(".counter-badge");
+      const searchInput = $("search-points");
+      const toastContainer = $("toast-container");
+      const collectionsToggle = $("collections-toggle");
+      const collectionsDropdown = $("collections-dropdown");
+      const newCollectionBtn = $("new-collection-btn");
+      const collectionsList = $("collections-list");
+      const collectionModal = $("collection-modal");
+      const collectionNameInput = $("collection-name-input");
+      const modalCreate = $("modal-create");
+      const modalCancel = $("modal-cancel");
 
-      // === UTILITAIRES ===
       const escapeHtml = (str) =>
         str.replace(
           /[&<>"']/g,
@@ -705,6 +1201,158 @@
           timeout = setTimeout(() => fn(...args), delay);
         };
       };
+
+      // Fonction pour afficher les notifications toast
+      const showToast = (message, type = "success", duration = 3000) => {
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        const icon = type === "success" ? "check-circle" : "exclamation-circle";
+        toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add("remove");
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      };
+
+      // Fonction pour filtrer les points par recherche
+      const filterPoints = () => {
+        const query = searchInput.value.toLowerCase().trim();
+        const cards = pointsList.querySelectorAll(".point-card");
+
+        cards.forEach((card) => {
+          const title = card
+            .querySelector(".point-title")
+            .textContent.toLowerCase();
+          if (query === "" || title.includes(query)) {
+            card.classList.remove("hidden");
+          } else {
+            card.classList.add("hidden");
+          }
+        });
+      };
+
+      function loadCollections() {
+        try {
+          const saved = localStorage.getItem(CONFIG.collectionsKey);
+          collections = saved ? JSON.parse(saved) : [];
+        } catch (error) {
+          console.error("Erreur de chargement collections:", error);
+          collections = [];
+        }
+      }
+
+      function saveCollections() {
+        try {
+          localStorage.setItem(
+            CONFIG.collectionsKey,
+            JSON.stringify(collections),
+          );
+        } catch (error) {
+          console.error("Erreur sauvegarde collections:", error);
+          showToast("Erreur lors de la sauvegarde", "error");
+        }
+      }
+
+      function createCollection(name) {
+        if (!name.trim()) {
+          showToast("Nom de collection requis", "error");
+          return null;
+        }
+        const collection = {
+          id: Date.now().toString(),
+          name: name.trim(),
+          color:
+            COLLECTION_COLORS[collections.length % COLLECTION_COLORS.length],
+        };
+        collections.push(collection);
+        saveCollections();
+        updateCollectionsUI();
+        updateCollectionSelect();
+        showToast(`Collection "${name}" créée`, "success");
+        return collection;
+      }
+
+      function deleteCollection(collectionId) {
+        const collection = collections.find((c) => c.id === collectionId);
+        if (!collection) return;
+
+        // Retirer la collection des points
+        points.forEach((p) => {
+          if (p.collectionId === collectionId) {
+            p.collectionId = null;
+          }
+        });
+
+        collections = collections.filter((c) => c.id !== collectionId);
+        saveCollections();
+        savePoints();
+        updateCollectionsUI();
+        updateCollectionSelect();
+        updatePointsList();
+        showToast(`Collection "${collection.name}" supprimée`, "success");
+      }
+
+      function updateCollectionsUI() {
+        collectionsList.innerHTML = "";
+
+        if (collections.length === 0) {
+          collectionsList.innerHTML =
+            '<div style="padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem;">Aucune collection</div>';
+          return;
+        }
+
+        collections.forEach((coll) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "collection-btn";
+          if (currentCollectionFilter === coll.id) btn.classList.add("active");
+
+          btn.innerHTML = `
+            <span class="collection-badge" style="background: ${coll.color}"></span>
+            <span>${escapeHtml(coll.name)}</span>
+          `;
+
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            currentCollectionFilter =
+              currentCollectionFilter === coll.id ? null : coll.id;
+            updatePointsList();
+            updateCollectionsUI();
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.type = "button";
+          deleteBtn.className = "collection-delete";
+          deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          deleteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (confirm(`Supprimer la collection "${coll.name}" ?`)) {
+              deleteCollection(coll.id);
+            }
+          });
+
+          const wrapper = document.createElement("div");
+          wrapper.style.cssText =
+            "display:flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border);";
+          wrapper.appendChild(btn);
+          wrapper.appendChild(deleteBtn);
+          collectionsList.appendChild(wrapper);
+        });
+      }
+
+      function updateCollectionSelect() {
+        collectionSelect.innerHTML =
+          '<option value="">--</option>';
+        collections.forEach((coll) => {
+          const opt = document.createElement("option");
+          opt.value = coll.id;
+          opt.textContent = coll.name;
+          opt.style.borderLeft = `4px solid ${coll.color}`;
+          collectionSelect.appendChild(opt);
+        });
+      }
 
       const formatCoords = (lat, lng) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 
@@ -733,7 +1381,6 @@
         }
       };
 
-      // === DONNÉES MÉTÉO ===
       const WEATHER_CODES = {
         0: { text: "Ciel dégagé", emoji: "☀️" },
         1: { text: "Principalement ensoleillé", emoji: "🌤️" },
@@ -772,7 +1419,6 @@
 
       const getAQILevel = (aqi) => AQI_LEVELS.find((l) => aqi <= l.max);
 
-      // === API ===
       async function fetchData(url, cacheKey) {
         const cached = cache.get(cacheKey);
         if (cached && Date.now() - cached.timestamp < CONFIG.cacheExpiry) {
@@ -781,12 +1427,25 @@
 
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          if (!response.ok) {
+            // Ne pas logger les erreurs de service (5xx) qui sont hors de notre contrôle
+            if (response.status >= 500) {
+              return null;
+            }
+            throw new Error(`HTTP ${response.status}`);
+          }
           const data = await response.json();
           cache.set(cacheKey, { data, timestamp: Date.now() });
           return data;
         } catch (error) {
-          console.error(`Erreur API (${cacheKey}):`, error);
+          // Ne logger que les vraies erreurs (réseau, parsing), pas les erreurs de service
+          if (error.message.includes("HTTP")) {
+            console.warn(
+              `Service indisponible (${cacheKey}): ${error.message}`,
+            );
+          } else {
+            console.error(`Erreur API (${cacheKey}):`, error);
+          }
           return null;
         }
       }
@@ -815,7 +1474,6 @@
           `elevation_${lat}_${lng}`,
         );
 
-      // === RENDU ===
       function renderWeather(data) {
         if (!data?.current_weather) {
           return '<div class="error-msg">Données météo indisponibles</div>';
@@ -857,6 +1515,7 @@
         }
 
         const addr = geoData.address;
+        console.log("Données géographiques:", geoData);
         const elevation = elevationData?.results?.[0]?.elevation;
 
         const parts = [
@@ -865,13 +1524,13 @@
             label: "Adresse",
             value: geoData.display_name,
           },
-          { icon: "flag", label: "Pays", value: addr.country },
-          {
-            icon: "city",
-            label: "Ville",
-            value: addr.city || addr.town || addr.village,
-          },
-          { icon: "envelope", label: "Code postal", value: addr.postcode },
+          // { icon: "flag", label: "Pays", value: addr.country },
+          // {
+          //   icon: "city",
+          //   label: "Ville",
+          //   value: addr.city || addr.town || addr.village,
+          // },
+          // { icon: "envelope", label: "Code postal", value: addr.postcode },
           {
             icon: "mountain",
             label: "Altitude",
@@ -959,7 +1618,18 @@
         `;
       }
 
-      // === GESTION DES POINTS ===
+      function renderCollectionOptions(selectedId = null) {
+        return `
+          <option value="">--</option>
+          ${collections
+            .map(
+              (coll) =>
+                `<option value="${coll.id}" ${coll.id === selectedId ? "selected" : ""}>${escapeHtml(coll.name)}</option>`,
+            )
+            .join("")}
+        `;
+      }
+
       function createPointCard(point, index) {
         const tabsId = `tabs_${index}`;
         return `
@@ -968,27 +1638,30 @@
               <div style="flex:1;">
                 <div class="point-title" data-index="${index}">${escapeHtml(point.name)}</div>
                 <div class="point-coords">${formatCoords(point.lat, point.lng)}</div>
-              </div>
+                </div>
+                <select class="card-collection-select" data-index="${index}">
+                  ${renderCollectionOptions(point.collectionId)}
+                </select>
               <button class="delete-btn" data-index="${index}" aria-label="Supprimer ${escapeHtml(point.name)}">
-                <i class="fas fa-trash"></i> Supprimer
+                <i class="fas fa-trash"></i> 
               </button>
             </div>
             <div class="point-info">
               <div class="tabs">
-                <button class="tab active" data-tab="weather" data-id="${tabsId}">
-                  <i class="fas fa-cloud-sun"></i> Météo
-                </button>
-                <button class="tab" data-tab="info" data-id="${tabsId}">
+                <button class="tab active" data-tab="info" data-id="${tabsId}">
                   <i class="fas fa-info-circle"></i> Infos
+                </button>
+                <button class="tab" data-tab="weather" data-id="${tabsId}">
+                  <i class="fas fa-cloud-sun"></i> Météo
                 </button>
                 <button class="tab" data-tab="air" data-id="${tabsId}">
                   <i class="fas fa-wind"></i> Air
                 </button>
               </div>
-              <div class="tab-content active" data-content="weather" data-id="${tabsId}">
+              <div class="tab-content active" data-content="info" data-id="${tabsId}">
                 <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
               </div>
-              <div class="tab-content" data-content="info" data-id="${tabsId}">
+              <div class="tab-content" data-content="weather" data-id="${tabsId}">
                 <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
               </div>
               <div class="tab-content" data-content="air" data-id="${tabsId}">
@@ -1071,14 +1744,30 @@
           toggleBtn.style.display = "block";
         }
 
+        // Filtrer par collection si nécessaire
+        const filteredPoints = currentCollectionFilter
+          ? points.filter((p) => p.collectionId === currentCollectionFilter)
+          : points;
+
         // Utiliser DocumentFragment pour améliorer les performances
         const fragment = document.createDocumentFragment();
         const tempDiv = document.createElement("div");
 
-        points.forEach((point, index) => {
-          tempDiv.innerHTML = createPointCard(point, index);
-          fragment.appendChild(tempDiv.firstElementChild);
-          loadPointData(point, `tabs_${index}`);
+        filteredPoints.forEach((point, index) => {
+          const originalIndex = points.indexOf(point);
+          tempDiv.innerHTML = createPointCard(point, originalIndex);
+          const card = tempDiv.firstElementChild;
+          if (point.collectionId) {
+            const collection = collections.find(
+              (c) => c.id === point.collectionId,
+            );
+            if (collection) {
+              card.setAttribute("data-collection", point.collectionId);
+              card.style.setProperty("--collection-color", collection.color);
+            }
+          }
+          fragment.appendChild(card);
+          loadPointData(point, `tabs_${originalIndex}`);
         });
 
         pointsList.appendChild(fragment);
@@ -1101,12 +1790,14 @@
         pointsList.querySelectorAll(".delete-btn").forEach((el) => {
           el.addEventListener("click", () => {
             const index = parseInt(el.dataset.index);
-            if (confirm(`Supprimer "${points[index].name}" ?`)) {
-              points[index].marker.remove();
-              points.splice(index, 1);
-              updatePointsList();
-              savePoints();
-            }
+            const pointName = points[index].name;
+            const point = points[index];
+
+            points[index].marker.remove();
+            points.splice(index, 1);
+            updatePointsList();
+            savePoints();
+            showToast(`"${pointName}" supprimé`, "success");
           });
         });
 
@@ -1125,6 +1816,28 @@
               .classList.add("active");
           });
         });
+
+        // Événements pour modifier la collection d'un point
+        pointsList
+          .querySelectorAll(".card-collection-select")
+          .forEach((select) => {
+            select.addEventListener("change", () => {
+              const index = parseInt(select.dataset.index);
+              const point = points[index];
+              point.collectionId = select.value || null;
+              savePoints();
+              updatePointsList();
+              const collection = collections.find(
+                (c) => c.id === point.collectionId,
+              );
+              showToast(
+                collection
+                  ? `Point "${point.name}" déplacé vers ${collection.name}`
+                  : `Collection retirée pour "${point.name}"`,
+                "success",
+              );
+            });
+          });
       }
 
       function savePoints() {
@@ -1132,12 +1845,17 @@
           localStorage.setItem(
             CONFIG.storageKey,
             JSON.stringify(
-              points.map(({ name, lat, lng }) => ({ name, lat, lng })),
+              points.map(({ name, lat, lng, collectionId }) => ({
+                name,
+                lat,
+                lng,
+                collectionId: collectionId || null,
+              })),
             ),
           );
         } catch (error) {
           console.error("Erreur de sauvegarde:", error);
-          alert("Impossible de sauvegarder les points");
+          showToast("Impossible de sauvegarder les points", "error");
         }
       }
 
@@ -1169,7 +1887,16 @@
           });
       }
 
-      // === ÉVÉNEMENTS ===
+      // Event listener pour la recherche
+      searchInput.addEventListener("input", debounce(filterPoints, 150));
+
+      // Event listener pour effacer la recherche
+      $("clear-search").addEventListener("click", () => {
+        searchInput.value = "";
+        filterPoints();
+        searchInput.focus();
+      });
+
       map.on("click", (e) => {
         const { lat, lng } = e.latlng;
         if (previewMarker) previewMarker.remove();
@@ -1187,15 +1914,18 @@
 
         const name = nameInput.value.trim() || "Sans nom";
         const { lat, lng } = previewMarker.getLatLng();
+        const collectionId = collectionSelect.value || null;
         const marker = createMarker(lat, lng, name);
 
-        points.push({ name, lat, lng, marker });
+        points.push({ name, lat, lng, marker, collectionId });
         previewMarker.remove();
         previewMarker = null;
         form.reset();
+        collectionSelect.value = "";
         form.classList.remove("visible");
         updatePointsList();
         savePoints();
+        showToast(`Point "${name}" ajouté`, "success");
       });
 
       $("close-form").addEventListener("click", () => {
@@ -1218,7 +1948,7 @@
 
       locateBtn.addEventListener("click", () => {
         if (!navigator.geolocation) {
-          alert("Géolocalisation non supportée par votre navigateur");
+          showToast("Géolocalisation non supportée", "error");
           return;
         }
 
@@ -1236,6 +1966,7 @@
               .openPopup();
             locateBtn.innerHTML = originalHTML;
             locateBtn.disabled = false;
+            showToast("Position trouvée", "success");
           },
           (error) => {
             const messages = {
@@ -1243,8 +1974,9 @@
               2: "Position indisponible",
               3: "Délai d'attente dépassé",
             };
-            alert(
-              `Erreur de géolocalisation: ${messages[error.code] || error.message}`,
+            showToast(
+              `Erreur: ${messages[error.code] || error.message}`,
+              "error",
             );
             locateBtn.innerHTML = originalHTML;
             locateBtn.disabled = false;
@@ -1270,9 +2002,56 @@
         debounce(() => map.invalidateSize(), 250),
       );
 
-      // === INITIALISATION ===
+      collectionsToggle.addEventListener("click", () => {
+        collectionsDropdown.style.display =
+          collectionsDropdown.style.display === "none" ? "block" : "none";
+      });
+
+      document.addEventListener("click", (e) => {
+        if (
+          !collectionsToggle.contains(e.target) &&
+          !collectionsDropdown.contains(e.target)
+        ) {
+          collectionsDropdown.style.display = "none";
+        }
+      });
+
+      newCollectionBtn.addEventListener("click", () => {
+        collectionNameInput.value = "";
+        collectionModal.style.display = "flex";
+        collectionNameInput.focus();
+        collectionsDropdown.style.display = "none";
+      });
+
+      modalCancel.addEventListener("click", () => {
+        collectionModal.style.display = "none";
+      });
+
+      modalCreate.addEventListener("click", () => {
+        const name = collectionNameInput.value.trim();
+        if (name) {
+          createCollection(name);
+          collectionModal.style.display = "none";
+        }
+      });
+
+      collectionNameInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          modalCreate.click();
+        }
+      });
+
+      collectionModal.addEventListener("click", (e) => {
+        if (e.target === collectionModal) {
+          collectionModal.style.display = "none";
+        }
+      });
+
       document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => map.invalidateSize(), 100);
+        loadCollections();
+        updateCollectionsUI();
+        updateCollectionSelect();
         loadPoints();
       });
     </script>
