@@ -534,7 +534,7 @@
       /* Toast notifications */
       #toast-container {
         position: fixed;
-        top: 1.5rem;
+        bottom: 1.5rem;
         right: 1.5rem;
         z-index: 1005;
         display: flex;
@@ -1161,6 +1161,16 @@
         "#f97316",
       ];
 
+      const getMarkerIcon = (color) => {
+        if (!color) return null;
+        return L.divIcon({
+          className: "custom-marker",
+          html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+      };
+
       const $ = (id) => document.getElementById(id);
       const form = $("data-form");
       const nameInput = $("point-name");
@@ -1282,6 +1292,7 @@
         points.forEach((p) => {
           if (p.collectionId === collectionId) {
             p.collectionId = null;
+            p.marker.setIcon(new L.Icon.Default());
           }
         });
 
@@ -1343,8 +1354,7 @@
       }
 
       function updateCollectionSelect() {
-        collectionSelect.innerHTML =
-          '<option value="">--</option>';
+        collectionSelect.innerHTML = '<option value="">--</option>';
         collections.forEach((coll) => {
           const opt = document.createElement("option");
           opt.value = coll.id;
@@ -1830,6 +1840,9 @@
               const collection = collections.find(
                 (c) => c.id === point.collectionId,
               );
+              point.marker.setIcon(
+                getMarkerIcon(collection?.color) || new L.Icon.Default(),
+              );
               showToast(
                 collection
                   ? `Point "${point.name}" déplacé vers ${collection.name}`
@@ -1865,7 +1878,12 @@
           if (!saved) return;
 
           JSON.parse(saved).forEach((pt) => {
-            const marker = createMarker(pt.lat, pt.lng, pt.name);
+            const marker = createMarker(
+              pt.lat,
+              pt.lng,
+              pt.name,
+              pt.collectionId,
+            );
             points.push({ ...pt, marker });
           });
           updatePointsList();
@@ -1874,9 +1892,14 @@
         }
       }
 
-      function createMarker(lat, lng, name) {
+      function createMarker(lat, lng, name, collectionId = null) {
+        const collection = collectionId
+          ? collections.find((c) => c.id === collectionId)
+          : null;
+        const icon = getMarkerIcon(collection?.color);
         const popupPoint = { name, lat, lng };
-        return L.marker([lat, lng])
+        const options = icon ? { icon } : {};
+        return L.marker([lat, lng], options)
           .addTo(map)
           .bindPopup(formatPopupContent(popupPoint))
           .on("click", () => {
@@ -1915,7 +1938,7 @@
         const name = nameInput.value.trim() || "Sans nom";
         const { lat, lng } = previewMarker.getLatLng();
         const collectionId = collectionSelect.value || null;
-        const marker = createMarker(lat, lng, name);
+        const marker = createMarker(lat, lng, name, collectionId);
 
         points.push({ name, lat, lng, marker, collectionId });
         previewMarker.remove();
