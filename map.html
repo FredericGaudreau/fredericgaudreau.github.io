@@ -601,6 +601,136 @@
       }
 
       /* Search input */
+      #nominatim-search {
+        position: fixed;
+        left: 3.5rem;
+        top: 1.25rem;
+        z-index: 1002;
+        width: min(360px, calc(100vw - 2.5rem));
+        background: var(--bg-glass);
+        border: 2px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      #toggle-nominatim {
+        position: fixed;
+        left: 3.5rem;
+        top: 1.25rem;
+        z-index: 1001;
+        background: var(--primary);
+      }
+
+      #toggle-nominatim:hover {
+        background: var(--primary-dark);
+        transform: scale(1.1);
+      }
+
+      #nominatim-form {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      #search-address {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font: inherit;
+        transition: var(--transition);
+        box-sizing: border-box;
+      }
+
+      #search-address:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .clear-btn {
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 12px;
+        background: var(--border);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .clear-btn:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--error);
+      }
+
+      #search-results {
+        max-height: 280px;
+        overflow-y: auto;
+        border-top: 1px solid var(--border);
+      }
+
+      .search-result-item {
+        padding: 0.95rem 1rem;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        background: white;
+      }
+
+      .search-result-item:hover {
+        background: rgba(37, 99, 235, 0.06);
+      }
+
+      .search-result-item:last-child {
+        border-bottom: none;
+      }
+
+      .search-result-title {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .search-result-sub {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .search-result-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .search-result-actions button {
+        border: none;
+        border-radius: 10px;
+        padding: 0.45rem 0.85rem;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+        transition: var(--transition);
+        font: inherit;
+      }
+
+      .search-result-actions button:hover {
+        background: var(--primary-dark);
+      }
+
+      .search-result-empty {
+        padding: 1rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
       #search-wrapper {
         position: relative;
         padding: 1rem 1rem 0 1rem;
@@ -991,6 +1121,36 @@
   <body>
     <div id="map"></div>
 
+    <button
+      id="toggle-nominatim"
+      class="round-btn"
+      title="Rechercher une adresse"
+      aria-label="Rechercher une adresse"
+    >
+      <i class="fas fa-search"></i>
+    </button>
+
+    <div id="nominatim-search" style="display: none">
+      <form id="nominatim-form">
+        <input
+          type="search"
+          id="search-address"
+          placeholder="Rechercher une adresse..."
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          id="close-nominatim"
+          class="clear-btn"
+          aria-label="Fermer la recherche"
+          title="Fermer"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </form>
+      <div id="search-results"></div>
+    </div>
+
     <!-- Formulaire d'ajout -->
     <form id="data-form">
       <label for="point-name">📍 Nom :</label>
@@ -1181,6 +1341,11 @@
       const locateBtn = $("locate-btn");
       const counterBadge = toggleBtn.querySelector(".counter-badge");
       const searchInput = $("search-points");
+      const addressSearchInput = $("search-address");
+      const addressSearchResults = $("search-results");
+      const nominatimSearch = $("nominatim-search");
+      const toggleNominatimBtn = $("toggle-nominatim");
+      const closeNominatimBtn = $("close-nominatim");
       const toastContainer = $("toast-container");
       const collectionsToggle = $("collections-toggle");
       const collectionsDropdown = $("collections-dropdown");
@@ -1210,6 +1375,91 @@
           clearTimeout(timeout);
           timeout = setTimeout(() => fn(...args), delay);
         };
+      };
+
+      const renderAddressResults = (results) => {
+        if (!results || results.length === 0) {
+          addressSearchResults.innerHTML =
+            '<div class="search-result-empty">Aucun résultat trouvé.</div>';
+          return;
+        }
+
+        addressSearchResults.innerHTML = results
+          .map((result) => {
+            const display = result.display_name;
+            const details = [
+              result.address.city || result.address.town || result.address.village,
+              result.address.state,
+              result.address.country,
+            ]
+              .filter(Boolean)
+              .join(" • ");
+
+            return `
+              <div class="search-result-item" data-lat="${result.lat}" data-lng="${result.lon}" data-name="${escapeHtml(display)}">
+                <span class="search-result-title">${escapeHtml(display)}</span>
+                <span class="search-result-sub">${escapeHtml(details)}</span>
+                <div class="search-result-actions">
+                  <button type="button" class="btn-add-result">Ajouter</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      };
+
+      const searchAddress = async () => {
+        const query = addressSearchInput.value.trim();
+        if (query.length < 3) {
+          addressSearchResults.innerHTML = "";
+          return;
+        }
+
+        addressSearchResults.innerHTML =
+          '<div class="search-result-empty"><i class="fas fa-spinner fa-spin"></i> Recherche en cours...</div>';
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&accept-language=fr&q=${encodeURIComponent(
+              query,
+            )}`,
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const results = await response.json();
+          renderAddressResults(results);
+        } catch (error) {
+          console.error("Erreur de recherche Nominatim:", error);
+          addressSearchResults.innerHTML =
+            '<div class="search-result-empty">Impossible de récupérer les résultats.</div>';
+        }
+      };
+
+      const addSearchResultPoint = (lat, lng, name) => {
+        const marker = createMarker(parseFloat(lat), parseFloat(lng), name);
+        points.push({ name, lat: parseFloat(lat), lng: parseFloat(lng), marker, collectionId: null });
+        updatePointsList();
+        savePoints();
+        map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
+        marker.openPopup();
+        showToast(`Point ajouté : ${name}`);
+      };
+
+      const clearAddressSearch = () => {
+        if (addressSearchInput.value.trim() === "") {
+          // Fermer le panneau si le champ est déjà vide
+          nominatimSearch.style.display = "none";
+          toggleNominatimBtn.style.display = "block";
+          addressSearchResults.innerHTML = "";
+        } else {
+          // Sinon effacer le champ
+          addressSearchInput.value = "";
+          addressSearchResults.innerHTML = "";
+          addressSearchInput.focus();
+        }
       };
 
       // Fonction pour afficher les notifications toast
@@ -1910,14 +2160,47 @@
           });
       }
 
-      // Event listener pour la recherche
+      // Event listener pour la recherche de points
       searchInput.addEventListener("input", debounce(filterPoints, 150));
+
+      // Event listener pour la recherche d'adresses Nominatim
+      addressSearchInput.addEventListener("input", debounce(searchAddress, 250));
+
+      addressSearchResults.addEventListener("click", (event) => {
+        const resultItem = event.target.closest(".search-result-item");
+        if (!resultItem) return;
+
+        const lat = resultItem.dataset.lat;
+        const lng = resultItem.dataset.lng;
+        const name = resultItem.dataset.name || "Adresse trouvée";
+
+        if (event.target.closest(".btn-add-result")) {
+          addSearchResultPoint(lat, lng, name);
+          return;
+        }
+
+        map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
+        if (previewMarker) previewMarker.remove();
+        previewMarker = L.marker([lat, lng]).addTo(map);
+        previewMarker.bindPopup(`<strong>${escapeHtml(name)}</strong>`).openPopup();
+      });
 
       // Event listener pour effacer la recherche
       $("clear-search").addEventListener("click", () => {
         searchInput.value = "";
         filterPoints();
         searchInput.focus();
+      });
+
+      toggleNominatimBtn.addEventListener("click", () => {
+        nominatimSearch.style.display = "block";
+        toggleNominatimBtn.style.display = "none";
+        addressSearchInput.focus();
+      });
+
+      closeNominatimBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        clearAddressSearch();
       });
 
       map.on("click", (e) => {
