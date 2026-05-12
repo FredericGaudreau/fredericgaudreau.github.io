@@ -202,6 +202,25 @@
         z-index: 1;
       }
 
+      .points-action-btn {
+        background: none;
+        border: 0;
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0 0.25rem;
+        transition: var(--transition);
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .points-action-btn:hover {
+        color: var(--primary);
+        transform: scale(1.1);
+      }
+
       #close-points {
         background: none;
         border: 0;
@@ -846,6 +865,12 @@
         flex-shrink: 0;
       }
 
+      .collection-count {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
       .card-collection-select {
         width: auto;
         padding: 0.25rem 0.5rem;
@@ -1207,7 +1232,25 @@
     <section id="points-section">
       <h3>
         Points
-        <button id="close-points" aria-label="Fermer">×</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center">
+          <button
+            id="export-btn"
+            class="points-action-btn"
+            title="Exporter les points"
+            aria-label="Exporter les points"
+          >
+            <i class="fas fa-download"></i>
+          </button>
+          <button
+            id="import-btn"
+            class="points-action-btn"
+            title="Importer les points"
+            aria-label="Importer les points"
+          >
+            <i class="fas fa-upload"></i>
+          </button>
+          <button id="close-points" aria-label="Fermer">×</button>
+        </div>
       </h3>
       <div id="search-wrapper">
         <input
@@ -1227,6 +1270,14 @@
       </div>
       <ul id="points-list"></ul>
     </section>
+
+    <!-- Input caché pour l'import -->
+    <input
+      type="file"
+      id="import-file-input"
+      accept=".json"
+      style="display: none"
+    />
 
     <!-- Toast container -->
     <div id="toast-container"></div>
@@ -1388,7 +1439,9 @@
           .map((result) => {
             const display = result.display_name;
             const details = [
-              result.address.city || result.address.town || result.address.village,
+              result.address.city ||
+                result.address.town ||
+                result.address.village,
               result.address.state,
               result.address.country,
             ]
@@ -1440,7 +1493,13 @@
 
       const addSearchResultPoint = (lat, lng, name) => {
         const marker = createMarker(parseFloat(lat), parseFloat(lng), name);
-        points.push({ name, lat: parseFloat(lat), lng: parseFloat(lng), marker, collectionId: null });
+        points.push({
+          name,
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          marker,
+          collectionId: null,
+        });
         updatePointsList();
         savePoints();
         map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
@@ -1570,9 +1629,11 @@
           btn.className = "collection-btn";
           if (currentCollectionFilter === coll.id) btn.classList.add("active");
 
+          const count = points.filter((p) => p.collectionId === coll.id).length;
           btn.innerHTML = `
             <span class="collection-badge" style="background: ${coll.color}"></span>
             <span>${escapeHtml(coll.name)}</span>
+            <span class="collection-count">${count}</span>
           `;
 
           btn.addEventListener("click", (e) => {
@@ -2033,6 +2094,7 @@
         pointsList.appendChild(fragment);
         attachPointEvents();
         updateCounter();
+        updateCollectionsUI();
       }
 
       function attachPointEvents() {
@@ -2142,6 +2204,186 @@
         }
       }
 
+      function exportPoints() {
+        // Filtrer les points selon la collection sélectionnée
+        const pointsToExport = currentCollectionFilter
+          ? points.filter((p) => p.collectionId === currentCollectionFilter)
+          : points;
+
+        if (pointsToExport.length === 0) {
+          showToast("Aucun point à exporter", "error");
+          return;
+        }
+
+        // Exporter les collections (seulement celle sélectionnée si filtrée)
+        const collectionsToExport = currentCollectionFilter
+          ? collections.filter((c) => c.id === currentCollectionFilter)
+          : collections;
+
+        const exportData = {
+          version: 1,
+          exportDate: new Date().toISOString(),
+          points: pointsToExport.map(({ name, lat, lng, collectionId }) => ({
+            name,
+            lat,
+            lng,
+            collectionId: collectionId || null,
+          })),
+          collections: collectionsToExport,
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        const collectionName = currentCollectionFilter
+          ? collections.find((c) => c.id === currentCollectionFilter)?.name ||
+            "collection"
+          : "all";
+        link.download = `points_${collectionName}_${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        const message = currentCollectionFilter
+          ? `${pointsToExport.length} point(s) de la collection exporté(s)`
+          : `${pointsToExport.length} point(s) exporté(s)`;
+        showToast(message, "success");
+      }
+
+      function importPoints() {
+        const fileInput = $("import-file-input");
+        fileInput.click();
+      }
+
+      function handleFileImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importData = JSON.parse(e.target.result);
+
+            if (!importData.points || !Array.isArray(importData.points)) {
+              showToast("Format de fichier invalide", "error");
+              return;
+            }
+
+            // Si une collection est sélectionnée, importer les points dans cette collection
+            if (currentCollectionFilter) {
+              const selectedCollection = collections.find(
+                (c) => c.id === currentCollectionFilter,
+              );
+              if (!selectedCollection) {
+                showToast("Collection sélectionnée introuvable", "error");
+                return;
+              }
+
+              // Importer les points dans la collection sélectionnée
+              let importedCount = 0;
+              importData.points.forEach((pt) => {
+                const exists = points.some(
+                  (p) =>
+                    p.lat === pt.lat && p.lng === pt.lng && p.name === pt.name,
+                );
+                if (!exists) {
+                  const marker = createMarker(
+                    pt.lat,
+                    pt.lng,
+                    pt.name,
+                    currentCollectionFilter, // Assigner à la collection sélectionnée
+                  );
+                  points.push({
+                    name: pt.name,
+                    lat: pt.lat,
+                    lng: pt.lng,
+                    collectionId: currentCollectionFilter,
+                    marker,
+                  });
+                  importedCount++;
+                }
+              });
+
+              savePoints();
+              updatePointsList();
+              showToast(
+                `${importedCount} point(s) importé(s) dans "${selectedCollection.name}"`,
+                "success",
+              );
+            } else {
+              // Mode normal: fusionner ou remplacer
+              const shouldMerge = confirm(
+                `Fusionner avec les points existants?\n\nOUI: Ajouter les ${importData.points.length} point(s) aux existants\nAnnuler: Remplacer tous les points`,
+              );
+
+              if (!shouldMerge) {
+                // Supprimer tous les marqueurs existants
+                points.forEach((p) => p.marker.remove());
+                points = [];
+              }
+
+              // Importer les collections
+              if (
+                importData.collections &&
+                Array.isArray(importData.collections)
+              ) {
+                importData.collections.forEach((importedColl) => {
+                  const exists = collections.some(
+                    (c) => c.id === importedColl.id,
+                  );
+                  if (!exists) {
+                    collections.push(importedColl);
+                  }
+                });
+                saveCollections();
+                updateCollectionsUI();
+                updateCollectionSelect();
+              }
+
+              // Importer les points
+              let importedCount = 0;
+              importData.points.forEach((pt) => {
+                const exists = points.some(
+                  (p) =>
+                    p.lat === pt.lat && p.lng === pt.lng && p.name === pt.name,
+                );
+                if (!exists) {
+                  const marker = createMarker(
+                    pt.lat,
+                    pt.lng,
+                    pt.name,
+                    pt.collectionId,
+                  );
+                  points.push({ ...pt, marker });
+                  importedCount++;
+                }
+              });
+
+              savePoints();
+              updatePointsList();
+              showToast(
+                `${importedCount} point(s) importé(s) avec succès`,
+                "success",
+              );
+            }
+          } catch (error) {
+            console.error("Erreur lors de l'import:", error);
+            showToast("Erreur lors de l'import du fichier", "error");
+          }
+        };
+
+        reader.onerror = () => {
+          showToast("Erreur lors de la lecture du fichier", "error");
+        };
+
+        reader.readAsText(file);
+
+        // Réinitialiser l'input pour permettre de réimporter le même fichier
+        event.target.value = "";
+      }
+
       function createMarker(lat, lng, name, collectionId = null) {
         const collection = collectionId
           ? collections.find((c) => c.id === collectionId)
@@ -2163,8 +2405,16 @@
       // Event listener pour la recherche de points
       searchInput.addEventListener("input", debounce(filterPoints, 150));
 
+      // Event listener pour export/import
+      $("export-btn").addEventListener("click", exportPoints);
+      $("import-btn").addEventListener("click", importPoints);
+      $("import-file-input").addEventListener("change", handleFileImport);
+
       // Event listener pour la recherche d'adresses Nominatim
-      addressSearchInput.addEventListener("input", debounce(searchAddress, 250));
+      addressSearchInput.addEventListener(
+        "input",
+        debounce(searchAddress, 250),
+      );
 
       addressSearchResults.addEventListener("click", (event) => {
         const resultItem = event.target.closest(".search-result-item");
@@ -2182,7 +2432,9 @@
         map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
         if (previewMarker) previewMarker.remove();
         previewMarker = L.marker([lat, lng]).addTo(map);
-        previewMarker.bindPopup(`<strong>${escapeHtml(name)}</strong>`).openPopup();
+        previewMarker
+          .bindPopup(`<strong>${escapeHtml(name)}</strong>`)
+          .openPopup();
       });
 
       // Event listener pour effacer la recherche
@@ -2356,9 +2608,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => map.invalidateSize(), 100);
         loadCollections();
+        loadPoints();
         updateCollectionsUI();
         updateCollectionSelect();
-        loadPoints();
       });
     </script>
   </body>
