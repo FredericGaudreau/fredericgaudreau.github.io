@@ -14,6 +14,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -533,6 +537,15 @@
       }
 
       #locate-btn:hover {
+        background: var(--primary-dark);
+        transform: scale(1.1);
+      }
+
+      #routing-btn {
+        background: var(--primary);
+      }
+
+      #routing-btn:hover {
         background: var(--primary-dark);
         transform: scale(1.1);
       }
@@ -1100,6 +1113,27 @@
         text-align: center;
       }
 
+      /* Panneau de routage */
+      #routing-panel {
+        position: fixed;
+        left: 4.5rem;
+        bottom: 5rem;
+        background: var(--bg-glass);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        z-index: 1000;
+        min-width: 280px;
+      }
+
+      #routing-panel h3 {
+        padding: 1rem;
+        font-size: 1.1rem;
+        border-bottom: 2px solid var(--border);
+        color: var(--primary);
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         #points-section {
@@ -1301,6 +1335,79 @@
       >
         <i class="fas fa-location-arrow"></i>
       </button>
+      <button
+        id="routing-btn"
+        class="round-btn"
+        title="Calculer un itinéraire"
+        aria-label="Calculer un itinéraire"
+      >
+        <i class="fas fa-road"></i>
+      </button>
+    </div>
+
+    <!-- Panneau de routage -->
+    <div id="routing-panel" style="display: none">
+      <h3>Itinéraire</h3>
+      <div
+        style="
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        "
+      >
+        <select
+          id="routing-start"
+          style="
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font: inherit;
+          "
+        >
+          <option value="">Sélectionner le point de départ...</option>
+        </select>
+        <select
+          id="routing-end"
+          style="
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font: inherit;
+          "
+        >
+          <option value="">Sélectionner la destination...</option>
+        </select>
+        <button
+          id="routing-calculate"
+          style="
+            padding: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font: inherit;
+          "
+        >
+          Calculer
+        </button>
+        <button
+          id="routing-close"
+          style="
+            padding: 0.5rem;
+            background: var(--border);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font: inherit;
+          "
+        >
+          Annuler
+        </button>
+      </div>
     </div>
 
     <button
@@ -1313,6 +1420,7 @@
     </button>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script>
       "use strict";
 
@@ -1357,6 +1465,7 @@
       let collections = [];
       let currentCollectionFilter = null;
       let previewMarker = null;
+      let routingControl = null;
       const cache = new Map();
 
       const COLLECTION_COLORS = [
@@ -1406,6 +1515,12 @@
       const collectionNameInput = $("collection-name-input");
       const modalCreate = $("modal-create");
       const modalCancel = $("modal-cancel");
+      const routingBtn = $("routing-btn");
+      const routingPanel = $("routing-panel");
+      const routingStart = $("routing-start");
+      const routingEnd = $("routing-end");
+      const routingCalculate = $("routing-calculate");
+      const routingClose = $("routing-close");
 
       const escapeHtml = (str) =>
         str.replace(
@@ -2095,6 +2210,7 @@
         attachPointEvents();
         updateCounter();
         updateCollectionsUI();
+        updateRoutingSelects();
       }
 
       function attachPointEvents() {
@@ -2402,6 +2518,129 @@
           });
       }
 
+      function updateRoutingSelects() {
+        routingStart.innerHTML =
+          '<option value="">Sélectionner le point de départ...</option>';
+        routingEnd.innerHTML =
+          '<option value="">Sélectionner la destination...</option>';
+
+        points.forEach((point, index) => {
+          const optStart = document.createElement("option");
+          optStart.value = `${point.lat},${point.lng}`;
+          optStart.textContent = `${escapeHtml(point.name)} (${formatCoords(point.lat, point.lng)})`;
+          routingStart.appendChild(optStart);
+
+          const optEnd = document.createElement("option");
+          optEnd.value = `${point.lat},${point.lng}`;
+          optEnd.textContent = `${escapeHtml(point.name)} (${formatCoords(point.lat, point.lng)})`;
+          routingEnd.appendChild(optEnd);
+        });
+      }
+
+      function calculateRoute() {
+        const startVal = routingStart.value;
+        const endVal = routingEnd.value;
+
+        if (!startVal || !endVal) {
+          showToast(
+            "Sélectionnez le point de départ et la destination",
+            "error",
+          );
+          return;
+        }
+
+        if (startVal === endVal) {
+          showToast(
+            "Le départ et la destination ne peuvent pas être identiques",
+            "error",
+          );
+          return;
+        }
+
+        const [startLat, startLng] = startVal.split(",").map(parseFloat);
+        const [endLat, endLng] = endVal.split(",").map(parseFloat);
+
+        // Supprimer l'itinéraire précédent s'il existe
+        if (routingControl) {
+          map.removeControl(routingControl);
+        }
+
+        // Créer un nouvel itinéraire
+        routingControl = L.Routing.control({
+          waypoints: [L.latLng(startLat, startLng), L.latLng(endLat, endLng)],
+          routeWhileDragging: true,
+          showAlternatives: false,
+          language: "fr",
+          position: "bottomright",
+          lineOptions: {
+            styles: [
+              {
+                color: "#2563eb",
+                opacity: 0.8,
+                weight: 5,
+                lineCap: "round",
+                lineJoin: "round",
+                dashArray: "none",
+              },
+            ],
+          },
+          altLineOptions: {
+            styles: [
+              {
+                color: "#ccc",
+                opacity: 0.8,
+                weight: 4,
+              },
+            ],
+          },
+          createMarker: function (i, wp) {
+            const colors = ["🟢", "🔴"];
+            return L.marker(wp.latLng, {
+              draggable: false,
+              title: i === 0 ? "Départ" : "Destination",
+            }).bindPopup(
+              colors[i] + " " + (i === 0 ? "Départ" : "Destination"),
+            );
+          },
+        }).addTo(map);
+
+        // Ajouter un bouton de fermeture au panneau d'instructions
+        setTimeout(() => {
+          const routingContainer = document.querySelector('.leaflet-routing-container-hideable');
+          if (routingContainer) {
+            // Créer le bouton de fermeture
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '✕';
+            closeButton.className = 'routing-close-btn';
+            closeButton.title = 'Fermer les instructions';
+            closeButton.onclick = clearRoute;
+
+            // Ajouter le bouton au panneau
+            routingContainer.style.position = 'relative';
+            routingContainer.appendChild(closeButton);
+          }
+        }, 100);
+
+        // Forcer la langue française pour les instructions
+        if (routingControl && routingControl._router) {
+          routingControl._router.options.language = "fr";
+          routingControl._router.options.units = "metric";
+        }
+
+        routingPanel.style.display = "none";
+        showToast("Itinéraire calculé", "success");
+      }
+
+      function clearRoute() {
+        if (routingControl) {
+          map.removeControl(routingControl);
+          routingControl = null;
+        }
+        routingPanel.style.display = "none";
+        routingStart.value = "";
+        routingEnd.value = "";
+      }
+
       // Event listener pour la recherche de points
       searchInput.addEventListener("input", debounce(filterPoints, 150));
 
@@ -2409,6 +2648,16 @@
       $("export-btn").addEventListener("click", exportPoints);
       $("import-btn").addEventListener("click", importPoints);
       $("import-file-input").addEventListener("change", handleFileImport);
+
+      // Event listener pour le routage
+      routingBtn.addEventListener("click", () => {
+        updateRoutingSelects();
+        routingPanel.style.display =
+          routingPanel.style.display === "none" ? "block" : "none";
+      });
+
+      routingCalculate.addEventListener("click", calculateRoute);
+      routingClose.addEventListener("click", clearRoute);
 
       // Event listener pour la recherche d'adresses Nominatim
       addressSearchInput.addEventListener(
@@ -2611,6 +2860,7 @@
         loadPoints();
         updateCollectionsUI();
         updateCollectionSelect();
+        updateRoutingSelects();
       });
     </script>
   </body>
