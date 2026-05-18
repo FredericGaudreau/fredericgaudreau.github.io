@@ -310,6 +310,24 @@
         font-family: monospace;
       }
 
+      .rename-btn {
+        background: var(--primary);
+        color: white;
+        border: 0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .rename-btn:hover {
+        background: var(--primary-dark);
+        transform: scale(1.05);
+      }
+
       .delete-btn {
         background: var(--error);
         color: white;
@@ -1114,6 +1132,25 @@
         background: #d4d4d8;
       }
 
+      .modal-content label {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        margin: 0;
+        cursor: pointer;
+        display: flex !important;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .modal-content input[type="radio"] {
+        cursor: pointer;
+        accent-color: var(--primary);
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        margin: -2px 0 0 0;
+      }
+
       .collection-delete {
         background: none;
         border: none;
@@ -1156,8 +1193,6 @@
         z-index: 1000;
         min-width: 280px;
       }
-
-
 
       .routing-content {
         padding: 1rem;
@@ -1329,7 +1364,10 @@
           </button>
         </h3>
         <div style="padding: 0.75rem">
-          <button id="new-collection-btn" class="collection-btn new-collection-header">
+          <button
+            id="new-collection-btn"
+            class="collection-btn new-collection-header"
+          >
             <i class="fas fa-plus"></i> Nouvelle collection
           </button>
           <div id="collections-list"></div>
@@ -1350,6 +1388,101 @@
         <div class="modal-buttons">
           <button id="modal-cancel" class="btn-secondary">Annuler</button>
           <button id="modal-create" class="btn-primary">Créer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour renommer un point -->
+    <div id="rename-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Renommer le point</h3>
+        <input
+          type="text"
+          id="rename-input"
+          placeholder="Nouveau nom du point"
+          autocomplete="off"
+        />
+        <div class="modal-buttons">
+          <button id="rename-cancel" class="btn-secondary">Annuler</button>
+          <button id="rename-confirm" class="btn-primary">Renommer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour les options d'export -->
+    <div id="export-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Exporter les points</h3>
+        <div style="text-align: left; margin-bottom: 1.5rem; font-size: 0.9rem">
+          <p style="margin-bottom: 1rem; color: var(--text-secondary)">
+            <strong>Points à exporter:</strong> <span id="export-count">0</span>
+          </p>
+          <label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              cursor: pointer;
+            "
+          >
+            <input type="radio" name="export-format" value="json" checked style="vertical-align: middle;"  />
+            JSON (format natif, recommandé)
+          </label>
+          <label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              cursor: pointer;
+            "
+          >
+            <input type="radio" name="export-format" value="csv" style="vertical-align: middle;" />
+            CSV (format tableur, compatible Excel)
+          </label>
+        </div>
+        <div class="modal-buttons">
+          <button id="export-cancel" class="btn-secondary">Annuler</button>
+          <button id="export-confirm" class="btn-primary">Télécharger</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour les options d'import -->
+    <div id="import-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Importer les points</h3>
+        <div style="text-align: left; margin-bottom: 1.5rem; font-size: 0.9rem">
+          <p style="margin-bottom: 1rem; color: var(--text-secondary)">
+            <strong>Points importés:</strong> <span id="import-count">0</span>
+          </p>
+          <label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.75rem;
+              cursor: pointer;
+            "
+          >
+            <input type="radio" name="import-mode" value="merge" checked />
+            Fusionner (ajouter aux points existants)
+          </label>
+          <label
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              cursor: pointer;
+            "
+          >
+            <input type="radio" name="import-mode" value="replace" />
+            Remplacer (supprimer tous les points existants)
+          </label>
+        </div>
+        <div class="modal-buttons">
+          <button id="import-cancel" class="btn-secondary">Annuler</button>
+          <button id="import-confirm" class="btn-primary">Importer</button>
         </div>
       </div>
     </div>
@@ -1401,7 +1534,7 @@
     <input
       type="file"
       id="import-file-input"
-      accept=".json"
+      accept=".json,.csv"
       style="display: none"
     />
 
@@ -1558,6 +1691,16 @@
       const collectionNameInput = $("collection-name-input");
       const modalCreate = $("modal-create");
       const modalCancel = $("modal-cancel");
+      const renameModal = $("rename-modal");
+      const renameInput = $("rename-input");
+      const renameConfirm = $("rename-confirm");
+      const renameCancel = $("rename-cancel");
+      const exportModal = $("export-modal");
+      const exportCancel = $("export-cancel");
+      const exportConfirm = $("export-confirm");
+      const importModal = $("import-modal");
+      const importCancel = $("import-cancel");
+      const importConfirm = $("import-confirm");
       const routingBtn = $("routing-btn");
       const routingPanel = $("routing-panel");
       const routingStart = $("routing-start");
@@ -1587,12 +1730,12 @@
       };
 
       const renderAddressResults = (results) => {
-        addressSearchResults.innerHTML = '';
-        
+        addressSearchResults.innerHTML = "";
+
         if (!results || !Array.isArray(results) || results.length === 0) {
-          const empty = document.createElement('div');
-          empty.className = 'search-result-empty';
-          empty.textContent = 'Aucun résultat trouvé.';
+          const empty = document.createElement("div");
+          empty.className = "search-result-empty";
+          empty.textContent = "Aucun résultat trouvé.";
           addressSearchResults.appendChild(empty);
           return;
         }
@@ -1601,34 +1744,38 @@
 
         results.forEach((result) => {
           if (!result.lat || !result.lon || !result.display_name) return;
-          
+
           const display = result.display_name;
           const details = [
-            result.address?.city || result.address?.town || result.address?.village,
+            result.address?.city ||
+              result.address?.town ||
+              result.address?.village,
             result.address?.state,
             result.address?.country,
-          ].filter(Boolean).join(" • ");
+          ]
+            .filter(Boolean)
+            .join(" • ");
 
-          const item = document.createElement('div');
-          item.className = 'search-result-item';
+          const item = document.createElement("div");
+          item.className = "search-result-item";
           item.dataset.lat = parseFloat(result.lat);
           item.dataset.lng = parseFloat(result.lon);
           item.dataset.name = display;
 
-          const title = document.createElement('span');
-          title.className = 'search-result-title';
+          const title = document.createElement("span");
+          title.className = "search-result-title";
           title.textContent = display;
 
-          const sub = document.createElement('span');
-          sub.className = 'search-result-sub';
+          const sub = document.createElement("span");
+          sub.className = "search-result-sub";
           sub.textContent = details;
 
-          const actions = document.createElement('div');
-          actions.className = 'search-result-actions';
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'btn-add-result';
-          btn.textContent = 'Ajouter';
+          const actions = document.createElement("div");
+          actions.className = "search-result-actions";
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn-add-result";
+          btn.textContent = "Ajouter";
           actions.appendChild(btn);
 
           item.appendChild(title);
@@ -1673,7 +1820,7 @@
       const addSearchResultPoint = (lat, lng, name) => {
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
-        
+
         // Valider les coordonnées
         if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
           showToast("Coordonnées invalides", "error");
@@ -1683,9 +1830,9 @@
           showToast("Coordonnées hors limites", "error");
           return;
         }
-        
+
         const validName = (name || "").trim().substring(0, 200) || "Sans nom";
-        
+
         const marker = createMarker(latNum, lngNum, validName);
         points.push({
           name: validName,
@@ -1775,16 +1922,19 @@
           return null;
         }
         if (trimmedName.length > 100) {
-          showToast("Le nom de collection ne peut pas dépasser 100 caractères", "error");
+          showToast(
+            "Le nom de collection ne peut pas dépasser 100 caractères",
+            "error",
+          );
           return null;
         }
-        
+
         // Vérifier que la collection n'existe pas déjà
-        if (collections.some(c => c.name === trimmedName)) {
+        if (collections.some((c) => c.name === trimmedName)) {
           showToast("Une collection avec ce nom existe déjà", "error");
           return null;
         }
-        
+
         const collection = {
           id: Date.now().toString(),
           name: trimmedName,
@@ -1824,9 +1974,10 @@
         collectionsList.innerHTML = "";
 
         if (collections.length === 0) {
-          const empty = document.createElement('div');
-          empty.style.cssText = 'padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem;';
-          empty.textContent = 'Aucune collection';
+          const empty = document.createElement("div");
+          empty.style.cssText =
+            "padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem;";
+          empty.textContent = "Aucune collection";
           collectionsList.appendChild(empty);
           return;
         }
@@ -1846,15 +1997,15 @@
           btn.className = "collection-btn";
           if (currentCollectionFilter === coll.id) btn.classList.add("active");
 
-          const badge = document.createElement('span');
-          badge.className = 'collection-badge';
+          const badge = document.createElement("span");
+          badge.className = "collection-badge";
           badge.style.background = coll.color;
-          
-          const nameSpan = document.createElement('span');
+
+          const nameSpan = document.createElement("span");
           nameSpan.textContent = coll.name;
-          
-          const countSpan = document.createElement('span');
-          countSpan.className = 'collection-count';
+
+          const countSpan = document.createElement("span");
+          countSpan.className = "collection-count";
           countSpan.textContent = count;
 
           btn.appendChild(badge);
@@ -1951,13 +2102,13 @@
       const getAQILevel = (aqi) => AQI_LEVELS.find((l) => aqi <= l.max);
 
       const validateData = (data, requiredFields) => {
-        if (!data || typeof data !== 'object') return false;
-        return requiredFields.every(field => field in data);
+        if (!data || typeof data !== "object") return false;
+        return requiredFields.every((field) => field in data);
       };
 
       // Gérer la taille du cache pour éviter les fuites mémoire
       const MAX_CACHE_SIZE = 100;
-      
+
       const setCache = (key, value) => {
         if (cache.size >= MAX_CACHE_SIZE) {
           // Supprimer la première entrée (FIFO)
@@ -1976,10 +2127,10 @@
         try {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 5000);
-          
+
           const response = await fetch(url, { signal: controller.signal });
           clearTimeout(timeout);
-          
+
           if (!response.ok) {
             if (response.status >= 500) {
               return null;
@@ -1987,19 +2138,21 @@
             throw new Error(`HTTP ${response.status}`);
           }
           const data = await response.json();
-          
+
           if (validator && !validator(data)) {
             console.warn(`Données invalides pour ${cacheKey}`);
             return null;
           }
-          
+
           setCache(cacheKey, { data, timestamp: Date.now() });
           return data;
         } catch (error) {
-          if (error.name === 'AbortError') {
+          if (error.name === "AbortError") {
             console.warn(`Timeout API (${cacheKey})`);
           } else if (error.message.includes("HTTP")) {
-            console.warn(`Service indisponible (${cacheKey}): ${error.message}`);
+            console.warn(
+              `Service indisponible (${cacheKey}): ${error.message}`,
+            );
           } else {
             console.error(`Erreur API (${cacheKey}):`, error);
           }
@@ -2011,28 +2164,28 @@
         fetchData(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&daily=sunrise,sunset&timezone=auto`,
           `weather_${lat}_${lng}`,
-          (d) => validateData(d, ['current_weather'])
+          (d) => validateData(d, ["current_weather"]),
         );
 
       const getGeoData = (lat, lng) =>
         fetchData(
           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
           `geo_${lat}_${lng}`,
-          (d) => validateData(d, ['address'])
+          (d) => validateData(d, ["address"]),
         );
 
       const getAirQualityData = (lat, lng) =>
         fetchData(
           `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi,pm10,pm2_5`,
           `air_${lat}_${lng}`,
-          (d) => validateData(d, ['current'])
+          (d) => validateData(d, ["current"]),
         );
 
       const getElevationData = (lat, lng) =>
         fetchData(
           `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`,
           `elevation_${lat}_${lng}`,
-          (d) => validateData(d, ['results'])
+          (d) => validateData(d, ["results"]),
         );
 
       function renderWeather(data) {
@@ -2203,6 +2356,9 @@
                 <select class="card-collection-select" data-index="${index}">
                   ${renderCollectionOptions(point.collectionId)}
                 </select>
+              <button class="rename-btn" data-index="${index}" aria-label="Renommer ${escapeHtml(point.name)}" title="Renommer">
+                <i class="fas fa-edit"></i>
+              </button>
               <button class="delete-btn" data-index="${index}" aria-label="Supprimer ${escapeHtml(point.name)}">
                 <i class="fas fa-trash"></i> 
               </button>
@@ -2343,7 +2499,7 @@
         pointsList.addEventListener("click", (e) => {
           const card = e.target.closest(".point-card");
           if (!card) return;
-          
+
           const index = parseInt(card.dataset.index);
           if (!Number.isInteger(index) || !points[index]) return;
           const point = points[index];
@@ -2355,7 +2511,9 @@
           }
           // Clic sur bouton suppression
           else if (e.target.closest(".delete-btn")) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer "${point.name}" ?`)) {
+            if (
+              confirm(`Êtes-vous sûr de vouloir supprimer "${point.name}" ?`)
+            ) {
               point.marker?.remove?.();
               points.splice(index, 1);
               updatePointsList();
@@ -2363,20 +2521,60 @@
               showToast(`"${point.name}" supprimé`, "success");
             }
           }
+          // Clic sur bouton renommer
+          else if (e.target.closest(".rename-btn")) {
+            renameInput.value = point.name;
+            renameInput.placeholder = `Nouveau nom pour "${point.name}"`;
+            renameModal.style.display = "flex";
+            renameInput.focus();
+            renameInput.select();
+
+            // Stocker l'index du point à renommer
+            renameConfirm.onclick = () => {
+              const newName = renameInput.value.trim();
+              if (!newName) {
+                showToast("Le nom ne peut pas être vide", "error");
+                return;
+              }
+              if (newName.length > 200) {
+                showToast(
+                  "Le nom ne peut pas dépasser 200 caractères",
+                  "error",
+                );
+                return;
+              }
+
+              point.name = newName;
+              savePoints();
+              updatePointsList();
+              renameModal.style.display = "none";
+              showToast(`Point renommé en "${newName}"`, "success");
+
+              // Mettre à jour le popup du marqueur
+              if (point.marker) {
+                point.marker.setPopupContent(formatPopupContent(point));
+              }
+            };
+          }
           // Clic sur tab
           else if (e.target.closest(".tab")) {
             const tab = e.target.closest(".tab");
             const tabType = tab.dataset.tab;
             const tabsContainer = card.querySelector(".tabs");
-            
+
             if (tabsContainer) {
-              tabsContainer.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+              tabsContainer
+                .querySelectorAll(".tab")
+                .forEach((t) => t.classList.remove("active"));
               tab.classList.add("active");
             }
-            
+
             const contentId = tab.dataset.id;
             card.querySelectorAll(".tab-content").forEach((tc) => {
-              tc.classList.toggle("active", tc.dataset.content === tabType && tc.dataset.id === contentId);
+              tc.classList.toggle(
+                "active",
+                tc.dataset.content === tabType && tc.dataset.id === contentId,
+              );
             });
           }
         });
@@ -2384,16 +2582,18 @@
         // Délégation pour changement de collection
         pointsList.addEventListener("change", (e) => {
           if (!e.target.classList.contains("card-collection-select")) return;
-          
+
           const card = e.target.closest(".point-card");
           const index = parseInt(card?.dataset.index);
           if (!Number.isInteger(index) || !points[index]) return;
-          
+
           const point = points[index];
           point.collectionId = e.target.value || null;
           savePoints();
           updatePointsList();
-          const collection = collections.find((c) => c.id === point.collectionId);
+          const collection = collections.find(
+            (c) => c.id === point.collectionId,
+          );
           point.marker?.setIcon?.(
             getMarkerIcon(collection?.color) || new L.Icon.Default(),
           );
@@ -2456,6 +2656,27 @@
           return;
         }
 
+        // Afficher le modal d'export
+        $("export-count").textContent = pointsToExport.length;
+        exportModal.style.display = "flex";
+
+        // Gérer la confirmation
+        exportConfirm.onclick = () => {
+          const format = document.querySelector(
+            'input[name="export-format"]:checked',
+          ).value;
+
+          if (format === "csv") {
+            exportAsCSV(pointsToExport);
+          } else {
+            exportAsJSON(pointsToExport);
+          }
+
+          exportModal.style.display = "none";
+        };
+      }
+
+      function exportAsJSON(pointsToExport) {
         // Exporter les collections (seulement celle sélectionnée si filtrée)
         const collectionsToExport = currentCollectionFilter
           ? collections.filter((c) => c.id === currentCollectionFilter)
@@ -2488,8 +2709,48 @@
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         const message = currentCollectionFilter
-          ? `${pointsToExport.length} point(s) de la collection exporté(s)`
-          : `${pointsToExport.length} point(s) exporté(s)`;
+          ? `${pointsToExport.length} point(s) de la collection exporté(s) en JSON`
+          : `${pointsToExport.length} point(s) exporté(s) en JSON`;
+        showToast(message, "success");
+      }
+
+      function exportAsCSV(pointsToExport) {
+        const headers = ["Nom", "Latitude", "Longitude", "Collection"];
+        const rows = pointsToExport.map((p) => {
+          const collectionName = p.collectionId
+            ? collections.find((c) => c.id === p.collectionId)?.name || ""
+            : "";
+          return [
+            `"${p.name.replace(/"/g, '""')}"`,
+            p.lat,
+            p.lng,
+            `"${collectionName}"`,
+          ];
+        });
+
+        const csvContent = [
+          headers.join(","),
+          ...rows.map((row) => row.join(",")),
+        ].join("\n");
+
+        const dataBlob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        const collectionName = currentCollectionFilter
+          ? collections.find((c) => c.id === currentCollectionFilter)?.name ||
+            "collection"
+          : "all";
+        link.download = `points_${collectionName}_${new Date().toISOString().split("T")[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        const message = currentCollectionFilter
+          ? `${pointsToExport.length} point(s) de la collection exporté(s) en CSV`
+          : `${pointsToExport.length} point(s) exporté(s) en CSV`;
         showToast(message, "success");
       }
 
@@ -2505,113 +2766,58 @@
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
-            const importData = JSON.parse(e.target.result);
+            let importData;
 
-            if (!importData.points || !Array.isArray(importData.points)) {
+            // Vérifier si c'est un JSON ou CSV
+            const fileContent = e.target.result;
+
+            if (file.name.endsWith(".csv")) {
+              importData = parseCSV(fileContent);
+            } else {
+              importData = JSON.parse(fileContent);
+            }
+
+            // Validation robuste
+            if (
+              !importData ||
+              !importData.points ||
+              !Array.isArray(importData.points)
+            ) {
               showToast("Format de fichier invalide", "error");
               return;
             }
 
-            // Si une collection est sélectionnée, importer les points dans cette collection
-            if (currentCollectionFilter) {
-              const selectedCollection = collections.find(
-                (c) => c.id === currentCollectionFilter,
-              );
-              if (!selectedCollection) {
-                showToast("Collection sélectionnée introuvable", "error");
-                return;
-              }
+            // Valider les données des points
+            const validPoints = importData.points.filter((pt) => {
+              if (!pt.name || pt.lat === undefined || pt.lng === undefined)
+                return false;
+              if (!Number.isFinite(pt.lat) || !Number.isFinite(pt.lng))
+                return false;
+              if (pt.lat < -90 || pt.lat > 90 || pt.lng < -180 || pt.lng > 180)
+                return false;
+              return true;
+            });
 
-              // Importer les points dans la collection sélectionnée
-              let importedCount = 0;
-              importData.points.forEach((pt) => {
-                const exists = points.some(
-                  (p) =>
-                    p.lat === pt.lat && p.lng === pt.lng && p.name === pt.name,
-                );
-                if (!exists) {
-                  const marker = createMarker(
-                    pt.lat,
-                    pt.lng,
-                    pt.name,
-                    currentCollectionFilter, // Assigner à la collection sélectionnée
-                  );
-                  points.push({
-                    name: pt.name,
-                    lat: pt.lat,
-                    lng: pt.lng,
-                    collectionId: currentCollectionFilter,
-                    marker,
-                  });
-                  importedCount++;
-                }
-              });
-
-              savePoints();
-              updatePointsList();
-              showToast(
-                `${importedCount} point(s) importé(s) dans "${selectedCollection.name}"`,
-                "success",
-              );
-            } else {
-              // Mode normal: fusionner ou remplacer
-              const shouldMerge = confirm(
-                `Fusionner avec les points existants?\n\nOUI: Ajouter les ${importData.points.length} point(s) aux existants\nAnnuler: Remplacer tous les points`,
-              );
-
-              if (!shouldMerge) {
-                // Supprimer tous les marqueurs existants
-                points.forEach((p) => p.marker.remove());
-                points = [];
-              }
-
-              // Importer les collections
-              if (
-                importData.collections &&
-                Array.isArray(importData.collections)
-              ) {
-                importData.collections.forEach((importedColl) => {
-                  const exists = collections.some(
-                    (c) => c.id === importedColl.id,
-                  );
-                  if (!exists) {
-                    collections.push(importedColl);
-                  }
-                });
-                saveCollections();
-                updateCollectionsUI();
-                updateCollectionSelect();
-              }
-
-              // Importer les points
-              let importedCount = 0;
-              importData.points.forEach((pt) => {
-                const exists = points.some(
-                  (p) =>
-                    p.lat === pt.lat && p.lng === pt.lng && p.name === pt.name,
-                );
-                if (!exists) {
-                  const marker = createMarker(
-                    pt.lat,
-                    pt.lng,
-                    pt.name,
-                    pt.collectionId,
-                  );
-                  points.push({ ...pt, marker });
-                  importedCount++;
-                }
-              });
-
-              savePoints();
-              updatePointsList();
-              showToast(
-                `${importedCount} point(s) importé(s) avec succès`,
-                "success",
-              );
+            if (validPoints.length === 0) {
+              showToast("Aucun point valide dans le fichier", "error");
+              return;
             }
+
+            // Afficher le modal d'import
+            $("import-count").textContent = validPoints.length;
+            importModal.style.display = "flex";
+
+            // Gérer la confirmation
+            importConfirm.onclick = () => {
+              const mode = document.querySelector(
+                'input[name="import-mode"]:checked',
+              ).value;
+              performImport(validPoints, importData.collections || [], mode);
+              importModal.style.display = "none";
+            };
           } catch (error) {
-            console.error("Erreur lors de l'import:", error);
-            showToast("Erreur lors de l'import du fichier", "error");
+            console.error("Erreur lors de la lecture du fichier:", error);
+            showToast("Erreur lors de la lecture du fichier", "error");
           }
         };
 
@@ -2623,6 +2829,86 @@
 
         // Réinitialiser l'input pour permettre de réimporter le même fichier
         event.target.value = "";
+      }
+
+      function parseCSV(csvContent) {
+        const lines = csvContent.trim().split("\n");
+        if (lines.length < 2) throw new Error("Format CSV invalide");
+
+        const points = [];
+        for (let i = 1; i < lines.length; i++) {
+          const [name, lat, lng, collection] = lines[i]
+            .split(",")
+            .map((v) => v.trim().replace(/^"|"$/g, ""));
+
+          if (name && lat && lng) {
+            points.push({
+              name: name.replace(/""/g, '"'),
+              lat: parseFloat(lat),
+              lng: parseFloat(lng),
+              collectionId: null,
+            });
+          }
+        }
+
+        return { points, collections: [] };
+      }
+
+      function performImport(validPoints, collectionsData, mode) {
+        try {
+          let importedCount = 0;
+
+          if (mode === "replace") {
+            // Supprimer tous les marqueurs existants
+            points.forEach((p) => p.marker.remove());
+            points = [];
+          }
+
+          // Importer les collections
+          if (Array.isArray(collectionsData)) {
+            collectionsData.forEach((importedColl) => {
+              const exists = collections.some((c) => c.id === importedColl.id);
+              if (!exists) {
+                collections.push(importedColl);
+              }
+            });
+            saveCollections();
+            updateCollectionsUI();
+            updateCollectionSelect();
+          }
+
+          // Importer les points
+          validPoints.forEach((pt) => {
+            // Vérifier les doublons si on fusionne
+            const isDuplicate = points.some(
+              (p) =>
+                Math.abs(p.lat - pt.lat) < 0.0001 &&
+                Math.abs(p.lng - pt.lng) < 0.0001 &&
+                p.name === pt.name,
+            );
+
+            if (!isDuplicate) {
+              const marker = createMarker(
+                pt.lat,
+                pt.lng,
+                pt.name,
+                pt.collectionId,
+              );
+              points.push({ ...pt, marker });
+              importedCount++;
+            }
+          });
+
+          savePoints();
+          updatePointsList();
+          showToast(
+            `${importedCount} point(s) importé(s) avec succès`,
+            "success",
+          );
+        } catch (error) {
+          console.error("Erreur lors de l'import:", error);
+          showToast("Erreur lors de l'import des données", "error");
+        }
       }
 
       function createMarker(lat, lng, name, collectionId = null) {
@@ -2731,17 +3017,19 @@
 
         // Ajouter un bouton de fermeture au panneau d'instructions
         setTimeout(() => {
-          const routingContainer = document.querySelector('.leaflet-routing-container-hideable');
+          const routingContainer = document.querySelector(
+            ".leaflet-routing-container-hideable",
+          );
           if (routingContainer) {
             // Créer le bouton de fermeture
-            const closeButton = document.createElement('button');
-            closeButton.innerHTML = '✕';
-            closeButton.className = 'routing-close-btn';
-            closeButton.title = 'Fermer les instructions';
+            const closeButton = document.createElement("button");
+            closeButton.innerHTML = "✕";
+            closeButton.className = "routing-close-btn";
+            closeButton.title = "Fermer les instructions";
             closeButton.onclick = clearRoute;
 
             // Ajouter le bouton au panneau
-            routingContainer.style.position = 'relative';
+            routingContainer.style.position = "relative";
             routingContainer.appendChild(closeButton);
           }
         }, 100);
@@ -2794,16 +3082,29 @@
         const resultItem = event.target.closest(".search-result-item");
         if (!resultItem) return;
 
-        const lat = resultItem.dataset.lat;
-        const lng = resultItem.dataset.lng;
+        const lat = parseFloat(resultItem.dataset.lat);
+        const lng = parseFloat(resultItem.dataset.lng);
         const name = resultItem.dataset.name || "Adresse trouvée";
 
         if (event.target.closest(".btn-add-result")) {
-          addSearchResultPoint(lat, lng, name);
+          // Ouvrir le formulaire d'ajout avec les coordonnées de la recherche
+          if (previewMarker) previewMarker.remove();
+          previewMarker = L.marker([lat, lng]).addTo(map);
+          form.classList.add("visible");
+          nameInput.value = name;
+          nameInput.placeholder = `Nom du point (${formatCoords(lat, lng)})`;
+          nameInput.focus();
+          nameInput.select();
+          map.setView([lat, lng], CONFIG.focusZoom);
+          // Fermer le panel de recherche Nominatim
+          nominatimSearch.style.display = "none";
+          toggleNominatimBtn.style.display = "block";
+          addressSearchResults.innerHTML = "";
+          addressSearchInput.value = "";
           return;
         }
 
-        map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
+        map.setView([lat, lng], CONFIG.focusZoom);
         if (previewMarker) previewMarker.remove();
         previewMarker = L.marker([lat, lng]).addTo(map);
         previewMarker
@@ -2851,15 +3152,15 @@
           // Limite de sécurité pour le nom
           name = name.substring(0, 200);
         }
-        
+
         const { lat, lng } = previewMarker.getLatLng();
-        
+
         // Valider les coordonnées
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
           showToast("Coordonnées invalides", "error");
           return;
         }
-        
+
         const collectionId = collectionSelect.value || null;
         const marker = createMarker(lat, lng, name, collectionId);
 
@@ -2905,7 +3206,7 @@
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude, accuracy } = position.coords;
-            
+
             // Valider les coordonnées
             if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
               showToast("Coordonnées invalides", "error");
@@ -2913,15 +3214,20 @@
               locateBtn.disabled = false;
               return;
             }
-            
+
             // Vérifier que latitude et longitude sont dans les bonnes plages
-            if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            if (
+              latitude < -90 ||
+              latitude > 90 ||
+              longitude < -180 ||
+              longitude > 180
+            ) {
               showToast("Coordonnées hors limites", "error");
               locateBtn.innerHTML = originalHTML;
               locateBtn.disabled = false;
               return;
             }
-            
+
             map.setView([latitude, longitude], 15);
             L.marker([latitude, longitude])
               .addTo(map)
@@ -2992,12 +3298,12 @@
 
       // Délégation d'événements pour les collections
       collectionsList.addEventListener("click", (e) => {
-        const wrapper = e.target.closest('[data-collection-id]');
+        const wrapper = e.target.closest("[data-collection-id]");
         if (!wrapper) return;
 
         const collectionId = wrapper.dataset.collectionId;
         const deleteBtn = e.target.closest(".collection-delete");
-        
+
         if (deleteBtn) {
           const coll = collections.find((c) => c.id === collectionId);
           if (coll && confirm(`Supprimer la collection "${coll.name}" ?`)) {
@@ -3006,7 +3312,8 @@
         } else {
           const collBtn = e.target.closest(".collection-btn");
           if (collBtn) {
-            currentCollectionFilter = currentCollectionFilter === collectionId ? null : collectionId;
+            currentCollectionFilter =
+              currentCollectionFilter === collectionId ? null : collectionId;
             updatePointsList();
             updateCollectionsUI();
           }
@@ -3034,6 +3341,45 @@
       collectionModal.addEventListener("click", (e) => {
         if (e.target === collectionModal) {
           collectionModal.style.display = "none";
+        }
+      });
+
+      // Événements pour le modal de renommage
+      renameCancel.addEventListener("click", () => {
+        renameModal.style.display = "none";
+      });
+
+      renameInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          renameConfirm.click();
+        }
+      });
+
+      renameModal.addEventListener("click", (e) => {
+        if (e.target === renameModal) {
+          renameModal.style.display = "none";
+        }
+      });
+
+      // Événements pour le modal d'export
+      exportCancel.addEventListener("click", () => {
+        exportModal.style.display = "none";
+      });
+
+      exportModal.addEventListener("click", (e) => {
+        if (e.target === exportModal) {
+          exportModal.style.display = "none";
+        }
+      });
+
+      // Événements pour le modal d'import
+      importCancel.addEventListener("click", () => {
+        importModal.style.display = "none";
+      });
+
+      importModal.addEventListener("click", (e) => {
+        if (e.target === importModal) {
+          importModal.style.display = "none";
         }
       });
 
