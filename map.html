@@ -192,18 +192,29 @@
         border-radius: 4px;
       }
 
-      #points-section h3 {
+      /* Panel headers uniformisés */
+      .panel-header {
         position: sticky;
         top: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 1rem;
-        font-size: 1.3rem;
+        font-size: 1.2rem;
+        font-weight: 700;
         border-bottom: 2px solid var(--border);
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: var(--text-primary);
+        z-index: 10;
+        margin: 0;
+      }
+
+      #points-section .panel-header {
         border-radius: 18px 18px 0 0;
-        z-index: 1;
+      }
+
+      #routing-panel .panel-header {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       }
 
       .points-action-btn {
@@ -834,22 +845,39 @@
         z-index: 999;
         margin-bottom: 0.75rem;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #collections-dropdown .panel-header {
+        border-radius: 12px 12px 0 0;
+        position: relative;
+      }
+
+      #close-collections {
+        font-size: 1.2rem !important;
+        padding: 0 !important;
+      }
+
+      .new-collection-header {
+        border-bottom: none;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
       }
 
       .collection-btn {
         width: 100%;
-        padding: 0.75rem 1rem;
+        padding: 0.65rem 0.75rem;
         border: none;
         background: none;
         text-align: left;
         font: inherit;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: var(--transition);
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        border-bottom: 1px solid var(--border);
       }
 
       .collection-btn:hover {
@@ -1027,9 +1055,11 @@
       }
 
       .modal-content h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
         margin-bottom: 1.5rem;
-        font-size: 1.25rem;
-        color: var(--primary);
+        margin-top: 0;
       }
 
       .modal-content input {
@@ -1127,11 +1157,61 @@
         min-width: 280px;
       }
 
-      #routing-panel h3 {
+
+
+      .routing-content {
         padding: 1rem;
-        font-size: 1.1rem;
-        border-bottom: 2px solid var(--border);
-        color: var(--primary);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .routing-content select,
+      .routing-content button {
+        padding: 0.65rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 0.95rem;
+        transition: var(--transition);
+      }
+
+      .routing-content select {
+        background: white;
+        cursor: pointer;
+        color: var(--text-primary);
+      }
+
+      .routing-content select:hover,
+      .routing-content select:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      #routing-calculate {
+        background: var(--primary);
+        color: white;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      #routing-calculate:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      #routing-close {
+        background: var(--border);
+        color: var(--text-primary);
+        border: 2px solid var(--border);
+        cursor: pointer;
+      }
+
+      #routing-close:hover {
+        background: #cbd5e1;
+        border-color: #94a3b8;
       }
 
       /* Responsive */
@@ -1238,10 +1318,22 @@
         <i class="fas fa-folder"></i>
       </button>
       <div id="collections-dropdown" style="display: none">
-        <button id="new-collection-btn" class="collection-btn">
-          <i class="fas fa-plus"></i> Nouvelle collection
-        </button>
-        <div id="collections-list"></div>
+        <h3 class="panel-header">
+          Collections
+          <button
+            id="close-collections"
+            class="points-action-btn"
+            aria-label="Fermer"
+          >
+            ×
+          </button>
+        </h3>
+        <div style="padding: 0.75rem">
+          <button id="new-collection-btn" class="collection-btn new-collection-header">
+            <i class="fas fa-plus"></i> Nouvelle collection
+          </button>
+          <div id="collections-list"></div>
+        </div>
       </div>
     </div>
 
@@ -1264,7 +1356,7 @@
 
     <!-- Section des points -->
     <section id="points-section">
-      <h3>
+      <h3 class="panel-header">
         Points
         <div style="display: flex; gap: 0.5rem; align-items: center">
           <button
@@ -1347,66 +1439,16 @@
 
     <!-- Panneau de routage -->
     <div id="routing-panel" style="display: none">
-      <h3>Itinéraire</h3>
-      <div
-        style="
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        "
-      >
-        <select
-          id="routing-start"
-          style="
-            padding: 0.5rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font: inherit;
-          "
-        >
+      <h3 class="panel-header">Itinéraire</h3>
+      <div class="routing-content">
+        <select id="routing-start">
           <option value="">Sélectionner le point de départ...</option>
         </select>
-        <select
-          id="routing-end"
-          style="
-            padding: 0.5rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font: inherit;
-          "
-        >
+        <select id="routing-end">
           <option value="">Sélectionner la destination...</option>
         </select>
-        <button
-          id="routing-calculate"
-          style="
-            padding: 0.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font: inherit;
-          "
-        >
-          Calculer
-        </button>
-        <button
-          id="routing-close"
-          style="
-            padding: 0.5rem;
-            background: var(--border);
-            color: var(--text-primary);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font: inherit;
-          "
-        >
-          Annuler
-        </button>
+        <button id="routing-calculate">Calculer</button>
+        <button id="routing-close">Annuler</button>
       </div>
     </div>
 
@@ -1509,6 +1551,7 @@
       const toastContainer = $("toast-container");
       const collectionsToggle = $("collections-toggle");
       const collectionsDropdown = $("collections-dropdown");
+      const closeCollectionsBtn = $("close-collections");
       const newCollectionBtn = $("new-collection-btn");
       const collectionsList = $("collections-list");
       const collectionModal = $("collection-modal");
@@ -1544,36 +1587,57 @@
       };
 
       const renderAddressResults = (results) => {
-        if (!results || results.length === 0) {
-          addressSearchResults.innerHTML =
-            '<div class="search-result-empty">Aucun résultat trouvé.</div>';
+        addressSearchResults.innerHTML = '';
+        
+        if (!results || !Array.isArray(results) || results.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'search-result-empty';
+          empty.textContent = 'Aucun résultat trouvé.';
+          addressSearchResults.appendChild(empty);
           return;
         }
 
-        addressSearchResults.innerHTML = results
-          .map((result) => {
-            const display = result.display_name;
-            const details = [
-              result.address.city ||
-                result.address.town ||
-                result.address.village,
-              result.address.state,
-              result.address.country,
-            ]
-              .filter(Boolean)
-              .join(" • ");
+        const fragment = document.createDocumentFragment();
 
-            return `
-              <div class="search-result-item" data-lat="${result.lat}" data-lng="${result.lon}" data-name="${escapeHtml(display)}">
-                <span class="search-result-title">${escapeHtml(display)}</span>
-                <span class="search-result-sub">${escapeHtml(details)}</span>
-                <div class="search-result-actions">
-                  <button type="button" class="btn-add-result">Ajouter</button>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
+        results.forEach((result) => {
+          if (!result.lat || !result.lon || !result.display_name) return;
+          
+          const display = result.display_name;
+          const details = [
+            result.address?.city || result.address?.town || result.address?.village,
+            result.address?.state,
+            result.address?.country,
+          ].filter(Boolean).join(" • ");
+
+          const item = document.createElement('div');
+          item.className = 'search-result-item';
+          item.dataset.lat = parseFloat(result.lat);
+          item.dataset.lng = parseFloat(result.lon);
+          item.dataset.name = display;
+
+          const title = document.createElement('span');
+          title.className = 'search-result-title';
+          title.textContent = display;
+
+          const sub = document.createElement('span');
+          sub.className = 'search-result-sub';
+          sub.textContent = details;
+
+          const actions = document.createElement('div');
+          actions.className = 'search-result-actions';
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-add-result';
+          btn.textContent = 'Ajouter';
+          actions.appendChild(btn);
+
+          item.appendChild(title);
+          item.appendChild(sub);
+          item.appendChild(actions);
+          fragment.appendChild(item);
+        });
+
+        addressSearchResults.appendChild(fragment);
       };
 
       const searchAddress = async () => {
@@ -1607,17 +1671,32 @@
       };
 
       const addSearchResultPoint = (lat, lng, name) => {
-        const marker = createMarker(parseFloat(lat), parseFloat(lng), name);
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lng);
+        
+        // Valider les coordonnées
+        if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+          showToast("Coordonnées invalides", "error");
+          return;
+        }
+        if (latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+          showToast("Coordonnées hors limites", "error");
+          return;
+        }
+        
+        const validName = (name || "").trim().substring(0, 200) || "Sans nom";
+        
+        const marker = createMarker(latNum, lngNum, validName);
         points.push({
-          name,
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
+          name: validName,
+          lat: latNum,
+          lng: lngNum,
           marker,
           collectionId: null,
         });
         updatePointsList();
         savePoints();
-        map.setView([parseFloat(lat), parseFloat(lng)], CONFIG.focusZoom);
+        map.setView([latNum, lngNum], CONFIG.focusZoom);
         marker.openPopup();
         showToast(`Point ajouté : ${name}`);
       };
@@ -1690,13 +1769,25 @@
       }
 
       function createCollection(name) {
-        if (!name.trim()) {
+        const trimmedName = (name || "").trim();
+        if (!trimmedName) {
           showToast("Nom de collection requis", "error");
           return null;
         }
+        if (trimmedName.length > 100) {
+          showToast("Le nom de collection ne peut pas dépasser 100 caractères", "error");
+          return null;
+        }
+        
+        // Vérifier que la collection n'existe pas déjà
+        if (collections.some(c => c.name === trimmedName)) {
+          showToast("Une collection avec ce nom existe déjà", "error");
+          return null;
+        }
+        
         const collection = {
           id: Date.now().toString(),
-          name: name.trim(),
+          name: trimmedName,
           color:
             COLLECTION_COLORS[collections.length % COLLECTION_COLORS.length],
         };
@@ -1704,7 +1795,7 @@
         saveCollections();
         updateCollectionsUI();
         updateCollectionSelect();
-        showToast(`Collection "${name}" créée`, "success");
+        showToast(`Collection "${trimmedName}" créée`, "success");
         return collection;
       }
 
@@ -1733,50 +1824,54 @@
         collectionsList.innerHTML = "";
 
         if (collections.length === 0) {
-          collectionsList.innerHTML =
-            '<div style="padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem;">Aucune collection</div>';
+          const empty = document.createElement('div');
+          empty.style.cssText = 'padding: 0.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem;';
+          empty.textContent = 'Aucune collection';
+          collectionsList.appendChild(empty);
           return;
         }
 
+        const fragment = document.createDocumentFragment();
+
         collections.forEach((coll) => {
+          const count = points.filter((p) => p.collectionId === coll.id).length;
+
+          const wrapper = document.createElement("div");
+          wrapper.style.cssText =
+            "display:flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border);";
+          wrapper.dataset.collectionId = coll.id;
+
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "collection-btn";
           if (currentCollectionFilter === coll.id) btn.classList.add("active");
 
-          const count = points.filter((p) => p.collectionId === coll.id).length;
-          btn.innerHTML = `
-            <span class="collection-badge" style="background: ${coll.color}"></span>
-            <span>${escapeHtml(coll.name)}</span>
-            <span class="collection-count">${count}</span>
-          `;
+          const badge = document.createElement('span');
+          badge.className = 'collection-badge';
+          badge.style.background = coll.color;
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = coll.name;
+          
+          const countSpan = document.createElement('span');
+          countSpan.className = 'collection-count';
+          countSpan.textContent = count;
 
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            currentCollectionFilter =
-              currentCollectionFilter === coll.id ? null : coll.id;
-            updatePointsList();
-            updateCollectionsUI();
-          });
+          btn.appendChild(badge);
+          btn.appendChild(nameSpan);
+          btn.appendChild(countSpan);
 
           const deleteBtn = document.createElement("button");
           deleteBtn.type = "button";
           deleteBtn.className = "collection-delete";
           deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-          deleteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (confirm(`Supprimer la collection "${coll.name}" ?`)) {
-              deleteCollection(coll.id);
-            }
-          });
 
-          const wrapper = document.createElement("div");
-          wrapper.style.cssText =
-            "display:flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border);";
           wrapper.appendChild(btn);
           wrapper.appendChild(deleteBtn);
-          collectionsList.appendChild(wrapper);
+          fragment.appendChild(wrapper);
         });
+
+        collectionsList.appendChild(fragment);
       }
 
       function updateCollectionSelect() {
@@ -1855,30 +1950,56 @@
 
       const getAQILevel = (aqi) => AQI_LEVELS.find((l) => aqi <= l.max);
 
-      async function fetchData(url, cacheKey) {
+      const validateData = (data, requiredFields) => {
+        if (!data || typeof data !== 'object') return false;
+        return requiredFields.every(field => field in data);
+      };
+
+      // Gérer la taille du cache pour éviter les fuites mémoire
+      const MAX_CACHE_SIZE = 100;
+      
+      const setCache = (key, value) => {
+        if (cache.size >= MAX_CACHE_SIZE) {
+          // Supprimer la première entrée (FIFO)
+          const firstKey = cache.keys().next().value;
+          cache.delete(firstKey);
+        }
+        cache.set(key, value);
+      };
+
+      async function fetchData(url, cacheKey, validator) {
         const cached = cache.get(cacheKey);
         if (cached && Date.now() - cached.timestamp < CONFIG.cacheExpiry) {
           return cached.data;
         }
 
         try {
-          const response = await fetch(url);
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeout);
+          
           if (!response.ok) {
-            // Ne pas logger les erreurs de service (5xx) qui sont hors de notre contrôle
             if (response.status >= 500) {
               return null;
             }
             throw new Error(`HTTP ${response.status}`);
           }
           const data = await response.json();
-          cache.set(cacheKey, { data, timestamp: Date.now() });
+          
+          if (validator && !validator(data)) {
+            console.warn(`Données invalides pour ${cacheKey}`);
+            return null;
+          }
+          
+          setCache(cacheKey, { data, timestamp: Date.now() });
           return data;
         } catch (error) {
-          // Ne logger que les vraies erreurs (réseau, parsing), pas les erreurs de service
-          if (error.message.includes("HTTP")) {
-            console.warn(
-              `Service indisponible (${cacheKey}): ${error.message}`,
-            );
+          if (error.name === 'AbortError') {
+            console.warn(`Timeout API (${cacheKey})`);
+          } else if (error.message.includes("HTTP")) {
+            console.warn(`Service indisponible (${cacheKey}): ${error.message}`);
           } else {
             console.error(`Erreur API (${cacheKey}):`, error);
           }
@@ -1890,24 +2011,28 @@
         fetchData(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&daily=sunrise,sunset&timezone=auto`,
           `weather_${lat}_${lng}`,
+          (d) => validateData(d, ['current_weather'])
         );
 
       const getGeoData = (lat, lng) =>
         fetchData(
           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
           `geo_${lat}_${lng}`,
+          (d) => validateData(d, ['address'])
         );
 
       const getAirQualityData = (lat, lng) =>
         fetchData(
           `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi,pm10,pm2_5`,
           `air_${lat}_${lng}`,
+          (d) => validateData(d, ['current'])
         );
 
       const getElevationData = (lat, lng) =>
         fetchData(
           `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`,
           `elevation_${lat}_${lng}`,
+          (d) => validateData(d, ['results'])
         );
 
       function renderWeather(data) {
@@ -2214,71 +2339,71 @@
       }
 
       function attachPointEvents() {
-        // Événements pour les titres
-        pointsList.querySelectorAll(".point-title").forEach((el) => {
-          el.addEventListener("click", () => {
-            const index = parseInt(el.dataset.index);
-            const point = points[index];
+        // Délégation d'événements pour les points - meilleure performance et gestion mémoire
+        pointsList.addEventListener("click", (e) => {
+          const card = e.target.closest(".point-card");
+          if (!card) return;
+          
+          const index = parseInt(card.dataset.index);
+          if (!Number.isInteger(index) || !points[index]) return;
+          const point = points[index];
+
+          // Clic sur titre
+          if (e.target.closest(".point-title")) {
             map.setView([point.lat, point.lng], CONFIG.focusZoom);
-            point.marker.openPopup();
-          });
-        });
-
-        // Événements pour les boutons de suppression
-        pointsList.querySelectorAll(".delete-btn").forEach((el) => {
-          el.addEventListener("click", () => {
-            const index = parseInt(el.dataset.index);
-            const pointName = points[index].name;
-            const point = points[index];
-
-            points[index].marker.remove();
-            points.splice(index, 1);
-            updatePointsList();
-            savePoints();
-            showToast(`"${pointName}" supprimé`, "success");
-          });
-        });
-
-        // Événements pour les onglets
-        pointsList.querySelectorAll(".tab").forEach((tab) => {
-          tab.addEventListener("click", () => {
-            const tabId = tab.dataset.id;
-            const tabType = tab.dataset.tab;
-
-            document
-              .querySelectorAll(`[data-id="${tabId}"]`)
-              .forEach((el) => el.classList.remove("active"));
-            tab.classList.add("active");
-            document
-              .querySelector(`[data-content="${tabType}"][data-id="${tabId}"]`)
-              .classList.add("active");
-          });
-        });
-
-        // Événements pour modifier la collection d'un point
-        pointsList
-          .querySelectorAll(".card-collection-select")
-          .forEach((select) => {
-            select.addEventListener("change", () => {
-              const index = parseInt(select.dataset.index);
-              const point = points[index];
-              point.collectionId = select.value || null;
-              savePoints();
+            point.marker?.openPopup?.();
+          }
+          // Clic sur bouton suppression
+          else if (e.target.closest(".delete-btn")) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer "${point.name}" ?`)) {
+              point.marker?.remove?.();
+              points.splice(index, 1);
               updatePointsList();
-              const collection = collections.find(
-                (c) => c.id === point.collectionId,
-              );
-              point.marker.setIcon(
-                getMarkerIcon(collection?.color) || new L.Icon.Default(),
-              );
-              showToast(
-                collection
-                  ? `Point "${point.name}" déplacé vers ${collection.name}`
-                  : `Collection retirée pour "${point.name}"`,
-                "success",
-              );
+              savePoints();
+              showToast(`"${point.name}" supprimé`, "success");
+            }
+          }
+          // Clic sur tab
+          else if (e.target.closest(".tab")) {
+            const tab = e.target.closest(".tab");
+            const tabType = tab.dataset.tab;
+            const tabsContainer = card.querySelector(".tabs");
+            
+            if (tabsContainer) {
+              tabsContainer.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+              tab.classList.add("active");
+            }
+            
+            const contentId = tab.dataset.id;
+            card.querySelectorAll(".tab-content").forEach((tc) => {
+              tc.classList.toggle("active", tc.dataset.content === tabType && tc.dataset.id === contentId);
             });
-          });
+          }
+        });
+
+        // Délégation pour changement de collection
+        pointsList.addEventListener("change", (e) => {
+          if (!e.target.classList.contains("card-collection-select")) return;
+          
+          const card = e.target.closest(".point-card");
+          const index = parseInt(card?.dataset.index);
+          if (!Number.isInteger(index) || !points[index]) return;
+          
+          const point = points[index];
+          point.collectionId = e.target.value || null;
+          savePoints();
+          updatePointsList();
+          const collection = collections.find((c) => c.id === point.collectionId);
+          point.marker?.setIcon?.(
+            getMarkerIcon(collection?.color) || new L.Icon.Default(),
+          );
+          showToast(
+            collection
+              ? `Point "${point.name}" déplacé vers ${collection.name}`
+              : `Collection retirée pour "${point.name}"`,
+            "success",
+          );
+        });
       }
 
       function savePoints() {
@@ -2719,8 +2844,22 @@
         e.preventDefault();
         if (!previewMarker) return;
 
-        const name = nameInput.value.trim() || "Sans nom";
+        let name = nameInput.value.trim();
+        if (!name) {
+          name = "Sans nom";
+        } else if (name.length > 200) {
+          // Limite de sécurité pour le nom
+          name = name.substring(0, 200);
+        }
+        
         const { lat, lng } = previewMarker.getLatLng();
+        
+        // Valider les coordonnées
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+          showToast("Coordonnées invalides", "error");
+          return;
+        }
+        
         const collectionId = collectionSelect.value || null;
         const marker = createMarker(lat, lng, name, collectionId);
 
@@ -2765,7 +2904,24 @@
 
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            const { latitude, longitude } = position.coords;
+            const { latitude, longitude, accuracy } = position.coords;
+            
+            // Valider les coordonnées
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+              showToast("Coordonnées invalides", "error");
+              locateBtn.innerHTML = originalHTML;
+              locateBtn.disabled = false;
+              return;
+            }
+            
+            // Vérifier que latitude et longitude sont dans les bonnes plages
+            if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+              showToast("Coordonnées hors limites", "error");
+              locateBtn.innerHTML = originalHTML;
+              locateBtn.disabled = false;
+              return;
+            }
+            
             map.setView([latitude, longitude], 15);
             L.marker([latitude, longitude])
               .addTo(map)
@@ -2814,6 +2970,10 @@
           collectionsDropdown.style.display === "none" ? "block" : "none";
       });
 
+      closeCollectionsBtn.addEventListener("click", () => {
+        collectionsDropdown.style.display = "none";
+      });
+
       document.addEventListener("click", (e) => {
         if (
           !collectionsToggle.contains(e.target) &&
@@ -2828,6 +2988,29 @@
         collectionModal.style.display = "flex";
         collectionNameInput.focus();
         collectionsDropdown.style.display = "none";
+      });
+
+      // Délégation d'événements pour les collections
+      collectionsList.addEventListener("click", (e) => {
+        const wrapper = e.target.closest('[data-collection-id]');
+        if (!wrapper) return;
+
+        const collectionId = wrapper.dataset.collectionId;
+        const deleteBtn = e.target.closest(".collection-delete");
+        
+        if (deleteBtn) {
+          const coll = collections.find((c) => c.id === collectionId);
+          if (coll && confirm(`Supprimer la collection "${coll.name}" ?`)) {
+            deleteCollection(collectionId);
+          }
+        } else {
+          const collBtn = e.target.closest(".collection-btn");
+          if (collBtn) {
+            currentCollectionFilter = currentCollectionFilter === collectionId ? null : collectionId;
+            updatePointsList();
+            updateCollectionsUI();
+          }
+        }
       });
 
       modalCancel.addEventListener("click", () => {
