@@ -1,5 +1,15 @@
-# Site personnel statique
+# Site personnel
 
-Ce site est hébergé en utilisant les possibilités de [GitHub Pages](https://pages.github.com/).
+Site statique personnel hébergé avec [GitHub Pages](https://pages.github.com/).
 
-C'est possible de consulter ce site [ici](https://fredericgaudreau.github.io/).
+**Lien:** https://fredericgaudreau.github.io/
+
+## Technologie
+
+- HTML5
+- CSS3
+- JavaScript (Vanilla)
+- [Leaflet.js](https://leafletjs.com/) - Carte interactive
+- [Font Awesome](https://fontawesome.com/) - Icônes
+- [Google Fonts](https://fonts.google.com/) - Typographie (Outfit)
+
