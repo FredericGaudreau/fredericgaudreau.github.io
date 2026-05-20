@@ -2524,7 +2524,7 @@
         const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
         const note = point.note ? escapeHtml(point.note).replace(/\n/g, "<br>") : null;
         const noteHtml = note
-          ? `<div class="info-item"><i class="fas fa-sticky-note"></i><strong>Note:</strong> <span style="white-space: pre-wrap;">${note}</span></div>`
+          ? `<div class="info-item"><i class="fas fa-sticky-note"></i><strong>Notes</strong><br> <span style="white-space: pre-wrap;">${note}</span></div>`
           : "";
 
         const weather = weatherData?.current_weather
