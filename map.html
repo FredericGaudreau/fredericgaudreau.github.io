@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer-when-downgrade" />
-    <meta
-      name="description"
-      content="Carte avec météo et informations géographiques."
-    />
+    <meta name="description" content="Carte avec météo et informations géographiques." />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https:; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://nominatim.openstreetmap.org https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.open-elevation.com https://server.arcgisonline.com https://tile.opentopomap.org https://router.project-osrm.org;" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <title>Carte</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link
@@ -426,10 +428,28 @@
       }
 
       .info-item {
-        margin-bottom: 0.25rem;
+        margin: 0.25rem 0.25rem 0.5rem 1rem;
         font-size: 0.9rem;
         line-height: 1.5;
         word-break: break-word;
+      }
+
+      .notes-textarea {
+        width: 100%;
+        min-height: 140px;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem;
+        font: inherit;
+        resize: vertical;
+        background: #f8fafc;
+        color: var(--text-primary);
+      }
+
+      .notes-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       .info-item i {
@@ -487,6 +507,7 @@
         border: 2px solid var(--border);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
         background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        padding: 0;
       }
 
       .leaflet-popup-content {
@@ -495,7 +516,9 @@
         color: var(--text-primary);
         line-height: 1.35;
         max-width: 220px;
-        padding: 0.75rem 0.8rem;
+        padding: 0;
+        margin: 0;
+        background: transparent;
       }
 
       .leaflet-popup-close-button {
@@ -505,14 +528,42 @@
       .popup-card {
         display: flex;
         flex-direction: column;
-        gap: 0.3rem;
+        gap: 0;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        background: transparent;
+        border-radius: 14px;
+      }
+
+      .popup-close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 4px 6px;
+        border-radius: 6px;
+      }
+
+      .popup-close-btn:hover {
+        background: rgba(0,0,0,0.05);
+        color: var(--error);
       }
 
       .popup-title {
         font-weight: 700;
-        color: var(--primary);
-        font-size: 0.95rem;
-        margin-bottom: 0.2rem;
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        padding: 0.45rem 0.6rem;
+        border-bottom: 2px solid var(--border);
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 0;
       }
 
       /* Boutons flottants */
@@ -1323,7 +1374,7 @@
           aria-label="Fermer la recherche"
           title="Fermer"
         >
-          <i class="fas fa-times"></i>
+          <i class="fas fa-xmark"></i>
         </button>
       </form>
       <div id="search-results"></div>
@@ -1842,6 +1893,8 @@
       const routingEnd = $("routing-end");
       const routingCalculate = $("routing-calculate");
       const routingClose = $("routing-close");
+      let pointEventsAttached = false;
+
 
       const escapeHtml = (str) =>
         str.replace(
@@ -1931,7 +1984,7 @@
 
         if (!isOnline) {
           addressSearchResults.innerHTML =
-            '<div class="search-result-empty"><i class="fas fa-wifi-off"></i> Mode hors ligne - recherche non disponible</div>';
+            '<div class="search-result-empty"><i class="fas fa-wifi-slash"></i> Mode hors ligne - recherche non disponible</div>';
           return;
         }
 
@@ -1957,19 +2010,29 @@
             clearTimeout(timeout);
 
             if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
+              showToast("Service indisponible", "error");
+              return;
             }
 
             results = await response.json();
+            // Validation des résultats
+            if (!Array.isArray(results)) {
+              console.warn("Invalid API response");
+              addressSearchResults.innerHTML = '';
+              return;
+            }
             // Sauvegarder dans le cache
             await persistentCache.set(cacheKey, results);
           }
 
           renderAddressResults(results);
         } catch (error) {
-          console.error("Erreur de recherche Nominatim:", error);
-          addressSearchResults.innerHTML =
-            '<div class="search-result-empty">Impossible de récupérer les résultats.</div>';
+          if (error.name === "AbortError") {
+            showToast("Recherche expirée", "error");
+          } else {
+            showToast("Erreur lors de la recherche", "error");
+          }
+          addressSearchResults.innerHTML = '';
         }
       };
 
@@ -1989,13 +2052,14 @@
 
         const validName = (name || "").trim().substring(0, 200) || "Sans nom";
 
-        const marker = createMarker(latNum, lngNum, validName);
+        const marker = createMarker(latNum, lngNum, validName, null, "");
         points.push({
           name: validName,
           lat: latNum,
           lng: lngNum,
           marker,
           collectionId: null,
+          note: "",
         });
         updatePointsList();
         savePoints();
@@ -2052,22 +2116,35 @@
       function loadCollections() {
         try {
           const saved = localStorage.getItem(CONFIG.collectionsKey);
-          collections = saved ? JSON.parse(saved) : [];
+          if (!saved) {
+            collections = [];
+            return;
+          }
+          collections = JSON.parse(saved);
+          if (!Array.isArray(collections)) {
+            console.warn("Collections data format invalid");
+            collections = [];
+          }
         } catch (error) {
-          console.error("Erreur de chargement collections:", error);
+          console.warn("Failed to load collections");
           collections = [];
         }
       }
 
       function saveCollections() {
         try {
-          localStorage.setItem(
-            CONFIG.collectionsKey,
-            JSON.stringify(collections),
-          );
+          // Vérifier la limite de taille localStorage (~5MB)
+          const data = JSON.stringify(collections);
+          if (data.length > 4500000) {
+            showToast("Espace de stockage insuffisant", "error");
+            return false;
+          }
+          localStorage.setItem(CONFIG.collectionsKey, data);
+          return true;
         } catch (error) {
-          console.error("Erreur sauvegarde collections:", error);
+          console.warn("Storage limit exceeded");
           showToast("Erreur lors de la sauvegarde", "error");
+          return false;
         }
       }
 
@@ -2085,23 +2162,40 @@
           return null;
         }
 
+        // Vérifier que le nom ne contient que des caractères sûrs
+        if (!/^[\p{L}\p{N}\s\-_.(),&'"]+$/u.test(trimmedName)) {
+          showToast("Caractères non autorisés dans le nom", "error");
+          return null;
+        }
+
         // Vérifier que la collection n'existe pas déjà
         if (collections.some((c) => c.name === trimmedName)) {
           showToast("Une collection avec ce nom existe déjà", "error");
           return null;
         }
 
+        const colorIndex = collections.length % COLLECTION_COLORS.length;
+        const selectedColor = COLLECTION_COLORS[colorIndex];
+        
+        // Valider la couleur (hex color)
+        if (!/^#[0-9A-F]{6}$/i.test(selectedColor)) {
+          console.warn("Invalid color format");
+          return null;
+        }
+
         const collection = {
           id: Date.now().toString(),
           name: trimmedName,
-          color:
-            COLLECTION_COLORS[collections.length % COLLECTION_COLORS.length],
+          color: selectedColor,
         };
         collections.push(collection);
-        saveCollections();
+        if (!saveCollections()) {
+          collections.pop();
+          return null;
+        }
         updateCollectionsUI();
         updateCollectionSelect();
-        showToast(`Collection "${trimmedName}" créée`, "success");
+        showToast(`Collection créée`, "success");
         return collection;
       }
 
@@ -2343,7 +2437,7 @@
       function renderWeather(data) {
         if (!data?.current_weather) {
           return `<div class="error-msg">
-            <i class="fas fa-${isOnline ? "cloud-slash" : "wifi-off"}"></i>
+            <i class="fas fa-${isOnline ? "cloud-slash" : "wifi-slash"}"></i>
             ${isOnline ? "Données météo indisponibles" : "Mode hors ligne - données non disponibles"}
           </div>`;
         }
@@ -2381,7 +2475,7 @@
       function renderGeoInfo(geoData, elevationData) {
         if (!geoData?.address) {
           return `<div class="error-msg">
-            <i class="fas fa-${isOnline ? "map-slash" : "wifi-off"}"></i>
+            <i class="fas fa-${isOnline ? "map-slash" : "wifi-slash"}"></i>
             ${isOnline ? "Informations indisponibles" : "Mode hors ligne - données non disponibles"}
           </div>`;
         }
@@ -2428,6 +2522,10 @@
       ) {
         const title = `📍 ${escapeHtml(point.name)}`;
         const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
+        const note = point.note ? escapeHtml(point.note).replace(/\n/g, "<br>") : null;
+        const noteHtml = note
+          ? `<div class="info-item"><i class="fas fa-sticky-note"></i><strong>Note:</strong> <span style="white-space: pre-wrap;">${note}</span></div>`
+          : "";
 
         const weather = weatherData?.current_weather
           ? getWeather(weatherData.current_weather.weathercode)
@@ -2457,12 +2555,14 @@
 
         return `
           <div class="popup-card">
+            <button class="popup-close-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Fermer">×</button>
             <div class="popup-title">${title}</div>
             
             ${city || postal || country ? `<div class="info-item"><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
             ${elevation != null ? `<div class="info-item"><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
             ${weather ? `<div class="info-item"><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
             ${airHTML}
+            ${noteHtml}
           </div>
         `;
       }
@@ -2470,7 +2570,7 @@
       function renderAirQuality(data) {
         if (!data?.current || data.current.us_aqi == null) {
           return `<div class="error-msg">
-            <i class="fas fa-${isOnline ? "smog-slash" : "wifi-off"}"></i>
+            <i class="fas fa-${isOnline ? "cloud" : "wifi-slash"}"></i>
             ${isOnline ? "Données qualité de l'air indisponibles" : "Mode hors ligne - données non disponibles"}
           </div>`;
         }
@@ -2535,6 +2635,9 @@
                 <button class="tab" data-tab="air" data-id="${tabsId}">
                   <i class="fas fa-wind"></i> Air
                 </button>
+                <button class="tab" data-tab="notes" data-id="${tabsId}">
+                  <i class="fas fa-sticky-note"></i> Notes
+                </button>
               </div>
               <div class="tab-content active" data-content="info" data-id="${tabsId}">
                 <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
@@ -2544,6 +2647,9 @@
               </div>
               <div class="tab-content" data-content="air" data-id="${tabsId}">
                 <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+              </div>
+              <div class="tab-content" data-content="notes" data-id="${tabsId}">
+                <textarea maxlength="1000" class="notes-textarea" data-index="${index}" placeholder="Ajouter une note...">${escapeHtml(point.note || "")}</textarea>
               </div>
             </div>
           </li>
@@ -2576,6 +2682,16 @@
           `[data-content="air"][data-id="${tabsId}"]`,
         );
         if (airEl) airEl.innerHTML = renderAirQuality(airData);
+
+        // Conserver localement les dernières données récupérées pour ce point
+        try {
+          point._weatherData = weatherData;
+          point._geoData = geoData;
+          point._elevationData = elevationData;
+          point._airData = airData;
+        } catch (e) {
+          // silent
+        }
 
         if (point.marker) {
           point.marker.setPopupContent(
@@ -2656,6 +2772,9 @@
       }
 
       function attachPointEvents() {
+        if (pointEventsAttached) return;
+        pointEventsAttached = true;
+
         // Délégation d'événements pour les points - meilleure performance et gestion mémoire
         pointsList.addEventListener("click", (e) => {
           const card = e.target.closest(".point-card");
@@ -2713,7 +2832,15 @@
 
               // Mettre à jour le popup du marqueur
               if (point.marker) {
-                point.marker.setPopupContent(formatPopupContent(point));
+                point.marker.setPopupContent(
+                  formatPopupContent(
+                    point,
+                    point._weatherData,
+                    point._geoData,
+                    point._elevationData,
+                    point._airData,
+                  ),
+                );
               }
             };
           }
@@ -2737,6 +2864,76 @@
                 tc.dataset.content === tabType && tc.dataset.id === contentId,
               );
             });
+          }
+        });
+
+        pointsList.addEventListener("input", (e) => {
+          const textarea = e.target.closest(".notes-textarea");
+          if (!textarea) return;
+
+          const card = textarea.closest(".point-card");
+          const index = parseInt(card?.dataset.index);
+          if (!Number.isInteger(index) || !points[index]) return;
+
+          const point = points[index];
+          point.note = textarea.value.substring(0, 1000);
+          savePoints();
+
+          if (point.marker) {
+            const popup = point.marker.getPopup?.();
+            if (popup) {
+              popup.setContent(
+                formatPopupContent(
+                  point,
+                  point._weatherData,
+                  point._geoData,
+                  point._elevationData,
+                  point._airData,
+                ),
+              );
+              if (point.marker.isPopupOpen()) {
+                point.marker.openPopup();
+              }
+            } else {
+              point.marker.setPopupContent(
+                formatPopupContent(
+                  point,
+                  point._weatherData,
+                  point._geoData,
+                  point._elevationData,
+                  point._airData,
+                ),
+              );
+            }
+          }
+        });
+
+        // Afficher un toast quand l'utilisateur quitte le champ de notes
+        pointsList.addEventListener("focusout", (e) => {
+          const textarea = e.target.closest(".notes-textarea");
+          if (!textarea) return;
+
+          const card = textarea.closest(".point-card");
+          const index = parseInt(card?.dataset.index);
+          if (!Number.isInteger(index) || !points[index]) return;
+
+          showToast("Note sauvegardée", "success", 1500);
+        });
+
+        // Délégation: fermer un popup via le bouton ×
+        document.addEventListener("click", (e) => {
+          const btn = e.target.closest(".popup-close-btn");
+          if (!btn) return;
+
+          const lat = parseFloat(btn.dataset.lat);
+          const lng = parseFloat(btn.dataset.lng);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+          const p = points.find((pt) => pt.lat === lat && pt.lng === lng);
+          if (p && p.marker) {
+            p.marker.closePopup();
+          } else if (typeof map !== "undefined" && map && map.closePopup) {
+            map.closePopup();
           }
         });
 
@@ -2769,20 +2966,24 @@
 
       function savePoints() {
         try {
-          localStorage.setItem(
-            CONFIG.storageKey,
-            JSON.stringify(
-              points.map(({ name, lat, lng, collectionId }) => ({
-                name,
-                lat,
-                lng,
-                collectionId: collectionId || null,
-              })),
-            ),
-          );
+          const data = points.map(({ name, lat, lng, collectionId, note }) => ({
+            name: (name || "").trim().substring(0, 200),
+            lat: Number.isFinite(lat) ? lat : 0,
+            lng: Number.isFinite(lng) ? lng : 0,
+            collectionId: collectionId || null,
+            note: String(note || "").trim().substring(0, 1000),
+          }));
+          const json = JSON.stringify(data);
+          if (json.length > 4500000) {
+            showToast("Espace de stockage insuffisant", "error");
+            return false;
+          }
+          localStorage.setItem(CONFIG.storageKey, json);
+          return true;
         } catch (error) {
-          console.error("Erreur de sauvegarde:", error);
+          console.warn("Storage error");
           showToast("Impossible de sauvegarder les points", "error");
+          return false;
         }
       }
 
@@ -2791,18 +2992,41 @@
           const saved = localStorage.getItem(CONFIG.storageKey);
           if (!saved) return;
 
-          JSON.parse(saved).forEach((pt) => {
+          const parsedPoints = JSON.parse(saved);
+          if (!Array.isArray(parsedPoints)) {
+            console.warn("Invalid points format");
+            return;
+          }
+
+          parsedPoints.forEach((pt) => {
+            // Valider les données
+            if (!Number.isFinite(pt.lat) || !Number.isFinite(pt.lng)) {
+              return;
+            }
+            if (pt.lat < -90 || pt.lat > 90 || pt.lng < -180 || pt.lng > 180) {
+              return;
+            }
+            const name = (pt.name || "").trim().substring(0, 200) || "Point";
+            const note = String(pt.note || "").trim().substring(0, 1000);
             const marker = createMarker(
               pt.lat,
               pt.lng,
-              pt.name,
+              name,
               pt.collectionId,
+              note,
             );
-            points.push({ ...pt, marker });
+            points.push({
+              name,
+              lat: pt.lat,
+              lng: pt.lng,
+              marker,
+              collectionId: pt.collectionId || null,
+              note,
+            });
           });
           updatePointsList();
         } catch (error) {
-          console.error("Erreur de chargement:", error);
+          console.warn("Failed to load points");
         }
       }
 
@@ -2846,11 +3070,12 @@
         const exportData = {
           version: 1,
           exportDate: new Date().toISOString(),
-          points: pointsToExport.map(({ name, lat, lng, collectionId }) => ({
+          points: pointsToExport.map(({ name, lat, lng, collectionId, note }) => ({
             name,
             lat,
             lng,
             collectionId: collectionId || null,
+            note: (note || "").trim().substring(0, 1000),
           })),
           collections: collectionsToExport,
         };
@@ -2876,16 +3101,18 @@
       }
 
       function exportAsCSV(pointsToExport) {
-        const headers = ["Nom", "Latitude", "Longitude", "Collection"];
+        const headers = ["Nom", "Latitude", "Longitude", "Collection", "Note"];
         const rows = pointsToExport.map((p) => {
           const collectionName = p.collectionId
             ? collections.find((c) => c.id === p.collectionId)?.name || ""
             : "";
+          const note = (p.note || "").replace(/"/g, '""');
           return [
             `"${p.name.replace(/"/g, '""')}"`,
             p.lat,
             p.lng,
-            `"${collectionName}"`,
+            `"${collectionName.replace(/"/g, '""')}"`,
+            `"${note}"`,
           ];
         });
 
@@ -2924,12 +3151,24 @@
         const file = event.target.files[0];
         if (!file) return;
 
+        // Vérifier la taille du fichier (max 5MB)
+        if (file.size > 5242880) {
+          showToast("Fichier trop volumineux (max 5MB)", "error");
+          event.target.value = "";
+          return;
+        }
+
+        // Vérifier le type de fichier
+        if (!file.name.endsWith(".json") && !file.name.endsWith(".csv")) {
+          showToast("Format non supporté (JSON ou CSV uniquement)", "error");
+          event.target.value = "";
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             let importData;
-
-            // Vérifier si c'est un JSON ou CSV
             const fileContent = e.target.result;
 
             if (file.name.endsWith(".csv")) {
@@ -2948,14 +3187,22 @@
               return;
             }
 
+            // Limiter le nombre de points (max 10000)
+            if (importData.points.length > 10000) {
+              showToast("Trop de points (max 10000)", "error");
+              return;
+            }
+
             // Valider les données des points
             const validPoints = importData.points.filter((pt) => {
-              if (!pt.name || pt.lat === undefined || pt.lng === undefined)
+              if (!pt || !pt.name || pt.lat === undefined || pt.lng === undefined)
                 return false;
               if (!Number.isFinite(pt.lat) || !Number.isFinite(pt.lng))
                 return false;
               if (pt.lat < -90 || pt.lat > 90 || pt.lng < -180 || pt.lng > 180)
                 return false;
+              const name = (pt.name || "").trim();
+              if (name.length === 0 || name.length > 200) return false;
               return true;
             });
 
@@ -2977,7 +3224,7 @@
               importModal.style.display = "none";
             };
           } catch (error) {
-            console.error("Erreur lors de la lecture du fichier:", error);
+            console.warn("File import failed");
             showToast("Erreur lors de la lecture du fichier", "error");
           }
         };
@@ -2987,8 +3234,6 @@
         };
 
         reader.readAsText(file);
-
-        // Réinitialiser l'input pour permettre de réimporter le même fichier
         event.target.value = "";
       }
 
@@ -2996,20 +3241,57 @@
         const lines = csvContent.trim().split("\n");
         if (lines.length < 2) throw new Error("Format CSV invalide");
 
-        const points = [];
-        for (let i = 1; i < lines.length; i++) {
-          const [name, lat, lng, collection] = lines[i]
-            .split(",")
-            .map((v) => v.trim().replace(/^"|"$/g, ""));
+        const splitCSVLine = (line) => {
+          const values = [];
+          let current = "";
+          let inQuotes = false;
 
-          if (name && lat && lng) {
-            points.push({
-              name: name.replace(/""/g, '"'),
-              lat: parseFloat(lat),
-              lng: parseFloat(lng),
-              collectionId: null,
-            });
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === "," && !inQuotes) {
+              values.push(current);
+              current = "";
+            } else {
+              current += char;
+            }
           }
+          values.push(current);
+          return values.map((v) => v.trim());
+        };
+
+        const headerParts = splitCSVLine(lines[0]);
+        const noteIndex = headerParts.findIndex(
+          (header) => header.toLowerCase().trim() === "note",
+        );
+
+        const points = [];
+        for (let i = 1; i < lines.length && i < 10001; i++) {
+          const parts = splitCSVLine(lines[i]);
+          if (parts.length < 3) continue;
+
+          const name = (parts[0] || "").replace(/^"|"$/g, "").trim();
+          const lat = parseFloat(parts[1]);
+          const lng = parseFloat(parts[2]);
+          const note = noteIndex !== -1 ? (parts[noteIndex] || "").replace(/^"|"$/g, "").trim() : "";
+
+          if (!name || !Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+          if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
+          if (name.length > 200) continue;
+
+          points.push({
+            name: name.substring(0, 200),
+            lat,
+            lng,
+            collectionId: null,
+            note: note.substring(0, 1000),
+          });
         }
 
         return { points, collections: [] };
@@ -3072,12 +3354,12 @@
         }
       }
 
-      function createMarker(lat, lng, name, collectionId = null) {
+      function createMarker(lat, lng, name, collectionId = null, note = "") {
         const collection = collectionId
           ? collections.find((c) => c.id === collectionId)
           : null;
         const icon = getMarkerIcon(collection?.color);
-        const popupPoint = { name, lat, lng };
+        const popupPoint = { name, lat, lng, note };
         const options = icon ? { icon } : {};
         return L.marker([lat, lng], options)
           .addTo(map)
@@ -3323,9 +3605,9 @@
         }
 
         const collectionId = collectionSelect.value || null;
-        const marker = createMarker(lat, lng, name, collectionId);
+        const marker = createMarker(lat, lng, name, collectionId, "");
 
-        points.push({ name, lat, lng, marker, collectionId });
+        points.push({ name, lat, lng, marker, collectionId, note: "" });
         previewMarker.remove();
         previewMarker = null;
         form.reset();
@@ -3564,7 +3846,7 @@
         } else {
           statusBtn.style.background = "#ef4444";
           statusBtn.title = "Mode hors ligne";
-          statusBtn.innerHTML = '<i class="fas fa-wifi-off"></i>';
+          statusBtn.innerHTML = '<i class="fas fa-wifi-slash"></i>';
         }
       }
 
