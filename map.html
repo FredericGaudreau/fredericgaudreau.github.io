@@ -2023,7 +2023,7 @@
         const toast = document.createElement("div");
         toast.className = `toast ${type}`;
         const icon = type === "success" ? "check-circle" : "exclamation-circle";
-        toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+        toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${escapeHtml(message)}</span>`;
         toastContainer.appendChild(toast);
 
         setTimeout(() => {
