@@ -5,24 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Carte interactive avec météo et points d'intérêt." />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com;" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Carte - Frédéric Gaudreau" />
+    <meta property="og:description" content="Carte interactive avec météo et points d'intérêt." />
+    <meta property="og:url" content="https://fredericgaudreau.github.io/carte.html" />
+    <link rel="canonical" href="https://fredericgaudreau.github.io/carte.html" />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
     <link rel="stylesheet" href="/src/css/style.css" />
     <link
       rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <title>Carte - Frédéric Gaudreau</title>
   </head>
-  <body>
+  <body data-page="map-page">
     <div id="header"></div>
     <main>
       <article>
         <h1>Carte</h1>
-        
+
         <p>
           Carte créée avec
-          <a href="http://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>.
+          <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>.
           Permet de créer, organiser et annoter des points d'intérêt.
         </p>
 
@@ -43,6 +50,6 @@
       </article>
     </main>
     <div id="footer"></div>
+    <script src="/src/js/index.js" defer></script>
   </body>
 </html>
-<script src="/src/js/index.js"></script>

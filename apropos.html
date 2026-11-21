@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
@@ -6,16 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="À propos de Frédéric Gaudreau." />
     <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com;" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="À propos - Frédéric Gaudreau" />
+    <meta property="og:description" content="À propos de Frédéric Gaudreau." />
+    <meta property="og:url" content="https://fredericgaudreau.github.io/apropos.html" />
+    <link rel="canonical" href="https://fredericgaudreau.github.io/apropos.html" />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
     <link rel="stylesheet" href="/src/css/style.css" />
     <link
       rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <title>À propos - Frédéric Gaudreau</title>
   </head>
-  <body>
+  <body data-page="about">
     <div id="header"></div>
     <main>
       <article>
@@ -30,6 +36,6 @@
       </article>
     </main>
     <div id="footer"></div>
+    <script src="/src/js/index.js" defer></script>
   </body>
 </html>
-<script src="/src/js/index.js"></script>
