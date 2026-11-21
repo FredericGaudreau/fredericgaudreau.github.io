@@ -1,0 +1,21 @@
+{
+  "name": "fredericgaudreau.github.io",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Site statique personnel hébergé avec GitHub Pages",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:html": "html-validate \"*.html\"",
+    "check:syntax": "node --check src/js/map.js && node --check src/js/index.js && node --check sw.js",
+    "check": "npm run lint && npm run format:check && npm run check:html && npm run check:syntax",
+    "serve": "python3 -m http.server 8000 --bind 127.0.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.30.0",
+    "html-validate": "^9.5.0",
+    "prettier": "^3.5.0"
+  },
+  "type": "module"
+}

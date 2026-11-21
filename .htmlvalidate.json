@@ -1,0 +1,12 @@
+{
+  "elements": ["html5"],
+  "rules": {
+    "void-style": "off",
+    "no-implicit-button-type": "off",
+    "no-inline-style": "off",
+    "doctype-style": "off",
+    "attribute-empty-style": "off",
+    "element-permitted-content": "off",
+    "wcag/h32": "off"
+  }
+}

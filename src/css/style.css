@@ -8,7 +8,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Outfit', 'Arial', sans-serif;
+  font-family: "Outfit", "Arial", sans-serif;
 }
 
 body {
@@ -52,7 +52,7 @@ a:focus-visible {
   border-radius: 2px;
 }
 
-nav a[aria-current='page'] {
+nav a[aria-current="page"] {
   color: #2563eb;
 }
 
