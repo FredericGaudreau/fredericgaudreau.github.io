@@ -886,6 +886,13 @@ function formatPopupContent(
   <a class="popup-edit-note" href="/notes.html#point=${point.lat.toFixed(5)},${point.lng.toFixed(5)}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a></div>`
     : "";
 
+  const collection = point.collectionId
+    ? collections.find((c) => c.id === point.collectionId)
+    : null;
+  const badgeHtml = collection
+    ? `<span class="popup-badge"><span class="popup-badge-dot" style="background:${collection.color}"></span>${escapeHtml(collection.name)}</span>`
+    : "";
+
   const weather = weatherData?.current_weather
     ? getWeather(weatherData.current_weather.weathercode)
     : null;
@@ -913,7 +920,10 @@ function formatPopupContent(
   return `
           <div class="popup-card">
             <div class="popup-header">
-              <div class="popup-title" title="${title}">${title}</div>
+              <div class="popup-header-main">
+                ${badgeHtml}
+                <div class="popup-title" title="${title}">${title}</div>
+              </div>
               <div class="popup-header-actions">
                 <button class="popup-actions-btn popup-share-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Partager ce point" title="Partager ce point">
                   <i class="fas fa-share" aria-hidden="true"></i>
@@ -926,11 +936,16 @@ function formatPopupContent(
             <button class="popup-coords" data-lat="${point.lat}" data-lng="${point.lng}" title="Copier les coordonnées">
               <i class="fas fa-location-dot" aria-hidden="true"></i> ${coords}
             </button>
-            ${city || postal || country ? `<div class="info-item"><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
-            ${elevation != null ? `<div class="info-item"><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
-            ${weather ? `<div class="info-item"><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
+            ${city || postal || country ? `<div class="info-item"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
+            ${elevation != null ? `<div class="info-item"><i class="fas fa-mountain" aria-hidden="true"></i><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
+            ${weather ? `<div class="info-item"><i class="fas fa-cloud-sun" aria-hidden="true"></i><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
             ${airHTML}
             ${noteHtml}
+            <div class="popup-footer">
+              <button class="popup-actions-btn popup-route-btn" data-lat="${point.lat}" data-lng="${point.lng}" title="Itinéraire vers ce point">
+                <i class="fas fa-route" aria-hidden="true"></i> Itinéraire
+              </button>
+            </div>
           </div>
         `;
 }
@@ -1277,6 +1292,29 @@ function attachPointEvents() {
     } else if (typeof map !== "undefined" && map && map.closePopup) {
       map.closePopup();
     }
+  });
+
+  // Délégation: préparer un itinéraire vers ce point depuis le popup
+  document.addEventListener("click", (e) => {
+    const routeBtn = e.target.closest(".popup-route-btn");
+    if (!routeBtn) return;
+
+    const lat = parseFloat(routeBtn.dataset.lat);
+    const lng = parseFloat(routeBtn.dataset.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    updateRoutingSelects();
+    const target = points.find(
+      (pt) => pt.lat.toFixed(5) === lat.toFixed(5) && pt.lng.toFixed(5) === lng.toFixed(5),
+    );
+    if (!target) {
+      showToast("Ce point ne peut pas servir de destination", "error");
+      return;
+    }
+
+    routingEnd.value = `${target.lat},${target.lng}`;
+    routingPanel.style.display = "block";
+    showToast(`Destination : ${target.name || "point"}`, "success");
   });
 
   // Délégation: copier les coordonnées depuis le popup

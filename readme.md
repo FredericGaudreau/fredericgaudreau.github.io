@@ -7,7 +7,7 @@ Site statique personnel hébergé avec [GitHub Pages](https://pages.github.com/)
 ## Outils
 
 - **Carte** ([`map.html`](map.html)) — carte interactive Leaflet : points d'intérêt avec collections, météo, altitude, qualité de l'air, recherche d'adresse, itinéraires, partage par URL et export JSON/CSV/Markdown
-- **Notes** ([`notes.html`](notes.html)) — éditeur Markdown avec rendu en direct, lié aux points de la carte, export `.md`
+- **Notes** ([`notes.html`](notes.html)) — éditeur Markdown avec rendu en direct, lié aux points de la carte, recherche, export `.md` (note unique ou tout) et sauvegarde/restauration JSON
 - Parseur Markdown partagé sans dépendance ([`src/js/markdown.js`](src/js/markdown.js))
 
 ## Technologie

@@ -43,6 +43,13 @@
               <i class="fas fa-plus" aria-hidden="true"></i>
             </button>
           </div>
+          <input
+            type="search"
+            id="notes-search"
+            placeholder="Rechercher…"
+            aria-label="Rechercher dans les notes"
+            autocomplete="off"
+          />
           <ul id="notes-list"></ul>
           <div class="notes-sidebar-footer" id="notes-stats" aria-live="off"></div>
         </aside>
@@ -100,15 +107,33 @@
               >
                 <i class="fas fa-copy" aria-hidden="true"></i>
               </button>
-              <button
-                type="button"
-                id="export-btn"
-                class="tool-btn"
-                aria-label="Télécharger en .md"
-                title="Télécharger en .md"
-              >
-                <i class="fas fa-download" aria-hidden="true"></i>
-              </button>
+              <div class="toolbar-group">
+                <button
+                  type="button"
+                  id="export-menu-btn"
+                  class="tool-btn"
+                  aria-label="Options d'export"
+                  title="Options d'export"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <i class="fas fa-file-export" aria-hidden="true"></i>
+                </button>
+                <div id="export-menu" hidden>
+                  <button type="button" id="export-md-btn">
+                    <i class="fas fa-file-lines" aria-hidden="true"></i> Cette note (.md)
+                  </button>
+                  <button type="button" id="export-all-md-btn">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i> Toutes les notes (.md)
+                  </button>
+                  <button type="button" id="export-json-btn">
+                    <i class="fas fa-code" aria-hidden="true"></i> Sauvegarde (JSON)
+                  </button>
+                  <button type="button" id="import-json-btn">
+                    <i class="fas fa-upload" aria-hidden="true"></i> Restaurer (JSON)
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
                 id="delete-btn"
@@ -140,6 +165,7 @@
       </div>
     </main>
     <div id="footer"></div>
+    <input type="file" id="import-notes-input" accept=".json,application/json" hidden />
     <script src="/src/js/index.js" defer></script>
     <script src="/src/js/markdown.js" defer></script>
     <script src="/src/js/notes.js" defer></script>

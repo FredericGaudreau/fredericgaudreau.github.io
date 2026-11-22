@@ -32,22 +32,54 @@
         <h1>Carte</h1>
 
         <p>
-          Carte créée avec
-          <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>.
-          Permet de créer, organiser et annoter des points d'intérêt.
+          Une carte interactive créée avec
+          <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>
+          pour créer, organiser et annoter des points d'intérêt.
         </p>
 
-        <h2>Fonctionnalités</h2>
+        <h2>Points et collections</h2>
         <ul>
-          <li>Ajouter, modifier, supprimer des points</li>
-          <li>Organiser les points en collections avec couleurs</li>
-          <li>Voir les informations locales (météo, altitude, qualité de l'air)</li>
+          <li>Ajouter, renommer et supprimer des points ; annoter chaque point avec une note</li>
+          <li>Organiser les points en collections, chacune avec sa couleur de marqueur</li>
+          <li>Rechercher et filtrer les points par nom ou par collection</li>
         </ul>
 
-        <h2>Stockage local</h2>
+        <h2>Informations locales</h2>
         <p>
-          Les points sont sauvegardés dans le navigateur. Fonctionne hors ligne avec les données
-          mises en cache.
+          Chaque popup affiche ce qui est disponible en ligne : lieu (adresse, ville, pays),
+          altitude, météo courante et qualité de l'air (US AQI), fournies par des API ouvertes et
+          mises en cache localement.
+        </p>
+
+        <h2>Notes liées aux points</h2>
+        <p>
+          Points et <a href="/notes.html">notes Markdown</a> sont reliés : la note d'un point
+          s'affiche rendue directement dans son popup et s'édite en un clic dans l'éditeur de notes.
+        </p>
+
+        <h2>Itinéraires et partage</h2>
+        <ul>
+          <li>Calculer un itinéraire entre deux points enregistrés (Leaflet Routing Machine)</li>
+          <li>
+            Partager un point par un lien qui ouvre la carte à sa position exacte, avec son popup
+          </li>
+        </ul>
+
+        <h2>Exporter et importer</h2>
+        <p>Points, collections et notes s'exportent et se réimportent en un clic :</p>
+        <ul>
+          <li>Points au format JSON ou CSV, notes au format Markdown</li>
+          <li>Import JSON ou CSV, en fusion ou en remplacement</li>
+        </ul>
+
+        <h2>Données et confidentialité</h2>
+        <p>
+          Tout est stocké dans votre navigateur (localStorage) — rien n'est envoyé sur un serveur.
+          Les seules requêtes externes sont les tuiles de carte et les API d'informations locales.
+        </p>
+        <p>
+          Le site est installable et fonctionne hors ligne grâce à un service worker ; la dernière
+          vue de la carte reste disponible même sans connexion.
         </p>
 
         <p><a href="/map.html">Retourner à la carte →</a></p>

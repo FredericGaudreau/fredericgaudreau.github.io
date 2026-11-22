@@ -14,10 +14,15 @@ const wordCount = $("word-count");
 const readTime = $("read-time");
 const noteDates = $("note-dates");
 const notesStats = $("notes-stats");
+const notesSearch = $("notes-search");
+const exportMenuBtn = $("export-menu-btn");
+const exportMenu = $("export-menu");
+const importNotesInput = $("import-notes-input");
 const saveStatus = $("save-status");
 let notes = [];
 let linkedPoint = null;
 let currentId = null;
+let searchQuery = "";
 let debounceTimer = null;
 let statusTimer = null;
 
@@ -164,9 +169,17 @@ function noteTitle(note) {
 
 function renderNotesList() {
   const sorted = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
+  const query = searchQuery.trim().toLowerCase();
+  const filtered = query
+    ? sorted.filter(
+        (note) =>
+          (note.title || "").toLowerCase().includes(query) ||
+          note.content.toLowerCase().includes(query),
+      )
+    : sorted;
   notesListEl.innerHTML = "";
 
-  sorted.forEach((note) => {
+  filtered.forEach((note) => {
     const li = document.createElement("li");
     li.className = "note-item";
     li.dataset.id = note.id;
@@ -185,10 +198,10 @@ function renderNotesList() {
 
   updateNotesStats();
 
-  if (sorted.length === 0) {
+  if (filtered.length === 0) {
     const empty = document.createElement("li");
     empty.className = "note-item-empty";
-    empty.textContent = "Aucune note. Créez-en une !";
+    empty.textContent = query ? "Aucune note ne correspond." : "Aucune note. Créez-en une !";
     notesListEl.appendChild(empty);
   }
 }
@@ -329,20 +342,104 @@ function copyMarkdown() {
     .catch(() => setStatus("Copie impossible", "error"));
 }
 
-function exportNote() {
-  const note = currentNote();
-  if (!note) return;
-
-  const blob = new Blob([markdownInput.value], { type: "text/markdown" });
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${slugify(noteTitle(note))}.md`;
+  link.download = filename;
   document.body.appendChild(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function exportNote() {
+  const note = currentNote();
+  if (!note) return;
+
+  downloadFile(markdownInput.value, `${slugify(noteTitle(note))}.md`, "text/markdown");
   setStatus("Téléchargement lancé");
+}
+
+function exportAllMarkdown() {
+  if (notes.length === 0) {
+    setStatus("Aucune note à exporter", "error");
+    return;
+  }
+
+  const sorted = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
+  const header = `# Toutes les notes\n\n${sorted.length} note(s) — exportées le ${new Date().toLocaleDateString("fr-CA")}\n\n`;
+  const body = sorted.map((n) => `## ${noteTitle(n)}\n\n${n.content.trim()}\n\n---\n`).join("\n");
+  downloadFile(
+    header + body,
+    `notes_${new Date().toISOString().split("T")[0]}.md`,
+    "text/markdown",
+  );
+  setStatus("Téléchargement lancé");
+}
+
+function exportNotesJSON() {
+  if (notes.length === 0) {
+    setStatus("Aucune note à exporter", "error");
+    return;
+  }
+
+  const payload = JSON.stringify(
+    { version: 1, exportDate: new Date().toISOString(), notes },
+    null,
+    2,
+  );
+  downloadFile(
+    payload,
+    `notes_sauvegarde_${new Date().toISOString().split("T")[0]}.json`,
+    "application/json",
+  );
+  setStatus("Sauvegarde téléchargée");
+}
+
+function importNotesJSON(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const incoming = Array.isArray(parsed) ? parsed : parsed?.notes;
+      if (!Array.isArray(incoming) || incoming.length === 0) {
+        setStatus("Fichier invalide", "error");
+        return;
+      }
+      const valid = incoming
+        .filter((n) => n && typeof n.content === "string")
+        .map((n) => ({
+          id:
+            typeof n.id === "string"
+              ? n.id
+              : Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+          title: typeof n.title === "string" ? n.title.substring(0, 120) : "",
+          content: n.content.substring(0, 100000),
+          createdAt: Number.isFinite(n.createdAt) ? n.createdAt : Date.now(),
+          updatedAt: Number.isFinite(n.updatedAt) ? n.updatedAt : Date.now(),
+        }));
+      if (valid.length === 0) {
+        setStatus("Aucune note valide dans le fichier", "error");
+        return;
+      }
+      if (!confirm(`Restaurer ${valid.length} note(s) et remplacer celles actuelles ?`)) return;
+
+      notes = valid;
+      persist();
+      currentId = [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+      searchQuery = "";
+      notesSearch.value = "";
+      renderNotesList();
+      renderEditor();
+      setStatus(`${valid.length} note(s) restaurée(s)`);
+    } catch (error) {
+      console.warn("Import impossible:", error);
+      setStatus("Fichier JSON invalide", "error");
+    }
+  };
+  reader.readAsText(file);
 }
 
 function toggleFullscreen() {
@@ -377,10 +474,62 @@ markdownInput.addEventListener("input", () => {
 
 titleInput.addEventListener("input", scheduleSave);
 
+function toggleExportMenu(force) {
+  const visible = typeof force === "boolean" ? force : exportMenu.hidden;
+  exportMenu.hidden = !visible;
+  exportMenuBtn.setAttribute("aria-expanded", String(visible));
+}
+
+exportMenuBtn.addEventListener("click", () => toggleExportMenu());
+
+document.addEventListener("click", (e) => {
+  if (!exportMenu.hidden && !e.target.closest(".toolbar-group")) {
+    toggleExportMenu(false);
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !exportMenu.hidden) {
+    toggleExportMenu(false);
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+    e.preventDefault();
+    clearTimeout(debounceTimer);
+    saveCurrent();
+  }
+});
+
+$("export-md-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  exportNote();
+});
+$("export-all-md-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  exportAllMarkdown();
+});
+$("export-json-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  exportNotesJSON();
+});
+$("import-json-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  importNotesInput.click();
+});
+importNotesInput.addEventListener("change", () => {
+  const file = importNotesInput.files?.[0];
+  importNotesInput.value = "";
+  if (file) importNotesJSON(file);
+});
+
+notesSearch.addEventListener("input", () => {
+  searchQuery = notesSearch.value;
+  renderNotesList();
+});
+
 $("new-note").addEventListener("click", createNote);
 $("delete-btn").addEventListener("click", deleteCurrent);
 $("copy-btn").addEventListener("click", copyMarkdown);
-$("export-btn").addEventListener("click", exportNote);
 $("fullscreen-btn").addEventListener("click", toggleFullscreen);
 
 $("toggle-preview").addEventListener("click", () => {
