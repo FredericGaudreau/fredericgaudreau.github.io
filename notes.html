@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Éditeur de notes en Markdown avec rendu en direct." />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com;"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Notes - Frédéric Gaudreau" />
+    <meta property="og:description" content="Éditeur de notes en Markdown avec rendu en direct." />
+    <meta property="og:url" content="https://fredericgaudreau.github.io/notes.html" />
+    <link rel="canonical" href="https://fredericgaudreau.github.io/notes.html" />
+    <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
+    <link rel="icon" type="image/png" href="/src/images/favicon.png" />
+    <link rel="stylesheet" href="/src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/notes.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>Notes - Frédéric Gaudreau</title>
+  </head>
+  <body data-page="notes">
+    <div id="header"></div>
+    <main class="notes-main">
+      <div id="notes-app">
+        <aside id="notes-sidebar" aria-label="Liste des notes">
+          <div class="sidebar-header">
+            <h2>Notes</h2>
+            <button
+              type="button"
+              id="new-note"
+              class="tool-btn"
+              aria-label="Nouvelle note"
+              title="Nouvelle note"
+            >
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+          <ul id="notes-list"></ul>
+        </aside>
+        <section id="notes-editor">
+          <div class="editor-toolbar">
+            <input
+              type="text"
+              id="note-title"
+              placeholder="Titre de la note"
+              autocomplete="off"
+              aria-label="Titre de la note"
+            />
+            <div class="toolbar-actions">
+              <button
+                type="button"
+                id="toggle-sidebar"
+                class="tool-btn"
+                aria-label="Afficher les notes"
+                aria-expanded="false"
+              >
+                <i class="fas fa-list" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="toggle-preview"
+                class="tool-btn"
+                aria-label="Basculer aperçu"
+                aria-pressed="true"
+                title="Basculer l'aperçu"
+              >
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="fullscreen-btn"
+                class="tool-btn"
+                aria-label="Plein écran"
+                title="Plein écran"
+              >
+                <i class="fas fa-expand" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="copy-btn"
+                class="tool-btn"
+                aria-label="Copier le Markdown"
+                title="Copier le Markdown"
+              >
+                <i class="fas fa-copy" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="export-btn"
+                class="tool-btn"
+                aria-label="Télécharger en .md"
+                title="Télécharger en .md"
+              >
+                <i class="fas fa-download" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="delete-btn"
+                class="tool-btn danger"
+                aria-label="Supprimer la note"
+                title="Supprimer la note"
+              >
+                <i class="fas fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <div id="editor-panes">
+            <label for="markdown-input" class="visually-hidden">Contenu Markdown</label>
+            <textarea
+              id="markdown-input"
+              placeholder="# Ma note&#10;&#10;Écrivez votre Markdown ici..."
+              spellcheck="true"
+            ></textarea>
+            <div id="markdown-preview" class="markdown-body" aria-label="Aperçu du rendu"></div>
+          </div>
+          <div class="statusbar">
+            <span id="char-count">0 caractère</span>
+            <span id="word-count">0 mot</span>
+            <span id="save-status" aria-live="polite"></span>
+          </div>
+        </section>
+      </div>
+    </main>
+    <div id="footer"></div>
+    <script src="/src/js/index.js" defer></script>
+    <script src="/src/js/notes.js" defer></script>
+  </body>
+</html>
