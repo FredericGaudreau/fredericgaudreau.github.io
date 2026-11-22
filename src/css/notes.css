@@ -228,6 +228,20 @@
   display: none;
 }
 
+.format-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.format-bar .tool-btn {
+  width: 30px;
+  height: 28px;
+  font-size: 0.8rem;
+}
+
 #editor-panes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -363,6 +377,14 @@
 .task.done {
   color: #64748b;
   text-decoration: line-through;
+}
+
+.markdown-body .task {
+  cursor: pointer;
+}
+
+.markdown-body .task:hover .checkbox {
+  border-color: #2563eb;
 }
 
 .statusbar {

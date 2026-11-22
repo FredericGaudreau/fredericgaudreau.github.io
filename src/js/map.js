@@ -1,5 +1,27 @@
 "use strict";
 
+if (typeof L === "undefined") {
+  const banner = document.createElement("div");
+  banner.className = "map-load-error";
+  banner.setAttribute("role", "alert");
+  banner.textContent =
+    "Impossible de charger la bibliothèque de carte (Leaflet). Vérifiez votre connexion et rechargez la page.";
+  document.body.appendChild(banner);
+  throw new Error("Leaflet indisponible");
+}
+
+function formatCoordValue(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num.toFixed(5) : "0";
+}
+
+function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return Promise.reject(new Error("Presse-papiers indisponible"));
+}
+
 const CONFIG = {
   defaultCenter: [45.8924, -74.1546],
   defaultZoom: 13,
@@ -46,11 +68,14 @@ class PersistentCache {
     const data = { key, value, timestamp: Date.now() };
 
     if (this.db) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = this.db.transaction(["cache"], "readwrite");
         const store = tx.objectStore("cache");
         const request = store.put(data);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+          console.warn("Échec d'écriture du cache (IndexedDB)");
+          resolve();
+        };
         request.onsuccess = () => resolve();
       });
     } else {
@@ -101,11 +126,11 @@ class PersistentCache {
   async clear() {
     await this.ready;
     if (this.db) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = this.db.transaction(["cache"], "readwrite");
         const store = tx.objectStore("cache");
         const request = store.clear();
-        request.onerror = () => reject(request.error);
+        request.onerror = () => resolve();
         request.onsuccess = () => resolve();
       });
     } else {
@@ -879,11 +904,11 @@ function formatPopupContent(
   airData = null,
 ) {
   const title = escapeHtml(point.name);
-  const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
+  const coords = `${formatCoordValue(point.lat)}, ${formatCoordValue(point.lng)}`;
   const note = point.note && point.note.trim() ? renderMarkdown(point.note.trim()) : null;
+  const noteEditUrl = `/notes.html#point=${formatCoordValue(point.lat)},${formatCoordValue(point.lng)}`;
   const noteHtml = note
-    ? `<div class="popup-note"><i class="fas fa-sticky-note"></i> <strong>Notes</strong>${note}
-  <a class="popup-edit-note" href="/notes.html#point=${point.lat.toFixed(5)},${point.lng.toFixed(5)}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a></div>`
+    ? `<div class="popup-note"><div class="popup-note-header"><i class="fas fa-sticky-note" aria-hidden="true"></i> <strong>Notes</strong><a class="popup-edit-note" href="${noteEditUrl}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a></div><div class="popup-note-content">${note}</div></div>`
     : "";
 
   const collection = point.collectionId
@@ -1325,8 +1350,7 @@ function attachPointEvents() {
     const lat = parseFloat(coordsBtn.dataset.lat);
     const lng = parseFloat(coordsBtn.dataset.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-    navigator.clipboard
-      .writeText(`${lat.toFixed(5)}, ${lng.toFixed(5)}`)
+    copyTextToClipboard(`${lat.toFixed(5)}, ${lng.toFixed(5)}`)
       .then(() => showToast("Coordonnées copiées", "success"))
       .catch(() => showToast("Copie impossible", "error"));
   });
@@ -2327,7 +2351,7 @@ async function sharePoint(point) {
       await navigator.share({ title: point.name, url });
       return;
     }
-    await navigator.clipboard.writeText(url);
+    await copyTextToClipboard(url);
     showToast("Lien copié dans le presse-papiers", "success");
   } catch (error) {
     if (error?.name !== "AbortError") {

@@ -15,6 +15,7 @@ const readTime = $("read-time");
 const noteDates = $("note-dates");
 const notesStats = $("notes-stats");
 const notesSearch = $("notes-search");
+const formatBar = $("format-bar");
 const exportMenuBtn = $("export-menu-btn");
 const exportMenu = $("export-menu");
 const importNotesInput = $("import-notes-input");
@@ -442,6 +443,59 @@ function importNotesJSON(file) {
   reader.readAsText(file);
 }
 
+function applyFormat(type) {
+  const start = markdownInput.selectionStart;
+  const end = markdownInput.selectionEnd;
+  const value = markdownInput.value;
+  const selected = value.slice(start, end);
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+
+  let replacement = selected || "texte";
+  let replaceFrom = start;
+  let cursorFrom = start;
+  let cursorTo = start + replacement.length;
+
+  const blocks = { titre: "## ", liste: "- ", citation: "> " };
+  if (blocks[type]) {
+    replaceFrom = lineStart;
+    replacement = blocks[type] + value.slice(lineStart, end);
+    cursorFrom = lineStart + blocks[type].length;
+    cursorTo = start + blocks[type].length;
+  } else if (type === "gras") {
+    replacement = `**${selected || "gras"}**`;
+    cursorFrom = start + 2;
+    cursorTo = cursorFrom + (selected || "gras").length;
+  } else if (type === "italique") {
+    replacement = `*${selected || "italique"}*`;
+    cursorFrom = start + 1;
+    cursorTo = cursorFrom + (selected || "italique").length;
+  } else if (type === "code") {
+    replacement = `\`${selected || "code"}\``;
+    cursorFrom = start + 1;
+    cursorTo = cursorFrom + (selected || "code").length;
+  } else if (type === "lien") {
+    replacement = `[${selected || "texte du lien"}](https://)`;
+    cursorFrom = start + 1;
+    cursorTo = start + 1 + (selected || "texte du lien").length;
+  }
+
+  markdownInput.setRangeText(replacement, replaceFrom, end, "end");
+  markdownInput.setSelectionRange(cursorFrom, cursorTo);
+  markdownInput.focus();
+  renderPreview();
+  scheduleSave();
+}
+
+defineFormatBar();
+
+function defineFormatBar() {
+  formatBar.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-format]");
+    if (!btn) return;
+    applyFormat(btn.dataset.format);
+  });
+}
+
 function toggleFullscreen() {
   const icon = $("fullscreen-btn").querySelector("i");
   if (!document.fullscreenElement) {
@@ -472,6 +526,30 @@ markdownInput.addEventListener("input", () => {
   updateCounts();
 });
 
+previewEl.addEventListener("click", (e) => {
+  const taskItem = e.target.closest(".task");
+  if (!taskItem || linkedPoint) return;
+
+  const tasks = [...previewEl.querySelectorAll(".task")];
+  const index = tasks.indexOf(taskItem);
+  if (index === -1) return;
+
+  let seen = -1;
+  markdownInput.value = markdownInput.value.replace(
+    /^(\s*[-*]\s+)\[([ xX])\]\s+/gm,
+    (match, prefix, box) => {
+      seen += 1;
+      if (seen !== index) return match;
+      const done = box.trim().toLowerCase() === "x";
+      return `${prefix}[${done ? " " : "x"}] `;
+    },
+  );
+
+  renderPreview();
+  updateCounts();
+  scheduleSave();
+});
+
 titleInput.addEventListener("input", scheduleSave);
 
 function toggleExportMenu(force) {
@@ -492,6 +570,19 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !exportMenu.hidden) {
     toggleExportMenu(false);
     return;
+  }
+  if (document.activeElement === markdownInput && (e.ctrlKey || e.metaKey)) {
+    const key = e.key.toLowerCase();
+    if (key === "b") {
+      e.preventDefault();
+      applyFormat("gras");
+      return;
+    }
+    if (key === "i") {
+      e.preventDefault();
+      applyFormat("italique");
+      return;
+    }
   }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
     e.preventDefault();

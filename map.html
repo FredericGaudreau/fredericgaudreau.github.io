@@ -505,6 +505,25 @@
         text-align: center;
       }
 
+      .map-load-error {
+        position: fixed;
+        inset: 1rem;
+        z-index: 3000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1.5rem;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--error);
+        background: #fff;
+        border: 2px solid var(--error);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
       .leaflet-popup-content-wrapper {
         border-radius: 14px;
         border: 2px solid var(--border);
@@ -660,29 +679,134 @@
 
       .popup-note {
         margin-top: 0.5rem;
-        padding-top: 0.5rem;
+        padding: 0.5rem 0.6rem 0.25rem;
         border-top: 1px solid var(--border);
         font-size: 0.85rem;
       }
 
-      .popup-note p {
-        margin: 0.25rem 0;
+      .popup-note-header {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.3rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
       }
 
-      .popup-note ul,
-      .popup-note ol {
+      .popup-note-header i {
+        color: var(--primary);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .popup-edit-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-left: auto;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .popup-note-content {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        word-break: break-word;
+      }
+
+      .popup-note-content > :first-child {
+        margin-top: 0;
+      }
+
+      .popup-note-content > :last-child {
+        margin-bottom: 0.25rem;
+      }
+
+      .popup-note-content p {
+        margin: 0.3rem 0;
+      }
+
+      .popup-note-content h1,
+      .popup-note-content h2,
+      .popup-note-content h3,
+      .popup-note-content h4,
+      .popup-note-content h5,
+      .popup-note-content h6 {
+        margin: 0.5rem 0 0.2rem;
+        line-height: 1.25;
+        font-size: 0.85rem;
+      }
+
+      .popup-note-content h1 {
+        font-size: 0.95rem;
+      }
+
+      .popup-note-content h2 {
+        font-size: 0.9rem;
+      }
+
+      .popup-note-content ul,
+      .popup-note-content ol {
         margin: 0.25rem 0;
         padding-left: 1.25rem;
       }
 
-      .popup-note blockquote {
+      .popup-note-content li {
+        margin-bottom: 0.15rem;
+      }
+
+      .popup-note-content .task-list {
+        list-style: none;
+        padding-left: 0.4rem;
+      }
+
+      .popup-note-content .task .checkbox {
+        display: inline-block;
+        width: 0.75rem;
+        height: 0.75rem;
+        margin-right: 0.4rem;
+        border: 2px solid #94a3b8;
+        border-radius: 4px;
+        vertical-align: middle;
+      }
+
+      .popup-note-content .task.done {
+        color: #64748b;
+        text-decoration: line-through;
+      }
+
+      .popup-note-content .task.done .checkbox {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+
+      .popup-note-content a {
+        color: var(--primary);
+      }
+
+      .popup-note-content img {
+        max-width: 100%;
+        border-radius: 6px;
+      }
+
+      .popup-note-content hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 0.4rem 0;
+      }
+
+      .popup-note-content blockquote {
         margin: 0.35rem 0;
         padding: 0.15rem 0.6rem;
         border-left: 3px solid var(--primary);
         color: var(--text-secondary);
       }
 
-      .popup-note pre {
+      .popup-note-content pre {
         margin: 0.35rem 0;
         padding: 0.5rem 0.6rem;
         background: #0f172a;
@@ -692,21 +816,12 @@
         font-size: 0.75rem;
       }
 
-      .popup-note code {
+      .popup-note-content code {
         background: rgba(15, 23, 42, 0.08);
         border-radius: 4px;
         padding: 0.05rem 0.3rem;
         font-size: 0.8em;
-      }
-
-      .popup-edit-note {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        margin-top: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--primary);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       }
 
       .popup-share-btn {
@@ -1532,6 +1647,11 @@
   </head>
   <body>
     <div id="map"></div>
+    <noscript>
+      <p class="error-msg" style="margin: 1rem">
+        La carte nécessite JavaScript. Activez-le pour utiliser cet outil.
+      </p>
+    </noscript>
 
     <button
       id="toggle-nominatim"
