@@ -278,19 +278,6 @@ const routingCalculate = $("routing-calculate");
 const routingClose = $("routing-close");
 let pointEventsAttached = false;
 
-const escapeHtml = (str) =>
-  str.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
-
 const debounce = (fn, delay) => {
   let timeout;
   return (...args) => {
