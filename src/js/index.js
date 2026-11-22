@@ -1,4 +1,3 @@
-// Load header and footer dynamically
 async function includeHTML(id, file) {
   const element = document.getElementById(id);
   if (!element) {
@@ -18,8 +17,26 @@ async function includeHTML(id, file) {
   }
 }
 
-// Initialize components on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  includeHTML('header', 'src/components/header.html');
-  includeHTML('footer', 'src/components/footer.html');
+function markCurrentLink(id, path) {
+  const link = document.getElementById(id);
+  if (link) {
+    link.setAttribute("aria-current", "page");
+    link.setAttribute("href", path);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await Promise.all([
+    includeHTML("header", "src/components/header.html"),
+    includeHTML("footer", "src/components/footer.html"),
+  ]);
+
+  const page = document.body.dataset.page;
+  if (page === "home") {
+    markCurrentLink("home-link", "/");
+  } else if (page === "map") {
+    markCurrentLink("map-link", "/map.html");
+  } else if (page === "about") {
+    markCurrentLink("about-link", "/apropos.html");
+  }
 });
