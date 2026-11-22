@@ -1,6 +1,6 @@
 "use strict";
 
-const SW_CACHE_NAME = "site-cache-v3";
+const SW_CACHE_NAME = "site-cache-v4";
 const SW_PRECACHE_URLS = [
   "/",
   "/index.html",
@@ -26,7 +26,11 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(SW_CACHE_NAME)
-      .then((cache) => cache.addAll(SW_PRECACHE_URLS))
+      .then((cache) =>
+        Promise.allSettled(
+          SW_PRECACHE_URLS.map((url) => cache.add(new Request(url, { cache: "reload" }))),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
@@ -49,6 +53,21 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === "basic") {
+            const clone = response.clone();
+            caches.open(SW_CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match("/404.html"))),
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then((cached) => {

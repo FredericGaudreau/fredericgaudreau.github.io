@@ -49,6 +49,7 @@ Object.defineProperty(globalThis, "navigator", { value: {}, configurable: true }
 globalThis.confirm = () => false;
 globalThis.window = {
   innerWidth: 1200,
+  addEventListener() {},
   location: {
     href: "http://127.0.0.1:8000/notes.html#point=45.89240,-74.15460",
     hash: "#point=45.89240,-74.15460",

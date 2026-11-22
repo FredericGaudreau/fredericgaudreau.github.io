@@ -837,7 +837,6 @@ function renderGeoInfo(geoData, elevationData) {
   }
 
   const addr = geoData.address;
-  console.log("Données géographiques:", geoData);
   const elevation = elevationData?.results?.[0]?.elevation;
 
   const parts = [
@@ -2143,6 +2142,28 @@ importModal.addEventListener("click", (e) => {
 });
 
 $("export-notes-btn").addEventListener("click", exportNotesMarkdown);
+
+window.addEventListener("storage", (e) => {
+  if (e.key !== CONFIG.storageKey && e.key !== CONFIG.collectionsKey && e.key !== null) {
+    return;
+  }
+
+  if (e.key === null || e.key === CONFIG.storageKey) {
+    points.forEach((p) => p.marker?.remove?.());
+    points.length = 0;
+    loadPoints();
+  }
+
+  if (e.key === null || e.key === CONFIG.collectionsKey) {
+    collections = [];
+    loadCollections();
+  }
+
+  updatePointsList();
+  updateCollectionSelect();
+  updateCollectionsUI();
+  updateRoutingSelects();
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => map.invalidateSize(), 100);

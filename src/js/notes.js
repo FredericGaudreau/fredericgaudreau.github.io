@@ -103,6 +103,19 @@ function saveLinkedPointNote(content) {
   }
 }
 
+function exitLinkedMode() {
+  linkedPoint = null;
+  document.body.classList.remove("linked-mode");
+  $("linked-banner").hidden = true;
+  titleInput.readOnly = false;
+  $("new-note").disabled = false;
+  $("delete-btn").disabled = false;
+  loadNotes();
+  currentId = notes.length > 0 ? [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null;
+  renderNotesList();
+  renderEditor();
+}
+
 function enterLinkedMode(point) {
   linkedPoint = point;
   document.body.classList.add("linked-mode");
@@ -114,6 +127,7 @@ function enterLinkedMode(point) {
   $("delete-btn").disabled = true;
   markdownInput.value = point.note || "";
   currentId = null;
+  renderNotesList();
   renderPreview();
   updateCounts();
 }
@@ -335,6 +349,37 @@ $("toggle-preview").addEventListener("click", () => {
 $("toggle-sidebar").addEventListener("click", () => {
   const visible = document.body.classList.toggle("show-sidebar");
   $("toggle-sidebar").setAttribute("aria-expanded", String(visible));
+});
+
+window.addEventListener("storage", (e) => {
+  if (linkedPoint) {
+    if (e.key === MAP_POINTS_KEY) {
+      const stillThere = loadMapPoints().find(
+        (p) =>
+          Number.isFinite(p.lat) &&
+          Number.isFinite(p.lng) &&
+          p.lat.toFixed(5) === linkedPoint.lat.toFixed(5) &&
+          p.lng.toFixed(5) === linkedPoint.lng.toFixed(5),
+      );
+      if (!stillThere) {
+        linkedPoint.note = "";
+        setStatus("Le point a été supprimé", "error");
+        exitLinkedMode();
+      }
+    }
+    return;
+  }
+
+  if (e.key === NOTES_KEY || e.key === null) {
+    saveCurrent();
+    loadNotes();
+    if (!notes.some((n) => n.id === currentId)) {
+      currentId =
+        notes.length > 0 ? [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null;
+    }
+    renderNotesList();
+    renderEditor();
+  }
 });
 
 loadNotes();
