@@ -891,9 +891,10 @@ function formatPopupContent(
 ) {
   const title = `📍 ${escapeHtml(point.name)}`;
   const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
-  const note = point.note ? escapeHtml(point.note).replace(/\n/g, "<br>") : null;
+  const note = point.note && point.note.trim() ? renderMarkdown(point.note.trim()) : null;
   const noteHtml = note
-    ? `<div class="info-item"><i class="fas fa-sticky-note"></i><strong>Notes</strong><br> <span style="white-space: pre-wrap;">${note}</span></div>`
+    ? `<div class="popup-note"><i class="fas fa-sticky-note"></i> <strong>Notes</strong>${note}</div>
+  <a class="popup-edit-note" href="/notes.html#point=${point.lat.toFixed(5)},${point.lng.toFixed(5)}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a>`
     : "";
 
   const weather = weatherData?.current_weather
@@ -1433,6 +1434,54 @@ function exportAsJSON(pointsToExport) {
     ? `${pointsToExport.length} point(s) de la collection exporté(s) en JSON`
     : `${pointsToExport.length} point(s) exporté(s) en JSON`;
   showToast(message, "success");
+}
+
+function exportNotesMarkdown() {
+  const filtered = currentCollectionFilter
+    ? points.filter((p) => p.collectionId === currentCollectionFilter)
+    : points;
+  const withNotes = filtered.filter((p) => (p.note || "").trim());
+
+  if (withNotes.length === 0) {
+    showToast("Aucune note à exporter", "error");
+    return;
+  }
+
+  const collectionName = currentCollectionFilter
+    ? collections.find((c) => c.id === currentCollectionFilter)?.name
+    : null;
+  const header = `# Notes${collectionName ? ` — ${collectionName}` : ""}\n\n${withNotes.length} note(s) — exportées le ${new Date().toLocaleDateString("fr-CA")}\n\n`;
+  const body = withNotes
+    .map((p) => {
+      const coll = p.collectionId
+        ? collections.find((c) => c.id === p.collectionId)?.name || ""
+        : "";
+      const meta = `## ${p.name}${coll ? ` · ${coll}` : ""}\n\n${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}\n`;
+      return `${meta}\n${p.note.trim()}\n\n---\n`;
+    })
+    .join("\n");
+
+  const dataBlob = new Blob([header + body], { type: "text/markdown" });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `notes_${collectionName ? slug(collectionName) : "carte"}_${new Date().toISOString().split("T")[0]}.md`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast(`${withNotes.length} note(s) exportée(s) en Markdown`, "success");
+}
+
+function slug(value) {
+  return (
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "carte"
+  );
 }
 
 function exportAsCSV(pointsToExport) {
@@ -2105,6 +2154,8 @@ importModal.addEventListener("click", (e) => {
     closeModal(importModal);
   }
 });
+
+$("export-notes-btn").addEventListener("click", exportNotesMarkdown);
 
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => map.invalidateSize(), 100);

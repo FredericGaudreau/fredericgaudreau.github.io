@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Unit tests
+        run: npm run test
+
       - name: Syntax check
         run: npm run check:syntax
 

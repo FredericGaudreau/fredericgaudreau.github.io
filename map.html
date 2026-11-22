@@ -559,6 +559,57 @@
         color: var(--error);
       }
 
+      .popup-note {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+
+      .popup-note p {
+        margin: 0.25rem 0;
+      }
+
+      .popup-note ul,
+      .popup-note ol {
+        margin: 0.25rem 0;
+        padding-left: 1.25rem;
+      }
+
+      .popup-note blockquote {
+        margin: 0.35rem 0;
+        padding: 0.15rem 0.6rem;
+        border-left: 3px solid var(--primary);
+        color: var(--text-secondary);
+      }
+
+      .popup-note pre {
+        margin: 0.35rem 0;
+        padding: 0.5rem 0.6rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.75rem;
+      }
+
+      .popup-note code {
+        background: rgba(15, 23, 42, 0.08);
+        border-radius: 4px;
+        padding: 0.05rem 0.3rem;
+        font-size: 0.8em;
+      }
+
+      .popup-edit-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
       .popup-share-btn {
         background: none;
         border: none;
@@ -1589,6 +1640,14 @@
           >
             <i class="fas fa-upload"></i>
           </button>
+          <button
+            id="export-notes-btn"
+            class="points-action-btn"
+            title="Exporter les notes en Markdown"
+            aria-label="Exporter les notes en Markdown"
+          >
+            <i class="fas fa-file-lines"></i>
+          </button>
           <button id="close-points" aria-label="Fermer">×</button>
         </div>
       </h3>
@@ -1663,6 +1722,7 @@
       crossorigin=""
     ></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="src/js/markdown.js" defer></script>
     <script src="src/js/map.js" defer></script>
   </body>
 </html>

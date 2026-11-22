@@ -1,6 +1,6 @@
 "use strict";
 
-const SW_CACHE_NAME = "site-cache-v2";
+const SW_CACHE_NAME = "site-cache-v3";
 const SW_PRECACHE_URLS = [
   "/",
   "/index.html",
@@ -13,6 +13,7 @@ const SW_PRECACHE_URLS = [
   "/src/css/style.css",
   "/src/css/notes.css",
   "/src/js/index.js",
+  "/src/js/markdown.js",
   "/src/js/map.js",
   "/src/js/notes.js",
   "/src/components/header.html",

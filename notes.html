@@ -45,6 +45,13 @@
           <ul id="notes-list"></ul>
         </aside>
         <section id="notes-editor">
+          <div id="linked-banner" hidden>
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            <span
+              >Note du point « <strong id="linked-point-name"></strong> » —
+              <a href="/map.html">retour à la carte</a></span
+            >
+          </div>
           <div class="editor-toolbar">
             <input
               type="text"
@@ -130,6 +137,7 @@
     </main>
     <div id="footer"></div>
     <script src="/src/js/index.js" defer></script>
+    <script src="/src/js/markdown.js" defer></script>
     <script src="/src/js/notes.js" defer></script>
   </body>
 </html>

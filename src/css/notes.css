@@ -309,6 +309,34 @@
   color: #ef4444;
 }
 
+#linked-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(37, 99, 235, 0.08);
+  color: #1e40af;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#linked-banner a {
+  color: #2563eb;
+}
+
+body.linked-mode #notes-sidebar {
+  display: none;
+}
+
+body.linked-mode #notes-app {
+  grid-template-columns: 1fr;
+}
+
+.tool-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

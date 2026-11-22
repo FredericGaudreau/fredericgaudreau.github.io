@@ -1,6 +1,7 @@
 "use strict";
 
 const NOTES_KEY = "markdownNotes";
+const MAP_POINTS_KEY = "mapPoints";
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,187 +13,10 @@ const charCount = $("char-count");
 const wordCount = $("word-count");
 const saveStatus = $("save-status");
 let notes = [];
+let linkedPoint = null;
 let currentId = null;
 let debounceTimer = null;
 let statusTimer = null;
-
-function escapeHtml(str) {
-  return str.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
-}
-
-function escapeAttr(str) {
-  return escapeHtml(str);
-}
-
-function sanitizeUrl(url) {
-  const trimmed = url.trim();
-  if (/^(https?:|mailto:)/i.test(trimmed)) {
-    return trimmed;
-  }
-  if (trimmed.startsWith("/") || trimmed.startsWith("#")) {
-    return trimmed;
-  }
-  return null;
-}
-
-function renderInline(text) {
-  const codeSpans = [];
-  let result = text.replace(/`([^`]+)`/g, (m, code) => {
-    codeSpans.push(`<code>${escapeHtml(code)}</code>`);
-    return `\u0000C${codeSpans.length - 1}\u0000`;
-  });
-
-  result = escapeHtml(result);
-
-  result = result.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, url) => {
-    const safe = sanitizeUrl(url);
-    return safe ? `<img src="${escapeAttr(safe)}" alt="${escapeAttr(alt)}" loading="lazy" />` : m;
-  });
-
-  result = result.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
-    const safe = sanitizeUrl(url);
-    return safe
-      ? `<a href="${escapeAttr(safe)}" rel="noopener noreferrer">${label}</a>`
-      : `${label} (${escapeAttr(url)})`;
-  });
-
-  result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  result = result.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-  result = result.replace(/~~([^~]+)~~/g, "<del>$1</del>");
-
-  result = result.replace(/\u0000C(\d+)\u0000/g, (m, i) => codeSpans[i]);
-
-  return result;
-}
-
-function renderMarkdown(src) {
-  const lines = (src || "").split(/\r?\n/);
-  const out = [];
-  let i = 0;
-
-  const isListStart = (line) => /^\s*[-*]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line);
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    if (/^\s*```/.test(line)) {
-      const lang = line.trim().slice(3).trim();
-      const buf = [];
-      i += 1;
-      while (i < lines.length && !/^\s*```/.test(lines[i])) {
-        buf.push(lines[i]);
-        i += 1;
-      }
-      i += 1;
-      const code = escapeHtml(buf.join("\n"));
-      out.push(
-        lang
-          ? `<pre><code class="language-${escapeAttr(lang)}">${code}</code></pre>`
-          : `<pre><code>${code}</code></pre>`,
-      );
-      continue;
-    }
-
-    if (/^\s*$/.test(line)) {
-      i += 1;
-      continue;
-    }
-
-    const heading = line.match(/^(#{1,6})\s+(.*)/);
-    if (heading) {
-      const level = heading[1].length;
-      out.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
-      i += 1;
-      continue;
-    }
-
-    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
-      out.push("<hr />");
-      i += 1;
-      continue;
-    }
-
-    if (/^\s*>\s?/.test(line)) {
-      const buf = [];
-      while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
-        buf.push(lines[i].replace(/^\s*>\s?/, ""));
-        i += 1;
-      }
-      out.push(`<blockquote>${renderMarkdown(buf.join("\n"))}</blockquote>`);
-      continue;
-    }
-
-    if (/^\s*[-*]\s+\[( |x)\]\s+/i.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\s*[-*]\s+\[( |x)\]\s+/i.test(lines[i])) {
-        items.push({ text: lines[i], done: /\[x\]/i.test(lines[i]) });
-        i += 1;
-      }
-      out.push(
-        `<ul class="task-list">${items
-          .map((item) => {
-            const text = item.text.replace(/^\s*[-*]\s+\[( |x)\]\s+/i, "");
-            return `<li class="task${item.done ? " done" : ""}">${renderCheckbox(item.done)}${renderInline(text)}</li>`;
-          })
-          .join("")}</ul>`,
-      );
-      continue;
-    }
-
-    if (/^\s*[-*]\s+/.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
-        items.push(renderInline(lines[i].replace(/^\s*[-*]\s+/, "")));
-        i += 1;
-      }
-      out.push(`<ul>${items.map((it) => `<li>${it}</li>`).join("")}</ul>`);
-      continue;
-    }
-
-    if (/^\s*\d+[.)]\s+/.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) {
-        items.push(renderInline(lines[i].replace(/^\s*\d+[.)]\s+/, "")));
-        i += 1;
-      }
-      out.push(`<ol>${items.map((it) => `<li>${it}</li>`).join("")}</ol>`);
-      continue;
-    }
-
-    const para = [];
-    while (i < lines.length && !/^\s*$/.test(lines[i]) && !isBlockStart(lines[i])) {
-      para.push(renderInline(lines[i]));
-      i += 1;
-    }
-    out.push(`<p>${para.join("<br />")}</p>`);
-  }
-
-  return out.join("\n");
-
-  function renderCheckbox(done) {
-    return `<span class="checkbox" role="img" aria-label="${done ? "fait" : "à faire"}"></span>`;
-  }
-
-  function isBlockStart(line) {
-    return (
-      /^\s*```/.test(line) ||
-      /^(#{1,6})\s+/.test(line) ||
-      /^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line) ||
-      /^\s*>\s?/.test(line) ||
-      isListStart(line)
-    );
-  }
-}
 
 function slugify(str) {
   return (
@@ -230,6 +54,77 @@ function persist() {
     console.warn("Impossible de sauvegarder les notes:", error);
     setStatus("Échec de sauvegarde", "error");
   }
+}
+
+function readLinkedPointHash() {
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const [lat, lng] = (params.get("point") || "").split(",").map(parseFloat);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
+}
+
+function loadMapPoints() {
+  try {
+    const saved = localStorage.getItem(MAP_POINTS_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn("Impossible de charger les points:", error);
+    return [];
+  }
+}
+
+function findMapPoint(lat, lng) {
+  return loadMapPoints().find(
+    (p) =>
+      Number.isFinite(p.lat) &&
+      Number.isFinite(p.lng) &&
+      p.lat.toFixed(5) === lat.toFixed(5) &&
+      p.lng.toFixed(5) === lng.toFixed(5),
+  );
+}
+
+function saveLinkedPointNote(content) {
+  try {
+    const all = loadMapPoints();
+    const pt = all.find(
+      (p) =>
+        p.lat.toFixed(5) === linkedPoint.lat.toFixed(5) &&
+        p.lng.toFixed(5) === linkedPoint.lng.toFixed(5),
+    );
+    if (!pt) return false;
+    pt.note = content.substring(0, 1000);
+    localStorage.setItem(MAP_POINTS_KEY, JSON.stringify(all));
+    return true;
+  } catch (error) {
+    console.warn("Impossible de sauvegarder le point:", error);
+    return false;
+  }
+}
+
+function enterLinkedMode(point) {
+  linkedPoint = point;
+  document.body.classList.add("linked-mode");
+  $("linked-point-name").textContent = point.name || "Sans nom";
+  $("linked-banner").hidden = false;
+  titleInput.value = point.name || "";
+  titleInput.readOnly = true;
+  $("new-note").disabled = true;
+  $("delete-btn").disabled = true;
+  markdownInput.value = point.note || "";
+  currentId = null;
+  renderPreview();
+  updateCounts();
+}
+
+function initLinkedMode() {
+  const target = readLinkedPointHash();
+  if (!target) return false;
+  const pt = findMapPoint(target.lat, target.lng);
+  if (!pt) return false;
+  enterLinkedMode(pt);
+  return true;
 }
 
 function currentNote() {
@@ -323,6 +218,14 @@ function createNote() {
 }
 
 function saveCurrent() {
+  if (linkedPoint) {
+    if (markdownInput.value !== (linkedPoint.note || "")) {
+      linkedPoint.note = markdownInput.value.substring(0, 1000);
+      const ok = saveLinkedPointNote(linkedPoint.note);
+      setStatus(ok ? "Enregistré sur la carte" : "Échec de sauvegarde", ok ? "ok" : "error");
+    }
+    return;
+  }
   const note = currentNote();
   if (!note) return;
   let changed = false;
@@ -435,4 +338,6 @@ $("toggle-sidebar").addEventListener("click", () => {
 });
 
 loadNotes();
-selectNote(notes.length > 0 ? [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null);
+if (!initLinkedMode()) {
+  selectNote(notes.length > 0 ? [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null);
+}
