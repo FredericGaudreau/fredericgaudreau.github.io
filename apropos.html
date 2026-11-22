@@ -37,6 +37,37 @@
         <p>
           Je m'intéresse aux relations entre la technologie, l'être humain et son environnement.
         </p>
+
+        <h2>Les outils</h2>
+        <p>
+          <a href="/map.html"><strong>Carte interactive</strong></a> — créez et organisez des points
+          d'intérêt en collections, annotez-les avec des notes en Markdown, consultez la météo,
+          l'altitude et la qualité de l'air, calculez des itinéraires et partagez un point par un
+          simple lien.
+        </p>
+        <p>
+          <a href="/notes.html"><strong>Notes Markdown</strong></a> — un éditeur avec rendu en
+          direct, des statistiques de lecture et un export en fichier .md. Chaque note peut être
+          reliée à un point de la carte directement depuis son popup.
+        </p>
+        <p>
+          Le rendu Markdown est assuré par un
+          <a
+            href="https://github.com/FredericGaudreau/fredericgaudreau.github.io/blob/master/src/js/markdown.js"
+            >petit parseur maison</a
+          >, écrit sans dépendance et pensé pour échapper le HTML par défaut.
+        </p>
+
+        <h2>Ce site</h2>
+        <p>
+          Tout est construit en HTML, CSS et JavaScript vanilla, sans framework ni étape de
+          construction. Les données (points, collections, notes) restent dans le stockage local de
+          votre navigateur — rien n'est envoyé sur un serveur.
+        </p>
+        <p>
+          Le site est installable et fonctionne hors ligne grâce à un service worker, et une petite
+          configuration de CI vérifie les tests, le formatage et le balisage à chaque modification.
+        </p>
       </article>
     </main>
     <div id="footer"></div>

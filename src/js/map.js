@@ -270,6 +270,9 @@ const exportConfirm = $("export-confirm");
 const importModal = $("import-modal");
 const importCancel = $("import-cancel");
 const importConfirm = $("import-confirm");
+const aboutModal = $("about-modal");
+const aboutClose = $("about-close");
+const aboutBtn = $("about-btn");
 const routingBtn = $("routing-btn");
 const routingPanel = $("routing-panel");
 const routingStart = $("routing-start");
@@ -875,12 +878,12 @@ function formatPopupContent(
   elevationData = null,
   airData = null,
 ) {
-  const title = `📍 ${escapeHtml(point.name)}`;
+  const title = escapeHtml(point.name);
   const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
   const note = point.note && point.note.trim() ? renderMarkdown(point.note.trim()) : null;
   const noteHtml = note
-    ? `<div class="popup-note"><i class="fas fa-sticky-note"></i> <strong>Notes</strong>${note}</div>
-  <a class="popup-edit-note" href="/notes.html#point=${point.lat.toFixed(5)},${point.lng.toFixed(5)}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a>`
+    ? `<div class="popup-note"><i class="fas fa-sticky-note"></i> <strong>Notes</strong>${note}
+  <a class="popup-edit-note" href="/notes.html#point=${point.lat.toFixed(5)},${point.lng.toFixed(5)}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a></div>`
     : "";
 
   const weather = weatherData?.current_weather
@@ -909,12 +912,20 @@ function formatPopupContent(
 
   return `
           <div class="popup-card">
-            <button class="popup-close-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Fermer">×</button>
-            <div class="popup-title">${title}</div>
-            <button class="popup-share-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Partager ce point" title="Partager ce point">
-              <i class="fas fa-share" aria-hidden="true"></i> Partager
+            <div class="popup-header">
+              <div class="popup-title" title="${title}">${title}</div>
+              <div class="popup-header-actions">
+                <button class="popup-actions-btn popup-share-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Partager ce point" title="Partager ce point">
+                  <i class="fas fa-share" aria-hidden="true"></i>
+                </button>
+                <button class="popup-close-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Fermer" title="Fermer">
+                  ×
+                </button>
+              </div>
+            </div>
+            <button class="popup-coords" data-lat="${point.lat}" data-lng="${point.lng}" title="Copier les coordonnées">
+              <i class="fas fa-location-dot" aria-hidden="true"></i> ${coords}
             </button>
-            
             ${city || postal || country ? `<div class="info-item"><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
             ${elevation != null ? `<div class="info-item"><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
             ${weather ? `<div class="info-item"><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
@@ -1266,6 +1277,20 @@ function attachPointEvents() {
     } else if (typeof map !== "undefined" && map && map.closePopup) {
       map.closePopup();
     }
+  });
+
+  // Délégation: copier les coordonnées depuis le popup
+  document.addEventListener("click", (e) => {
+    const coordsBtn = e.target.closest(".popup-coords");
+    if (!coordsBtn) return;
+
+    const lat = parseFloat(coordsBtn.dataset.lat);
+    const lng = parseFloat(coordsBtn.dataset.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    navigator.clipboard
+      .writeText(`${lat.toFixed(5)}, ${lng.toFixed(5)}`)
+      .then(() => showToast("Coordonnées copiées", "success"))
+      .catch(() => showToast("Copie impossible", "error"));
   });
 
   // Délégation pour changement de collection
@@ -1708,7 +1733,7 @@ function createMarker(lat, lng, name, collectionId = null, note = "") {
   const options = icon ? { icon } : {};
   return L.marker([lat, lng], options)
     .addTo(map)
-    .bindPopup(formatPopupContent(popupPoint))
+    .bindPopup(formatPopupContent(popupPoint), { maxWidth: 360 })
     .on("click", () => {
       const index = points.findIndex((p) => p.lat === lat && p.lng === lng);
       if (index !== -1) showPointCard(index);
@@ -2028,6 +2053,20 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+aboutBtn.addEventListener("click", () => {
+  openModal(aboutModal);
+});
+
+aboutClose.addEventListener("click", () => {
+  closeModal(aboutModal);
+});
+
+aboutModal.addEventListener("click", (e) => {
+  if (e.target === aboutModal) {
+    closeModal(aboutModal);
+  }
+});
+
 window.addEventListener(
   "resize",
   debounce(() => map.invalidateSize(), 250),
@@ -2194,7 +2233,7 @@ function updateNetworkStatus() {
 window.addEventListener("online", updateNetworkStatus);
 window.addEventListener("offline", updateNetworkStatus);
 
-const modals = [collectionModal, renameModal, exportModal, importModal];
+const modals = [collectionModal, renameModal, exportModal, importModal, aboutModal];
 let lastFocusedElement = null;
 
 function isModalOpen(modal) {

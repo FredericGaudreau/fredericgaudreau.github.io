@@ -11,6 +11,9 @@ const markdownInput = $("markdown-input");
 const previewEl = $("markdown-preview");
 const charCount = $("char-count");
 const wordCount = $("word-count");
+const readTime = $("read-time");
+const noteDates = $("note-dates");
+const notesStats = $("notes-stats");
 const saveStatus = $("save-status");
 let notes = [];
 let linkedPoint = null;
@@ -121,6 +124,7 @@ function enterLinkedMode(point) {
   document.body.classList.add("linked-mode");
   $("linked-point-name").textContent = point.name || "Sans nom";
   $("linked-banner").hidden = false;
+  updateNotesStats();
   titleInput.value = point.name || "";
   titleInput.readOnly = true;
   $("new-note").disabled = true;
@@ -179,6 +183,8 @@ function renderNotesList() {
     notesListEl.appendChild(li);
   });
 
+  updateNotesStats();
+
   if (sorted.length === 0) {
     const empty = document.createElement("li");
     empty.className = "note-item-empty";
@@ -197,6 +203,43 @@ function updateCounts() {
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   charCount.textContent = `${chars} caractère${chars > 1 ? "s" : ""}`;
   wordCount.textContent = `${words} mot${words > 1 ? "s" : ""}`;
+  if (readTime) {
+    readTime.textContent =
+      words > 0 ? `~${Math.max(1, Math.ceil(words / 200))} min de lecture` : "";
+  }
+  if (noteDates) {
+    if (linkedPoint) {
+      noteDates.textContent = "Point de la carte";
+    } else {
+      const note = currentNote();
+      if (note) {
+        const updated = new Date(note.updatedAt).toLocaleString("fr-CA");
+        const created = new Date(note.createdAt).toLocaleDateString("fr-CA");
+        noteDates.textContent = `Modifiée le ${updated} (créée le ${created})`;
+      } else {
+        noteDates.textContent = "";
+      }
+    }
+  }
+}
+
+function updateNotesStats() {
+  if (!notesStats) return;
+  let words = 0;
+  let chars = 0;
+  notes.forEach((note) => {
+    chars += note.content.length;
+    const trimmed = note.content.trim();
+    if (trimmed) words += trimmed.split(/\s+/).length;
+  });
+  if (notes.length === 0) {
+    notesStats.textContent = "Aucune note";
+    return;
+  }
+  const noteLabel = notes.length > 1 ? "notes" : "note";
+  const wordLabel = words > 1 ? "mots" : "mot";
+  const charLabel = chars > 1 ? "caractères" : "caractère";
+  notesStats.textContent = `${notes.length} ${noteLabel} · ${words} ${wordLabel} · ${chars} ${charLabel}`;
 }
 
 function renderEditor() {

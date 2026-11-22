@@ -518,7 +518,7 @@
         font-size: 0.84rem;
         color: var(--text-primary);
         line-height: 1.35;
-        max-width: 220px;
+        max-width: 360px;
         padding: 0;
         margin: 0;
         background: transparent;
@@ -539,23 +539,72 @@
         border-radius: 14px;
       }
 
-      .popup-close-btn {
-        position: absolute;
-        top: 8px;
-        right: 8px;
+      .popup-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.4rem 0.4rem 0.35rem 0.6rem;
+        border-bottom: 2px solid var(--border);
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      }
+
+      .popup-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.15rem;
+        flex-shrink: 0;
+      }
+
+      .popup-actions-btn {
         background: none;
         border: none;
-        font-size: 1.1rem;
-        line-height: 1;
         cursor: pointer;
-        color: var(--text-secondary);
-        padding: 4px 6px;
+        font-size: 0.8rem;
+        line-height: 1;
+        padding: 5px 7px;
         border-radius: 6px;
+        color: var(--text-secondary);
+      }
+
+      .popup-actions-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      .popup-actions-btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
       }
 
       .popup-close-btn:hover {
         background: rgba(0, 0, 0, 0.05);
         color: var(--error);
+      }
+
+      .popup-coords {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 0.3rem 0.6rem;
+        margin: 0.15rem 0.25rem 0;
+        border-radius: 6px;
+        align-self: flex-start;
+      }
+
+      .popup-coords:hover {
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--primary);
+      }
+
+      .popup-coords:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
       }
 
       .popup-note {
@@ -610,31 +659,16 @@
       }
 
       .popup-share-btn {
-        background: none;
-        border: none;
-        font-size: 0.75rem;
-        font-weight: 600;
         color: var(--primary);
-        cursor: pointer;
-        padding: 2px 6px;
-        margin-top: 0.5rem;
-        border-radius: 6px;
-        align-self: flex-start;
-      }
-
-      .popup-share-btn:hover {
-        background: rgba(37, 99, 235, 0.08);
       }
 
       .popup-title {
         font-weight: 700;
         color: var(--text-primary);
         font-size: 1rem;
-        margin-bottom: 0.25rem;
-        padding: 0.45rem 0.6rem;
-        border-bottom: 2px solid var(--border);
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 0;
+        line-height: 1.25;
+        word-break: break-word;
+        padding: 0.15rem 0;
       }
 
       /* Boutons flottants */
@@ -673,18 +707,45 @@
         background-color: var(--primary-dark);
       }
 
-      #about-link {
+      #about-btn {
         background: var(--bg-glass);
         border: 2px solid var(--border);
         color: var(--text-primary);
-        text-decoration: none;
         backdrop-filter: blur(12px);
       }
 
-      #about-link:hover {
+      #about-btn:hover {
         background: var(--primary);
         color: white;
-        /* transform: scale(1.15) rotate(15deg); */
+      }
+
+      .about-modal-content {
+        text-align: left;
+        max-width: 420px;
+      }
+
+      .about-modal-content ul {
+        margin: 0.75rem 0;
+        padding-left: 1.25rem;
+        text-align: left;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .about-modal-content li {
+        margin-bottom: 0.3rem;
+      }
+
+      .about-modal-content .about-modal-note {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+      }
+
+      .about-modal-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #locate-btn {
@@ -1618,6 +1679,40 @@
       </div>
     </div>
 
+    <!-- Modal À propos -->
+    <div
+      id="about-modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+      style="display: none"
+    >
+      <div class="modal-content about-modal-content">
+        <h3 id="about-modal-title">À propos de la carte</h3>
+        <p>
+          Carte créée avec
+          <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>.
+          Permet de créer, organiser et annoter des points d'intérêt.
+        </p>
+        <ul>
+          <li>Ajouter, modifier, supprimer des points</li>
+          <li>Organiser les points en collections avec couleurs</li>
+          <li>Voir les informations locales (météo, altitude, qualité de l'air)</li>
+          <li>Notes en Markdown reliées aux points</li>
+          <li>Itinéraires, partage et export JSON/CSV/Markdown</li>
+        </ul>
+        <p class="about-modal-note">
+          Les points et les notes sont sauvegardés dans votre navigateur seulement — aucune donnée
+          ne quitte votre appareil. Fonctionne hors ligne avec les données mises en cache.
+        </p>
+        <div class="modal-buttons">
+          <a href="/carte.html" class="btn-secondary about-modal-link">Plus de détails</a>
+          <button id="about-close" class="btn-primary">Fermer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Section des points -->
     <section id="points-section">
       <h3 class="panel-header">
@@ -1672,7 +1767,9 @@
 
     <!-- Boutons flottants -->
     <div id="footer">
-      <a href="/carte.html" id="about-link" class="round-btn" title="À propos">?</a>
+      <button id="about-btn" type="button" class="round-btn" title="À propos" aria-label="À propos">
+        ?
+      </button>
       <button id="locate-btn" class="round-btn" title="Me localiser" aria-label="Me localiser">
         <i class="fas fa-location-arrow"></i>
       </button>
