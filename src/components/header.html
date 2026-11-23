@@ -1,10 +1,36 @@
-<header>
-  <nav aria-label="Navigation principale">
-    <a href="/" id="home-link" aria-label="Accueil">
+<header id="site-header">
+  <a href="#main" class="skip-link">Aller au contenu principal</a>
+  <nav aria-label="Navigation principale" class="nav-container">
+    <a href="/" id="home-link" aria-label="Accueil" class="nav-link home-link">
       <i class="fas fa-home" aria-hidden="true"></i>
+      <span class="nav-text">Accueil</span>
     </a>
-    <a href="/map.html" id="map-link">Carte</a>
-    <a href="/notes.html" id="notes-link">Notes</a>
-    <a href="/apropos.html" id="about-link">À propos</a>
+    <a href="/map.html" id="map-link" class="nav-link">
+      <i class="fas fa-map-location-dot" aria-hidden="true"></i>
+      <span class="nav-text">Carte</span>
+    </a>
+    <a href="/notes.html" id="notes-link" class="nav-link">
+      <i class="fas fa-pen-nib" aria-hidden="true"></i>
+      <span class="nav-text">Notes</span>
+    </a>
+    <a href="/apropos.html" id="about-link" class="nav-link">
+      <i class="fas fa-info-circle" aria-hidden="true"></i>
+      <span class="nav-text">À propos</span>
+    </a>
+    <button 
+      id="mobile-menu-btn" 
+      class="mobile-menu-btn" 
+      aria-label="Menu" 
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <i class="fas fa-bars" aria-hidden="true"></i>
+    </button>
+  </nav>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Navigation mobile" hidden>
+    <a href="/" id="mobile-home-link">Accueil</a>
+    <a href="/map.html" id="mobile-map-link">Carte</a>
+    <a href="/notes.html" id="mobile-notes-link">Notes</a>
+    <a href="/apropos.html" id="mobile-about-link">À propos</a>
   </nav>
 </header>

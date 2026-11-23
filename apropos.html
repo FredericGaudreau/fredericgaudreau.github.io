@@ -4,81 +4,202 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="À propos de Frédéric Gaudreau." />
+    <meta name="description" content="À propos de Frédéric Gaudreau et de ses outils web : carte interactive et éditeur de notes Markdown fonctionnant entièrement dans le navigateur." />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    
+    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="À propos - Frédéric Gaudreau" />
-    <meta property="og:description" content="À propos de Frédéric Gaudreau." />
+    <meta property="og:description" content="Découvrez les outils web de Frédéric Gaudreau : carte interactive et éditeur de notes Markdown fonctionnant entièrement dans le navigateur." />
     <meta property="og:url" content="https://fredericgaudreau.github.io/apropos.html" />
-    <link rel="canonical" href="https://fredericgaudreau.github.io/apropos.html" />
+    <meta property="og:site_name" content="Frédéric Gaudreau" />
+    <meta property="og:locale" content="fr_FR" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="À propos - Frédéric Gaudreau" />
+    <meta name="twitter:description" content="Découvrez les outils web de Frédéric Gaudreau : carte interactive et éditeur de notes Markdown." />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
+    <link rel="icon" type="image/png" href="/src/images/favicon.png" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- Theme -->
     <meta name="theme-color" content="#2563eb" />
+    
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Fonts -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
     />
-    <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
-    <link rel="icon" type="image/png" href="/src/images/favicon.png" />
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="/src/css/style.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    
     <title>À propos - Frédéric Gaudreau</title>
   </head>
   <body data-page="about">
     <div id="header"></div>
-    <main>
-      <article>
-        <h1>À propos</h1>
-        <p>
-          Ce site sert principalement comme plate-forme pour utiliser et approfondir les langages
-          HTML, CSS et JavaScript, entre autres.
-        </p>
-        <p>
-          Je m'intéresse aux relations entre la technologie, l'être humain et son environnement.
-        </p>
+    
+    <main id="main">
+      <article class="animate-fade-in">
+        <header class="page-header">
+          <h1>À propos</h1>
+          <p class="subtitle">
+            Ce site est une plateforme pour explorer et approfondir les langages HTML, CSS et JavaScript.
+          </p>
+        </header>
 
-        <h2>Les outils</h2>
-        <p>
-          <a href="/map.html"><strong>Carte interactive</strong></a> — créez et organisez des points
-          d'intérêt en collections, annotez-les avec des notes en Markdown, consultez la météo,
-          l'altitude et la qualité de l'air, calculez des itinéraires et partagez un point par un
-          simple lien.
-        </p>
-        <p>
-          <a href="/notes.html"><strong>Notes Markdown</strong></a> — un éditeur avec rendu en
-          direct, des statistiques de lecture et un export en fichier .md. Chaque note peut être
-          reliée à un point de la carte directement depuis son popup.
-        </p>
-        <p>
-          Le rendu Markdown est assuré par un
-          <a
-            href="https://github.com/FredericGaudreau/fredericgaudreau.github.io/blob/master/src/js/markdown.js"
-            >petit parseur maison</a
-          >, écrit sans dépendance et pensé pour échapper le HTML par défaut.
-        </p>
+        <section aria-labelledby="about-me-heading">
+          <h2 id="about-me-heading">Qui suis-je ?</h2>
+          <p>
+            Je m'intéresse aux relations entre la technologie, l'être humain et son environnement. 
+            Passionné par le développement web et les outils qui améliorent la productivité, 
+            j'ai créé ces outils pour répondre à mes propres besoins tout en explorant les 
+            possibilités des technologies web modernes.
+          </p>
+        </section>
 
-        <h2>Ce site</h2>
-        <p>
-          Tout est construit en HTML, CSS et JavaScript vanilla, sans framework ni étape de
-          construction. Les données (points, collections, notes) restent dans le stockage local de
-          votre navigateur — rien n'est envoyé sur un serveur.
-        </p>
-        <p>
-          Le site est installable et fonctionne hors ligne grâce à un service worker, et une petite
-          configuration de CI vérifie les tests, le formatage et le balisage à chaque modification.
-        </p>
+        <section aria-labelledby="tools-heading">
+          <h2 id="tools-heading">Les outils</h2>
+          
+          <div class="tools-grid">
+            <article class="tool-card">
+              <i class="fas fa-map-location-dot" aria-hidden="true"></i>
+              <strong><a href="/map.html">Carte interactive</a></strong>
+              <p>
+                Créez et organisez des points d'intérêt en collections avec des couleurs personnalisées. 
+                Annotez chaque point avec des notes en Markdown. Consultez les informations locales 
+                (météo, altitude, qualité de l'air) pour chaque emplacement. Calculez des itinéraires 
+                entre vos points et partagez un point spécifique par un simple lien.
+              </p>
+              <ul>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Organisation en collections</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Notes Markdown par point</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Informations météo et altitude</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Calcul d'itinéraires</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Partage par lien</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Export JSON/CSV/Markdown</li>
+              </ul>
+            </article>
+            
+            <article class="tool-card">
+              <i class="fas fa-pen-nib" aria-hidden="true"></i>
+              <strong><a href="/notes.html">Notes Markdown</a></strong>
+              <p>
+                Un éditeur de notes Markdown avec aperçu en direct. Recherchez dans toutes vos notes, 
+                consultez des statistiques de lecture (nombre de caractères, mots, temps de lecture). 
+                Exportez vos notes en fichier .md ou sauvegardez l'ensemble en JSON.
+              </p>
+              <ul>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Aperçu en direct</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Recherche globale</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Statistiques de lecture</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Export .md et JSON</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Intégration avec la carte</li>
+                <li><i class="fas fa-check" aria-hidden="true"></i> Mode plein écran</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section aria-labelledby="tech-heading">
+          <h2 id="tech-heading">Technologies utilisées</h2>
+          <p>
+            Tout est construit en <strong>HTML</strong>, <strong>CSS</strong> et <strong>JavaScript vanilla</strong>, 
+            sans framework ni étape de construction. Les outils utilisent les API modernes du navigateur :
+          </p>
+          <ul>
+            <li><strong>Stockage local</strong> : Vos données (points, collections, notes) restent dans le stockage local de votre navigateur</li>
+            <li><strong>Service Worker</strong> : Le site est installable et fonctionne hors ligne</li>
+            <li><strong>IndexedDB</strong> : Cache persistant pour les données géographiques</li>
+            <li><strong>Geolocation API</strong> : Localisation de votre position</li>
+            <li><strong>Fetch API</strong> : Récupération des données météo et géographiques</li>
+            <li><strong>Leaflet.js</strong> : Bibliothèque de cartographie pour la carte interactive</li>
+          </ul>
+          <p>
+            Le rendu Markdown est assuré par un 
+            <a href="https://github.com/FredericGaudreau/fredericgaudreau.github.io/blob/master/src/js/markdown.js">parseur maison</a>, 
+            écrit sans dépendance et conçu pour échapper le HTML par défaut, assurant ainsi la sécurité.
+          </p>
+        </section>
+
+        <section aria-labelledby="privacy-heading">
+          <h2 id="privacy-heading">Vie privée et sécurité</h2>
+          <div class="highlight-card">
+            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+            <div class="highlight-content">
+              <h3>100% local, 100% privé</h3>
+              <p>
+                Aucune donnée ne quitte votre appareil. Tous vos points, collections et notes sont 
+                stockés uniquement dans votre navigateur. Vous gardez le contrôle total de vos données.
+              </p>
+            </div>
+          </div>
+          <p>
+            Le site fonctionne entièrement hors ligne une fois les ressources mises en cache. 
+            Vous pouvez l'installer comme une application progressive (PWA) pour un accès encore plus rapide.
+          </p>
+        </section>
+
+        <section aria-labelledby="install-heading">
+          <h2 id="install-heading">Installation</h2>
+          <p>
+            Le site est conçu pour fonctionner comme une application web progressive (PWA). 
+            Vous pouvez l'installer sur votre appareil pour un accès hors ligne et une expérience 
+            similaire à une application native.
+          </p>
+          <p>
+            <strong>Sur mobile (Chrome, Edge, Samsung Internet) :</strong>
+          </p>
+          <ol>
+            <li>Ouvrez le site dans votre navigateur</li>
+            <li>Appuyez sur les trois points (menu) en haut à droite</li>
+            <li>Sélectionnez "Ajouter à l'écran d'accueil" ou "Installer"</li>
+            <li>Confirmez l'installation</li>
+          </ol>
+          <p>
+            <strong>Sur desktop (Chrome, Edge) :</strong>
+          </p>
+          <ol>
+            <li>Ouvrez le site dans votre navigateur</li>
+            <li>Cliquez sur l'icône d'installation dans la barre d'adresse ou sur les trois points (menu)</li>
+            <li>Sélectionnez "Installer"</li>
+            <li>Confirmez l'installation</li>
+          </ol>
+        </section>
+
+        <section class="cta-section">
+          <p>
+            <a href="/" class="btn btn-secondary">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i>
+              Retour à l'accueil
+            </a>
+          </p>
+        </section>
       </article>
     </main>
+    
     <div id="footer"></div>
+    
     <script src="/src/js/index.js" defer></script>
   </body>
 </html>

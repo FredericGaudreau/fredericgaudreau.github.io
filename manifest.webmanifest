@@ -1,17 +1,22 @@
 {
-  "name": "Frédéric Gaudreau - Carte",
-  "short_name": "Carte",
-  "description": "Carte interactive avec météo et points d'intérêt.",
-  "lang": "fr",
-  "start_url": "/map.html",
+  "name": "Frédéric Gaudreau - Outils web",
+  "short_name": "Outils FG",
+  "description": "Carte interactive et éditeur de notes Markdown fonctionnant entièrement dans le navigateur. Vos données restent sur votre appareil.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#f8fafc",
   "theme_color": "#2563eb",
   "icons": [
     {
       "src": "/src/images/favicon.png",
-      "sizes": "48x48",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/src/images/favicon.png",
+      "sizes": "512x512",
       "type": "image/png"
     },
     {
@@ -19,5 +24,32 @@
       "sizes": "any",
       "type": "image/svg+xml"
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_protocol_handoff": false,
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+fgtools",
+      "url": "/map.html?import=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/map.html",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "name",
+      "text": "description",
+      "url": "link"
+    }
+  }
 }
