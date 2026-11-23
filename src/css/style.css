@@ -266,6 +266,10 @@ li {
 /* Mobile menu button */
 .mobile-menu-btn {
   display: none;
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -274,7 +278,7 @@ li {
   background: var(--color-neutral-200);
   border-radius: var(--border-radius);
   transition: all var(--transition);
-  margin-left: auto;
+  z-index: 10;
 }
 
 .mobile-menu-btn:hover {
@@ -562,6 +566,10 @@ textarea:focus-visible {
   
   .mobile-menu-btn {
     display: flex;
+    position: fixed;
+    right: var(--space-md);
+    top: calc(50% + var(--space-md));
+    transform: translateY(-50%);
   }
   
   .mobile-menu {
