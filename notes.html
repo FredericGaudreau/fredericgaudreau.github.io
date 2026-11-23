@@ -7,7 +7,7 @@
     <meta name="description" content="Éditeur de notes en Markdown avec rendu en direct." />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
+      content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
@@ -17,10 +17,21 @@
     <meta property="og:url" content="https://fredericgaudreau.github.io/notes.html" />
     <link rel="canonical" href="https://fredericgaudreau.github.io/notes.html" />
     <meta name="theme-color" content="#2563eb" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+    />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
     <link rel="stylesheet" href="/src/css/style.css" />
     <link rel="stylesheet" href="/src/css/notes.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <title>Notes - Frédéric Gaudreau</title>
   </head>
   <body data-page="notes">
@@ -37,7 +48,7 @@
               aria-label="Nouvelle note"
               title="Nouvelle note"
             >
-              +
+              <i class="fas fa-plus" aria-hidden="true"></i>
             </button>
           </div>
           <input
@@ -56,6 +67,7 @@
         </aside>
         <section id="notes-editor">
           <div id="linked-banner" hidden>
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
             <span
               >Note du point « <strong id="linked-point-name"></strong> » —
               <a href="/map.html">retour à la carte</a></span
@@ -77,7 +89,7 @@
                 aria-label="Afficher les notes"
                 aria-expanded="false"
               >
-                Liste
+                <i class="fas fa-list" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -87,7 +99,7 @@
                 aria-pressed="false"
                 title="Basculer l'aperçu seul"
               >
-                Aperçu
+                <i class="fas fa-eye" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -96,7 +108,7 @@
                 aria-label="Plein écran"
                 title="Plein écran"
               >
-                Plein écran
+                <i class="fas fa-expand" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -105,7 +117,7 @@
                 aria-label="Copier le Markdown"
                 title="Copier le Markdown"
               >
-                Copier
+                <i class="fas fa-copy" aria-hidden="true"></i>
               </button>
               <div class="toolbar-group">
                 <button
@@ -117,26 +129,26 @@
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  Exporter
+                  <i class="fas fa-file-export" aria-hidden="true"></i>
                 </button>
                 <div id="export-menu" hidden>
                   <button type="button" id="export-md-btn">
-                    Cette note (.md)
+                    <i class="fas fa-file-lines" aria-hidden="true"></i> Cette note (.md)
                   </button>
                   <button type="button" id="export-all-md-btn">
-                    Toutes les notes (.md)
+                    <i class="fas fa-layer-group" aria-hidden="true"></i> Toutes les notes (.md)
                   </button>
                   <button type="button" id="export-json-btn">
-                    Sauvegarde (JSON)
+                    <i class="fas fa-code" aria-hidden="true"></i> Sauvegarde (JSON)
                   </button>
                   <button type="button" id="import-json-btn">
-                    Restaurer (JSON)
+                    <i class="fas fa-upload" aria-hidden="true"></i> Restaurer (JSON)
                   </button>
                   <button type="button" id="copy-html-btn">
-                    Copier le HTML rendu
+                    <i class="fas fa-code-branch" aria-hidden="true"></i> Copier le HTML rendu
                   </button>
                   <button type="button" id="print-btn">
-                    Imprimer / PDF
+                    <i class="fas fa-print" aria-hidden="true"></i> Imprimer / PDF
                   </button>
                 </div>
               </div>
@@ -148,7 +160,7 @@
                 title="Vérification orthographique"
                 aria-pressed="true"
               >
-                Orthographe
+                <i class="fas fa-spell-check" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -157,7 +169,7 @@
                 aria-label="Dupliquer la note"
                 title="Dupliquer la note"
               >
-                Dupliquer
+                <i class="fas fa-clone" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -166,7 +178,7 @@
                 aria-label="Supprimer la note"
                 title="Supprimer la note"
               >
-                Supprimer
+                <i class="fas fa-trash" aria-hidden="true"></i>
               </button>
             </div>
           </div>
@@ -183,7 +195,7 @@
               aria-label="Gras"
               title="Gras (Ctrl+B)"
             >
-              G
+              <i class="fas fa-bold" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -192,7 +204,7 @@
               aria-label="Italique"
               title="Italique (Ctrl+I)"
             >
-              I
+              <i class="fas fa-italic" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -201,7 +213,7 @@
               aria-label="Titre"
               title="Titre"
             >
-              H
+              <i class="fas fa-heading" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -210,7 +222,7 @@
               aria-label="Liste à puces"
               title="Liste à puces"
             >
-              • Liste
+              <i class="fas fa-list-ul" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -219,7 +231,7 @@
               aria-label="Citation"
               title="Citation"
             >
-              " Citation
+              <i class="fas fa-quote-left" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -228,7 +240,7 @@
               aria-label="Code"
               title="Code"
             >
-              Code
+              <i class="fas fa-code" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -237,7 +249,7 @@
               aria-label="Lien"
               title="Lien"
             >
-              Lien
+              <i class="fas fa-link" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -246,7 +258,7 @@
               aria-label="Date du jour"
               title="Date du jour"
             >
-              Date
+              <i class="fas fa-calendar-day" aria-hidden="true"></i>
             </button>
           </div>
           <div id="editor-panes">
@@ -264,7 +276,7 @@
               aria-label="Fermer l'aperçu"
               title="Fermer l'aperçu"
             >
-              ×
+              <i class="fas fa-times" aria-hidden="true"></i>
             </button>
           </div>
           <div class="statusbar">

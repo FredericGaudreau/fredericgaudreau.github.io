@@ -1,34 +1,8 @@
-/* ============================================
-   Notes App - Styles
-   Utilise le design system défini dans style.css
-   ============================================ */
-
-/* Variables spécifiques à notes.css */
-:root {
-  --color-primary-50: var(--color-neutral-100);
-  --color-primary-100: var(--color-neutral-200);
-  --color-primary-200: var(--color-neutral-300);
-  --color-primary-500: var(--color-primary);
-  --color-primary-600: var(--color-primary-dark);
-  --color-primary-700: var(--color-neutral-700);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary-50: var(--color-neutral-100);
-    --color-primary-100: var(--color-neutral-200);
-    --color-primary-200: var(--color-neutral-300);
-    --color-primary-500: var(--color-primary);
-    --color-primary-600: var(--color-primary-dark);
-    --color-primary-700: var(--color-neutral-700);
-  }
-}
-
 .notes-main {
   max-width: none;
   display: flex;
   flex-direction: column;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 1rem 0.25rem;
 }
 
 #notes-app {
@@ -36,10 +10,10 @@
   grid-template-columns: 260px 1fr;
   height: calc(100dvh - 8.25rem);
   min-height: 24rem;
-  border: var(--border-width) solid var(--color-neutral-200);
-  border-radius: var(--border-radius-lg);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
-  background: var(--color-neutral-50);
+  background: #ffffff;
 }
 
 :fullscreen #notes-app {
@@ -47,107 +21,94 @@
   height: 100dvh;
 }
 
-/* ============================================
-   Sidebar
-   ============================================ */
 .notes-sidebar-footer {
-  padding: var(--space-md) var(--space-lg);
-  border-top: var(--border-width) solid var(--color-neutral-300);
+  padding: 0.6rem 1rem;
+  border-top: 1px solid #e2e8f0;
   font-size: 0.75rem;
-  color: var(--color-neutral-600);
+  color: #64748b;
 }
 
 #notes-sidebar {
   display: flex;
   flex-direction: column;
-  border-right: var(--border-width) solid var(--color-neutral-300);
-  background: var(--color-neutral-50);
+  border-right: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: var(--border-width) solid var(--color-neutral-200);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .sidebar-header h2 {
   font-size: 1rem;
-  color: var(--color-neutral-800);
 }
 
 #notes-search {
-  border: var(--border-width) solid var(--color-neutral-300);
-  border-radius: var(--border-radius);
-  padding: var(--space-sm) var(--space-md);
-  margin: var(--space-md) var(--space-lg);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  margin: 0.5rem;
   font: inherit;
   font-size: 0.85rem;
-  color: var(--color-neutral-800);
-  background: var(--color-neutral-50);
-  transition: all var(--transition-fast);
+  color: #0f172a;
+  background: #ffffff;
 }
 
 #notes-search:focus {
   outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
+  border-color: #2563eb;
 }
 
 #sort-notes {
-  border: var(--border-width) solid var(--color-neutral-300);
-  border-radius: var(--border-radius);
-  padding: var(--space-sm) var(--space-md);
-  margin: 0 var(--space-lg) var(--space-md);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.4rem;
+  margin: 0 0.5rem 0.25rem;
   font: inherit;
   font-size: 0.8rem;
-  color: var(--color-neutral-800);
-  background: var(--color-neutral-50);
+  color: #0f172a;
+  background: #ffffff;
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-#sort-notes:focus {
-  outline: none;
-  border-color: var(--color-primary-500);
 }
 
 #notes-list {
   list-style: none;
   margin: 0;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem;
   overflow-y: auto;
   flex: 1;
 }
 
 .note-item {
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.25rem;
 }
 
 .note-select {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 0.15rem;
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 0.6rem;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   background: none;
   text-align: left;
   cursor: pointer;
   font: inherit;
-  color: var(--color-neutral-700);
-  transition: all var(--transition-fast);
+  color: #0f172a;
 }
 
 .note-select:hover {
-  background: var(--color-neutral-200);
+  background: #eef2f7;
 }
 
 .note-item.active .note-select {
-  background: var(--color-primary-50);
-  color: var(--color-primary-600);
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
 }
 
 .note-item-title {
@@ -155,24 +116,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-neutral-800);
 }
 
 .note-item-date {
   font-size: 0.75rem;
-  color: var(--color-neutral-500);
+  color: #64748b;
 }
 
 .note-item-empty {
-  padding: var(--space-lg);
-  color: var(--color-neutral-500);
+  padding: 0.75rem;
+  color: #64748b;
   font-size: 0.85rem;
-  text-align: center;
 }
 
-/* ============================================
-   Editor
-   ============================================ */
 #notes-editor {
   display: flex;
   flex-direction: column;
@@ -183,10 +139,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-neutral-200);
-  background: var(--color-neutral-100);
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 #note-title {
@@ -196,8 +151,7 @@
   background: none;
   font: inherit;
   font-weight: 600;
-  font-size: 1.1rem;
-  color: var(--color-neutral-800);
+  color: #0f172a;
 }
 
 #note-title:focus {
@@ -206,8 +160,7 @@
 
 .toolbar-actions {
   display: flex;
-  gap: var(--space-xs);
-  align-items: center;
+  gap: 0.3rem;
 }
 
 .toolbar-group {
@@ -217,16 +170,16 @@
 #export-menu {
   position: absolute;
   right: 0;
-  top: calc(100% + var(--space-xs));
-  z-index: var(--z-dropdown);
+  top: calc(100% + 0.25rem);
+  z-index: 60;
   display: flex;
   flex-direction: column;
   min-width: 220px;
-  padding: var(--space-xs);
-  background: var(--color-neutral-50);
-  border: var(--border-width) solid var(--color-neutral-200);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-lg);
+  padding: 0.35rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
 
 #export-menu[hidden] {
@@ -236,28 +189,24 @@
 #export-menu button {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 0.5rem;
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 0.6rem;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: 6px;
   background: none;
   text-align: left;
   font: inherit;
   font-size: 0.85rem;
-  color: var(--color-neutral-700);
+  color: #0f172a;
   cursor: pointer;
-  transition: all var(--transition-fast);
 }
 
 #export-menu button:hover {
-  background: var(--color-neutral-200);
-  color: var(--color-primary-600);
+  background: #eef2f7;
+  color: #2563eb;
 }
 
-/* ============================================
-   Boutons de la toolbar
-   ============================================ */
 .tool-btn {
   display: inline-flex;
   align-items: center;
@@ -265,55 +214,45 @@
   width: 34px;
   height: 34px;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   background: none;
-  color: var(--color-neutral-500);
+  color: #64748b;
   cursor: pointer;
-  transition: all var(--transition-fast);
 }
 
 .tool-btn:hover {
-  background: var(--color-neutral-200);
-  color: var(--color-primary-600);
+  background: #eef2f7;
+  color: #2563eb;
 }
 
 .tool-btn:focus-visible {
-  outline: var(--border-width-thick) solid var(--color-primary-500);
+  outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
 .tool-btn.danger:hover {
   background: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
+  color: #ef4444;
 }
 
 #toggle-sidebar {
   display: none;
 }
 
-/* ============================================
-   Barre de format
-   ============================================ */
 .format-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-  border-bottom: var(--border-width) solid var(--color-neutral-200);
-  background: var(--color-neutral-100);
-  overflow-x: auto;
+  gap: 0.15rem;
+  padding: 0.15rem 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .format-bar .tool-btn {
   width: 30px;
   height: 28px;
-  font-size: var(--icon-size-sm);
-  flex-shrink: 0;
+  font-size: 0.8rem;
 }
 
-/* ============================================
-   Panneaux d'édition
-   ============================================ */
 #editor-panes {
   position: relative;
   display: grid;
@@ -336,50 +275,42 @@
 
 #close-preview {
   position: absolute;
-  top: var(--space-sm);
-  right: var(--space-md);
+  top: 0.6rem;
+  right: 0.9rem;
   z-index: 5;
   display: none;
   background: rgba(255, 255, 255, 0.9);
-  border: var(--border-width) solid var(--color-neutral-200);
-  border-radius: var(--border-radius);
+  border: 1px solid #e2e8f0;
 }
 
 #close-preview:hover {
   background: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
+  color: #ef4444;
 }
 
 #editor-panes.show-preview #close-preview {
   display: inline-flex;
 }
 
-/* ============================================
-   Éditeur Markdown
-   ============================================ */
 #markdown-input {
   border: none;
-  padding: var(--space-lg);
-  font-family: var(--font-mono);
+  padding: 1rem 1.25rem;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.9rem;
   line-height: 1.6;
   resize: none;
-  color: var(--color-neutral-800);
-  background: var(--color-neutral-50);
+  color: #0f172a;
 }
 
 #markdown-input:focus {
   outline: none;
 }
 
-/* ============================================
-   Aperçu Markdown
-   ============================================ */
 .markdown-body {
-  padding: var(--space-lg);
+  padding: 1rem 1.5rem;
   overflow-y: auto;
-  border-left: var(--border-width) solid var(--color-neutral-200);
-  background: var(--color-neutral-50);
+  border-left: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
 .markdown-body h1,
@@ -388,9 +319,8 @@
 .markdown-body h4,
 .markdown-body h5,
 .markdown-body h6 {
-  margin: var(--space-md) 0 var(--space-sm);
+  margin: 1.25rem 0 0.5rem;
   line-height: 1.3;
-  color: var(--color-neutral-800);
 }
 
 .markdown-body h1 {
@@ -406,35 +336,35 @@
 }
 
 .markdown-body p {
-  margin: var(--space-sm) 0;
-  color: var(--color-neutral-700);
+  margin: 0.5rem 0;
+  color: #0f172a;
 }
 
 .markdown-body ul,
 .markdown-body ol {
-  margin: var(--space-sm) 0;
-  padding-left: var(--space-xl);
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
 }
 
 .markdown-body li {
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.25rem;
 }
 
 .markdown-body blockquote {
-  margin: var(--space-md) 0;
-  padding: var(--space-sm) var(--space-lg);
-  border-left: var(--border-width-thick) solid var(--color-primary-500);
-  background: var(--color-primary-50);
-  border-radius: 0 var(--border-radius) var(--border-radius) 0;
-  color: var(--color-neutral-700);
+  margin: 0.75rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: 0 8px 8px 0;
+  color: #334155;
 }
 
 .markdown-body pre {
-  margin: var(--space-md) 0;
-  padding: var(--space-md);
-  background: var(--color-neutral-800);
-  color: var(--color-neutral-200);
-  border-radius: var(--border-radius);
+  margin: 0.75rem 0;
+  padding: 0.85rem 1rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
   overflow-x: auto;
 }
 
@@ -442,41 +372,31 @@
   background: none;
   padding: 0;
   color: inherit;
-  font-family: var(--font-mono);
 }
 
 .markdown-body code {
-  background: var(--color-neutral-200);
-  border-radius: var(--border-radius-sm);
-  padding: var(--space-xs) var(--space-sm);
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
   font-size: 0.85em;
-  font-family: var(--font-mono);
-  color: var(--color-neutral-800);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 .markdown-body img {
   max-width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
 }
 
 .markdown-body hr {
   border: none;
-  border-top: var(--border-width) solid var(--color-neutral-200);
-  margin: var(--space-lg) 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 1.25rem 0;
 }
 
 .markdown-body a {
-  color: var(--color-primary-600);
-  text-decoration: underline;
+  color: #2563eb;
 }
 
-.markdown-body a:hover {
-  color: var(--color-primary-700);
-}
-
-/* ============================================
-   Listes de tâches
-   ============================================ */
 .task-list {
   list-style: none;
   padding-left: 0.5rem;
@@ -486,21 +406,19 @@
   display: inline-block;
   width: 0.85rem;
   height: 0.85rem;
-  margin-right: var(--space-sm);
-  border: var(--border-width-thick) solid var(--color-neutral-400);
+  margin-right: 0.4rem;
+  border: 2px solid #94a3b8;
   border-radius: 4px;
   vertical-align: middle;
-  cursor: pointer;
-  transition: all var(--transition-fast);
 }
 
 .task.done .checkbox {
-  background: var(--color-primary-600);
-  border-color: var(--color-primary-600);
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .task.done {
-  color: var(--color-neutral-500);
+  color: #64748b;
   text-decoration: line-through;
 }
 
@@ -509,22 +427,18 @@
 }
 
 .markdown-body .task:hover .checkbox {
-  border-color: var(--color-primary-500);
+  border-color: #2563eb;
 }
 
-/* ============================================
-   Statusbar
-   ============================================ */
 .statusbar {
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: 1.25rem;
   overflow: hidden;
-  padding: var(--space-sm) var(--space-lg);
-  border-top: var(--border-width) solid var(--color-neutral-200);
+  padding: 0.4rem 1rem;
+  border-top: 1px solid #e2e8f0;
   font-size: 0.75rem;
-  color: var(--color-neutral-500);
-  background: var(--color-neutral-100);
+  color: #64748b;
 }
 
 .note-dates {
@@ -533,35 +447,24 @@
 }
 
 #save-status[data-type="error"] {
-  color: var(--color-error);
+  color: #ef4444;
 }
 
-/* ============================================
-   Bannière de note liée
-   ============================================ */
 #linked-banner {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(37, 99, 235, 0.08);
+  color: #1e40af;
   font-size: 0.85rem;
-  border-bottom: var(--border-width) solid var(--color-primary-200);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 #linked-banner a {
-  color: var(--color-primary-600);
+  color: #2563eb;
 }
 
-#linked-banner a:hover {
-  color: var(--color-primary-700);
-  text-decoration: underline;
-}
-
-/* ============================================
-   Mode lié (note liée à un point de la carte)
-   ============================================ */
 body.linked-mode #notes-sidebar {
   display: none;
 }
@@ -570,17 +473,11 @@ body.linked-mode #notes-app {
   grid-template-columns: 1fr;
 }
 
-/* ============================================
-   États des boutons
-   ============================================ */
 .tool-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* ============================================
-   Utilitaires
-   ============================================ */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -588,12 +485,8 @@ body.linked-mode #notes-app {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-  border: 0;
 }
 
-/* ============================================
-   Responsive Design
-   ============================================ */
 @media (max-width: 768px) {
   .note-dates {
     display: none;
@@ -607,8 +500,8 @@ body.linked-mode #notes-app {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: var(--z-modal);
-    background: var(--color-neutral-50);
+    z-index: 1000;
+    background: #f8fafc;
   }
 
   body.show-sidebar #notes-sidebar {
@@ -630,11 +523,6 @@ body.linked-mode #notes-app {
   #editor-panes:not(.show-preview) #markdown-preview {
     display: none;
   }
-
-  #notes-search,
-  #sort-notes {
-    margin: var(--space-sm) var(--space-md);
-  }
 }
 
 @media print {
@@ -645,7 +533,7 @@ body.linked-mode #notes-app {
   .statusbar,
   #linked-banner,
   #notes-sidebar,
-  #toggle-sidebar,
+  #notes-sidebar-toggle,
   #close-preview,
   #markdown-input {
     display: none !important;
@@ -663,6 +551,7 @@ body.linked-mode #notes-app {
     border-radius: 0;
   }
 
+  .editor-area,
   #editor-panes {
     display: block;
     grid-template-columns: 1fr;
@@ -673,6 +562,5 @@ body.linked-mode #notes-app {
     display: block !important;
     overflow: visible;
     height: auto;
-    background: white;
   }
 }
