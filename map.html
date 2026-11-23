@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.open-elevation.com https://server.arcgisonline.com https://tile.opentopomap.org https://router.project-osrm.org;"
+      content="default-src 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https:; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://nominatim.openstreetmap.org https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.open-elevation.com https://server.arcgisonline.com https://tile.opentopomap.org https://router.project-osrm.org;"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
@@ -20,9 +20,19 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
     />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
@@ -1697,7 +1707,7 @@
       title="Rechercher une adresse"
       aria-label="Rechercher une adresse"
     >
-      
+      <i class="fas fa-search"></i>
     </button>
 
     <div id="nominatim-search" style="display: none">
@@ -1715,7 +1725,7 @@
           aria-label="Fermer la recherche"
           title="Fermer"
         >
-          
+          <i class="fas fa-xmark"></i>
         </button>
       </form>
       <div id="search-results"></div>
@@ -1740,7 +1750,7 @@
         title="Gérer les collections"
         aria-label="Gérer les collections"
       >
-        
+        <i class="fas fa-folder"></i>
       </button>
       <div id="collections-dropdown" style="display: none">
         <h3 class="panel-header">
@@ -1749,7 +1759,7 @@
         </h3>
         <div style="padding: 0.75rem">
           <button id="new-collection-btn" class="collection-btn new-collection-header">
-             Nouvelle collection
+            <i class="fas fa-plus"></i> Nouvelle collection
           </button>
           <div id="collections-list"></div>
         </div>
@@ -1933,7 +1943,7 @@
             title="Exporter les points"
             aria-label="Exporter les points"
           >
-            
+            <i class="fas fa-download"></i>
           </button>
           <button
             id="import-btn"
@@ -1941,7 +1951,7 @@
             title="Importer les points"
             aria-label="Importer les points"
           >
-            
+            <i class="fas fa-upload"></i>
           </button>
           <button
             id="export-notes-btn"
@@ -1949,7 +1959,7 @@
             title="Exporter les notes en Markdown"
             aria-label="Exporter les notes en Markdown"
           >
-            
+            <i class="fas fa-file-lines"></i>
           </button>
           <button id="close-points" aria-label="Fermer">×</button>
         </div>
@@ -1985,7 +1995,7 @@
         ?
       </button>
       <button id="locate-btn" class="round-btn" title="Me localiser" aria-label="Me localiser">
-        
+        <i class="fas fa-location-arrow"></i>
       </button>
       <button
         id="routing-btn"
@@ -1993,7 +2003,7 @@
         title="Calculer un itinéraire"
         aria-label="Calculer un itinéraire"
       >
-        
+        <i class="fas fa-road"></i>
       </button>
       <button
         id="network-status"
@@ -2002,7 +2012,7 @@
         aria-label="Statut de la connexion"
         style="background: #10b981; cursor: default; pointer-events: none"
       >
-        
+        <i class="fas fa-wifi"></i>
       </button>
     </div>
 
@@ -2022,7 +2032,7 @@
     </div>
 
     <button id="toggle-points" class="round-btn" aria-label="Afficher les points">
-      
+      <i class="fas fa-list"></i>
       <span class="counter-badge" style="display: none">0</span>
     </button>
 
