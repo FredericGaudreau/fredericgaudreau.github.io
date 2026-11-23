@@ -675,7 +675,7 @@ function updateCollectionSelect() {
   });
 }
 
-const formatCoords = (lat, lng) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+const formatCoords = (lat, lng) => `${formatCoordValue(lat)}, ${formatCoordValue(lng)}`;
 
 const formatDate = (dateStr) =>
   new Date(dateStr).toLocaleString("fr-FR", {

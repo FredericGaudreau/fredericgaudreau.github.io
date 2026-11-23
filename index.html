@@ -7,8 +7,10 @@
     <meta name="description" content="Site personnel de Frédéric Gaudreau." />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com;"
+      content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
     />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Frédéric Gaudreau - Accueil" />
     <meta property="og:description" content="Site personnel de Frédéric Gaudreau." />
@@ -16,6 +18,12 @@
     <link rel="canonical" href="https://fredericgaudreau.github.io/" />
     <meta name="theme-color" content="#2563eb" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+    />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
     <link rel="stylesheet" href="/src/css/style.css" />
@@ -29,11 +37,20 @@
     <div id="header"></div>
     <main>
       <article>
+        <h1>Frédéric Gaudreau</h1>
         <p>
-          "Highly organized research is guaranteed to produce nothing new." ― Frank Herbert,
-          <em>Dune</em>
+          Ce site héberge une
+          <a href="/map.html">carte interactive</a> pour organiser des points d'intérêt et un
+          <a href="/notes.html">éditeur de notes Markdown</a> relié à la carte. Tout fonctionne dans
+          le navigateur, sans serveur.
         </p>
-        <p><a href="/map.html">Voir la carte</a></p>
+        <blockquote>
+          <p>
+            "Highly organized research is guaranteed to produce nothing new." ― Frank Herbert,
+            <em>Dune</em>
+          </p>
+        </blockquote>
+        <p><a href="/apropos.html">En savoir plus →</a></p>
       </article>
     </main>
     <div id="footer"></div>
