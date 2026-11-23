@@ -274,24 +274,13 @@ li {
 }
 
 .social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
   color: var(--color-neutral-700);
-  background: var(--color-neutral-200);
-  border-radius: 50px;
-  transition: all var(--transition);
+  transition: color var(--transition);
 }
 
 .social-link:hover {
   color: var(--color-primary);
-  background: var(--color-neutral-300);
-}
-
-.social-link i {
-  font-size: 1.25rem;
+  text-decoration: underline;
 }
 
 .copyright {
