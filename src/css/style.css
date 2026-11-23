@@ -1,13 +1,10 @@
 /* ============================================
-   Design System - Variables CSS
+   Variables CSS
    ============================================ */
 :root {
-  /* Couleurs principales */
+  /* Couleurs */
   --color-primary: #3b82f6;
-  --color-primary-light: #60a5fa;
   --color-primary-dark: #2563eb;
-  
-  /* Couleurs neutres */
   --color-neutral-50: #fafafa;
   --color-neutral-100: #f4f4f5;
   --color-neutral-200: #e4e4e7;
@@ -19,17 +16,10 @@
   --color-neutral-800: #27272a;
   --color-neutral-900: #18181b;
   
-  /* Couleurs sémantiques */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  
   /* Typographie */
-  --font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
   /* Espacement */
-  --space-xs: 0.25rem;
   --space-sm: 0.75rem;
   --space-md: 1.25rem;
   --space-lg: 1.75rem;
@@ -37,26 +27,13 @@
   
   /* Bordures */
   --border-radius: 8px;
-  --border-radius-lg: 12px;
   --border-width: 1px;
-  --border-width-thick: 2px;
-  
-  /* Ombres */
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.08);
   
   /* Transitions */
   --transition: 150ms ease;
-  
-  /* Z-index */
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-modal: 500;
 }
 
-/* ============================================
-   Mode sombre
-   ============================================ */
+/* Mode sombre */
 @media (prefers-color-scheme: dark) {
   :root {
     --color-neutral-50: #1e293b;
@@ -114,10 +91,16 @@ main {
   width: 100%;
 }
 
-article {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
+@media (max-width: 768px) {
+  main {
+    padding: var(--space-lg) var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: var(--space-md);
+  }
 }
 
 /* ============================================
@@ -161,26 +144,32 @@ a:hover {
 }
 
 a:focus-visible {
-  outline: var(--border-width-thick) solid var(--color-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 /* Citations */
 blockquote {
-  margin: var(--space-lg) 0;
-  padding: var(--space-md) var(--space-lg);
-  border-left: var(--border-width-thick) solid var(--color-primary);
-  background: var(--color-neutral-100);
-  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  margin: var(--space-xl) 0;
+  padding-left: var(--space-md);
+  border-left: var(--border-width) solid var(--color-primary);
   color: var(--color-neutral-700);
+  font-style: italic;
 }
 
 blockquote p {
-  margin-bottom: 0;
+  margin-bottom: var(--space-sm);
+  font-size: 1.125rem;
 }
 
-blockquote p:last-child {
-  margin-bottom: 0;
+blockquote footer {
+  font-size: 0.9rem;
+  color: var(--color-neutral-500);
+  font-style: normal;
+}
+
+blockquote footer:before {
+  content: "— ";
 }
 
 /* Listes */
@@ -198,7 +187,7 @@ ol {
 }
 
 li {
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
   color: var(--color-neutral-700);
 }
 
@@ -212,26 +201,27 @@ li {
   padding: var(--space-md) var(--space-lg);
   background: rgba(255, 255, 255, 0.98);
   border-bottom: var(--border-width) solid var(--color-neutral-200);
-  z-index: var(--z-sticky);
+  z-index: 100;
 }
 
 #site-header.scrolled {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .nav-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   max-width: 800px;
   margin: 0 auto;
+  flex-wrap: wrap;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   color: var(--color-neutral-600);
   font-weight: 500;
@@ -255,61 +245,8 @@ li {
   font-size: 1rem;
 }
 
-.nav-text {
-  display: inline;
-}
-
 .home-link {
   font-weight: 600;
-}
-
-/* Mobile menu button */
-.mobile-menu-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  color: var(--color-neutral-600);
-  background: var(--color-neutral-200);
-  border-radius: var(--border-radius);
-  transition: all var(--transition);
-}
-
-.mobile-menu-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-neutral-300);
-}
-
-.mobile-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  padding: var(--space-md);
-  background: rgba(255, 255, 255, 0.98);
-  border-bottom: var(--border-width) solid var(--color-neutral-200);
-  box-shadow: var(--shadow-md);
-  z-index: var(--z-dropdown);
-}
-
-.mobile-menu[hidden] {
-  display: none;
-}
-
-.mobile-menu a {
-  display: block;
-  padding: var(--space-md) var(--space-lg);
-  color: var(--color-neutral-700);
-  font-weight: 500;
-  border-radius: var(--border-radius);
-  transition: all var(--transition);
-}
-
-.mobile-menu a:hover {
-  color: var(--color-primary);
-  background: var(--color-neutral-100);
 }
 
 /* Footer */
@@ -341,9 +278,7 @@ li {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  min-width: 40px;
-  height: 40px;
-  padding: 0 var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   color: var(--color-neutral-500);
   background: var(--color-neutral-200);
   border-radius: 50px;
@@ -357,12 +292,6 @@ li {
 
 .social-link i {
   font-size: 1.25rem;
-}
-
-.social-text {
-  display: none;
-  font-size: 0.85rem;
-  font-weight: 500;
 }
 
 .copyright {
@@ -392,8 +321,6 @@ li {
 .skip-link:focus {
   top: var(--space-md);
 }
-
-
 
 /* ============================================
    Boutons
@@ -484,10 +411,10 @@ textarea::placeholder {
 }
 
 /* ============================================
-   Accessibilité - Focus visible
+   Accessibilité
    ============================================ */
 :focus-visible {
-  outline: var(--border-width-thick) solid var(--color-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -496,13 +423,10 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: var(--border-width-thick) solid var(--color-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* ============================================
-   Accessibilité - Réduction du mouvement
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -514,13 +438,9 @@ textarea:focus-visible {
   }
 }
 
-/* ============================================
-   Accessibilité - High Contrast
-   ============================================ */
 @media (prefers-contrast: high) {
   :root {
     --border-width: 2px;
-    --border-width-thick: 3px;
   }
   
   a:focus-visible,
@@ -533,88 +453,7 @@ textarea:focus-visible {
 }
 
 /* ============================================
-   Responsive Design
-   ============================================ */
-@media (max-width: 1024px) {
-  main {
-    padding: var(--space-lg) var(--space-md);
-  }
-  
-  .tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .nav-container {
-    justify-content: space-between;
-    gap: var(--space-md);
-  }
-  
-  .nav-link:not(.home-link) {
-    display: none;
-  }
-  
-  .home-link {
-    padding: var(--space-sm);
-  }
-  
-  .mobile-menu-btn {
-    display: flex;
-    margin-left: auto;
-  }
-  
-  .mobile-menu {
-    display: block;
-  }
-  
-  .tools-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  main {
-    padding: var(--space-lg) var(--space-md);
-  }
-  
-  h1 {
-    font-size: 1.75rem;
-  }
-  
-  .social-text {
-    display: inline;
-  }
-  
-  .social-link {
-    padding: var(--space-sm) var(--space-md);
-  }
-}
-
-@media (max-width: 480px) {
-  main {
-    padding: var(--space-md);
-  }
-  
-  h1 {
-    font-size: 1.5rem;
-  }
-  
-  
-  .social-nav {
-    gap: var(--space-sm);
-  }
-  
-  .nav-text {
-    display: none;
-  }
-  
-  .home-link {
-    padding: var(--space-sm);
-  }
-}
-
-
-/* ============================================
-   Index Page - Styles
+   Index Page - Styles simplifiés
    ============================================ */
 .tools-list {
   list-style: none;
@@ -630,45 +469,19 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-md);
-  border-radius: var(--border-radius);
-  transition: background var(--transition);
+  padding: var(--space-sm) 0;
+  transition: color var(--transition);
   font-size: 1.1rem;
 }
 
 .tools-list a:hover {
-  background: var(--color-neutral-100);
+  color: var(--color-primary-dark);
 }
 
 .tools-list i {
   color: var(--color-primary);
   font-size: 1.25rem;
   width: 24px;
-}
-
-blockquote {
-  margin: var(--space-xl) 0;
-  padding: var(--space-md) var(--space-lg);
-  border-left: var(--border-width-thick) solid var(--color-primary);
-  background: var(--color-neutral-100);
-  border-radius: 0 var(--border-radius) var(--border-radius) 0;
-  color: var(--color-neutral-700);
-  font-style: italic;
-}
-
-blockquote p {
-  margin-bottom: var(--space-sm);
-  font-size: 1.125rem;
-}
-
-blockquote footer {
-  font-size: 0.9rem;
-  color: var(--color-neutral-500);
-  font-style: normal;
-}
-
-blockquote footer:before {
-  content: "— ";
 }
 
 /* ============================================
@@ -696,5 +509,3 @@ blockquote footer:before {
     text-decoration: underline;
   }
 }
-
-/* ============================================
