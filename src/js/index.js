@@ -18,9 +18,79 @@
   };
 
   let isMenuOpen = false;
-
   const $ = (id) => document.getElementById(id);
 
+  // ============================================
+  // Menu mobile - Délégation d'événement
+  // ============================================
+  
+  // Utiliser la délégation d'événement pour gérer le bouton mobile menu
+  // qui est chargé dynamiquement
+  document.addEventListener('click', function(e) {
+    // Clic sur le bouton mobile menu
+    const menuBtn = e.target.closest('#mobile-menu-btn');
+    if (menuBtn) {
+      e.preventDefault();
+      toggleMobileMenu();
+      return;
+    }
+    
+    // Clic sur un lien du menu mobile
+    const menuLink = e.target.closest('#mobile-menu a');
+    if (menuLink) {
+      closeMobileMenu();
+    }
+  });
+
+  // Fermer avec Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && isMenuOpen) {
+      closeMobileMenu();
+    }
+  });
+
+  // Fermer en cliquant à l'extérieur
+  document.addEventListener('click', function(e) {
+    if (isMenuOpen && !e.target.closest('#mobile-menu-btn') && !e.target.closest('#mobile-menu')) {
+      closeMobileMenu();
+    }
+  });
+
+  function toggleMobileMenu() {
+    const menuBtn = $('#mobile-menu-btn');
+    const mobileMenu = $('#mobile-menu');
+    
+    if (!menuBtn || !mobileMenu) return;
+
+    isMenuOpen = !isMenuOpen;
+    menuBtn.setAttribute('aria-expanded', isMenuOpen);
+    mobileMenu.hidden = !isMenuOpen;
+    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    
+    if (isMenuOpen) {
+      mobileMenu.querySelector('a')?.focus();
+    } else {
+      menuBtn.focus();
+    }
+  }
+
+  function closeMobileMenu() {
+    const menuBtn = $('#mobile-menu-btn');
+    const mobileMenu = $('#mobile-menu');
+    
+    if (!menuBtn || !mobileMenu) return;
+
+    isMenuOpen = false;
+    menuBtn.setAttribute('aria-expanded', false);
+    mobileMenu.hidden = true;
+    document.body.style.overflow = '';
+    menuBtn.focus();
+  }
+
+  // ============================================
+  // Chargement des composants
+  // ============================================
+  
   async function includeHTML(id, file) {
     const element = $(id);
     if (!element) return;
@@ -32,9 +102,10 @@
       
       // Initialiser après chargement
       if (id === 'header') {
-        await new Promise(resolve => requestAnimationFrame(resolve));
-        initMobileMenu();
         markCurrentLink();
+      }
+      if (id === 'footer') {
+        updateCurrentYear();
       }
     } catch (error) {
       console.warn(`Failed to load ${file}:`, error);
@@ -42,104 +113,55 @@
     }
   }
 
+  // ============================================
+  // Navigation
+  // ============================================
+  
   function markCurrentLink() {
     const currentPage = document.body.dataset.page;
     
-    const navLinks = {
-      home: 'home-link',
-      map: 'map-link',
-      notes: 'notes-link',
-      about: 'about-link'
-    };
-    
-    Object.entries(navLinks).forEach(([key, id]) => {
-      const link = $(id);
+    ['home', 'map', 'notes', 'about'].forEach(key => {
+      const link = $(`${key}-link`);
+      const mobileLink = $(`mobile-${key}-link`);
+      const path = PAGE_MAPPING[key] || `/${key}.html`;
+      
       if (link) {
-        link.setAttribute('href', PAGE_MAPPING[key] || `/${key}.html`);
+        link.setAttribute('href', path);
         link.toggleAttribute('aria-current', key === currentPage);
       }
-    });
-    
-    const mobileNavLinks = {
-      home: 'mobile-home-link',
-      map: 'mobile-map-link',
-      notes: 'mobile-notes-link',
-      about: 'mobile-about-link'
-    };
-    
-    Object.entries(mobileNavLinks).forEach(([key, id]) => {
-      const link = $(id);
-      if (link) {
-        link.setAttribute('href', PAGE_MAPPING[key] || `/${key}.html`);
-        link.toggleAttribute('aria-current', key === currentPage);
+      if (mobileLink) {
+        mobileLink.setAttribute('href', path);
+        mobileLink.toggleAttribute('aria-current', key === currentPage);
       }
     });
   }
 
+  // ============================================
+  // Header scroll
+  // ============================================
+  
   function initHeaderScroll() {
     const header = $('#site-header');
     if (!header) return;
 
-    const handleScroll = () => {
+    window.addEventListener('scroll', () => {
       header.classList.toggle('scrolled', window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    }, { passive: true });
   }
 
-  function initMobileMenu() {
-    const menuBtn = $('#mobile-menu-btn');
-    const mobileMenu = $('#mobile-menu');
-    
-    if (!menuBtn || !mobileMenu) {
-      setTimeout(initMobileMenu, 200);
-      return;
-    }
-
-    const toggleMenu = () => {
-      isMenuOpen = !isMenuOpen;
-      menuBtn.setAttribute('aria-expanded', isMenuOpen);
-      mobileMenu.hidden = !isMenuOpen;
-      document.body.style.overflow = isMenuOpen ? 'hidden' : '';
-      
-      if (isMenuOpen) {
-        mobileMenu.querySelector('a')?.focus();
-      } else {
-        menuBtn.focus();
-      }
-    };
-
-    menuBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleMenu();
-    });
-
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        isMenuOpen = false;
-        menuBtn.setAttribute('aria-expanded', false);
-        mobileMenu.hidden = true;
-        document.body.style.overflow = '';
-      });
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) toggleMenu();
-    });
-
-    document.addEventListener('click', (e) => {
-      if (isMenuOpen && !e.target.closest('#mobile-menu-btn') && !e.target.closest('#mobile-menu')) {
-        toggleMenu();
-      }
-    });
-  }
-
+  // ============================================
+  // Footer
+  // ============================================
+  
   function updateCurrentYear() {
     const yearEl = $('#current-year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
   }
 
+  // ============================================
+  // Initialisation
+  // ============================================
+  
   async function init() {
     await Promise.all([
       includeHTML('header', COMPONENTS.header),
@@ -147,7 +169,6 @@
     ]);
 
     initHeaderScroll();
-    updateCurrentYear();
   }
 
   if (document.readyState === 'loading') {
