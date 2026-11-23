@@ -64,6 +64,15 @@
         throw new Error(`HTTP ${response.status}`);
       }
       element.innerHTML = await response.text();
+      
+      // Attendre que le DOM soit mis à jour
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      // Initialiser le menu mobile après le chargement du header
+      if (id === 'header') {
+        initMobileMenu();
+        markCurrentLink();
+      }
     } catch (error) {
       console.error(`Failed to load ${file}:`, error);
       element.innerHTML = `<p class="error-msg">Erreur de chargement du composant ${file}</p>`;
@@ -77,8 +86,8 @@
   /**
    * Met à jour le lien actuel dans le menu
    */
-  function markCurrentLink(page) {
-    const currentPage = page || document.body.dataset.page;
+  function markCurrentLink() {
+    const currentPage = document.body.dataset.page;
     
     // Lien dans le header principal
     const navLinks = {
@@ -136,93 +145,84 @@
     const header = $('#site-header');
     if (!header) return;
 
-    let lastScrollY = window.scrollY;
-    
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      
-      // Ajouter la classe .scrolled quand on scroll vers le bas
       if (scrollY > 10) {
         header.classList.add('scrolled');
       } else {
         header.classList.remove('scrolled');
       }
-      
-      lastScrollY = scrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
   }
 
   // ============================================
-  // Menu mobile
+  // Menu mobile - VERSION ROBUSTE
   // ============================================
   
   /**
    * Initialise le menu mobile
    */
   function initMobileMenu() {
-    // Utiliser la délégation d'événement car le header est chargé dynamiquement
-    document.addEventListener('click', (e) => {
-      const menuBtn = e.target.closest('#mobile-menu-btn');
-      if (menuBtn) {
-        e.preventDefault();
-        toggleMobileMenu();
-        return;
-      }
+    const menuBtn = $('#mobile-menu-btn');
+    const mobileMenu = $('#mobile-menu');
+    
+    if (!menuBtn || !mobileMenu) {
+      // Si les éléments n'existent pas encore, essayer plus tard
+      console.warn('Mobile menu elements not found, retrying...');
+      setTimeout(initMobileMenu, 200);
+      return;
+    }
+
+    console.log('Mobile menu initialized');
+
+    const toggleMenu = () => {
+      isMenuOpen = !isMenuOpen;
+      const isOpen = isMenuOpen;
       
-      const mobileMenu = $('#mobile-menu');
-      if (mobileMenu && !mobileMenu.hidden && !e.target.closest('#mobile-menu')) {
-        closeMobileMenu();
+      menuBtn.setAttribute('aria-expanded', isOpen);
+      mobileMenu.hidden = !isOpen;
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+      
+      if (isOpen) {
+        const firstLink = mobileMenu.querySelector('a');
+        if (firstLink) firstLink.focus();
+      } else {
+        menuBtn.focus();
       }
+    };
+
+    // Écouteur direct sur le bouton
+    on(menuBtn, 'click', (e) => {
+      e.preventDefault();
+      toggleMenu();
+    });
+
+    // Fermer le menu quand on clique sur un lien
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      on(link, 'click', () => {
+        isMenuOpen = false;
+        menuBtn.setAttribute('aria-expanded', false);
+        mobileMenu.hidden = true;
+        document.body.style.overflow = '';
+      });
     });
 
     // Fermer avec la touche Escape
-    document.addEventListener('keydown', (e) => {
+    on(document, 'keydown', (e) => {
       if (e.key === 'Escape' && isMenuOpen) {
-        closeMobileMenu();
+        toggleMenu();
       }
     });
-  }
 
-  function toggleMobileMenu() {
-    const menuBtn = $('#mobile-menu-btn');
-    const mobileMenu = $('#mobile-menu');
-    
-    if (!menuBtn || !mobileMenu) return;
-
-    isMenuOpen = !isMenuOpen;
-    const isOpen = isMenuOpen;
-    
-    menuBtn.setAttribute('aria-expanded', isOpen);
-    mobileMenu.hidden = !isOpen;
-    
-    // Bloquer le scroll du body quand le menu est ouvert
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    
-    // Focus sur le premier lien du menu
-    if (isOpen) {
-      const firstLink = mobileMenu.querySelector('a');
-      if (firstLink) {
-        firstLink.focus();
+    // Fermer en cliquant à l'extérieur
+    on(document, 'click', (e) => {
+      if (isMenuOpen && !e.target.closest('#mobile-menu-btn') && !e.target.closest('#mobile-menu')) {
+        toggleMenu();
       }
-    } else {
-      menuBtn.focus();
-    }
-  }
-
-  function closeMobileMenu() {
-    const menuBtn = $('#mobile-menu-btn');
-    const mobileMenu = $('#mobile-menu');
-    
-    if (!menuBtn || !mobileMenu) return;
-
-    isMenuOpen = false;
-    menuBtn.setAttribute('aria-expanded', false);
-    mobileMenu.hidden = true;
-    document.body.style.overflow = '';
-    menuBtn.focus();
+    });
   }
 
   // ============================================
@@ -253,16 +253,7 @@
       includeHTML('footer', COMPONENTS.footer)
     ]);
 
-    // Attendre un peu pour que le DOM soit complètement mis à jour
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Initialiser le menu mobile (doit être avant markCurrentLink)
-    initMobileMenu();
-
-    // Mettre à jour les liens actifs
-    markCurrentLink();
-
-    // Initialiser le header
+    // Initialiser le header scroll
     initHeaderScroll();
 
     // Mettre à jour l'année dans le footer
