@@ -709,11 +709,16 @@ $("delete-btn").addEventListener("click", deleteCurrent);
 $("copy-btn").addEventListener("click", copyMarkdown);
 $("fullscreen-btn").addEventListener("click", toggleFullscreen);
 
+function setPreviewMode(show) {
+  $("editor-panes").classList.toggle("show-preview", show);
+  $("toggle-preview").setAttribute("aria-pressed", String(show));
+}
+
 $("toggle-preview").addEventListener("click", () => {
-  const panes = $("editor-panes");
-  const showPreview = panes.classList.toggle("show-preview");
-  $("toggle-preview").setAttribute("aria-pressed", String(showPreview));
+  setPreviewMode(!$("editor-panes").classList.contains("show-preview"));
 });
+
+$("close-preview")?.addEventListener("click", () => setPreviewMode(false));
 
 $("toggle-sidebar").addEventListener("click", () => {
   const visible = document.body.classList.toggle("show-sidebar");

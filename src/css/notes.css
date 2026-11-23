@@ -254,6 +254,7 @@
 }
 
 #editor-panes {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
@@ -270,6 +271,25 @@
 
 #editor-panes.show-preview #markdown-preview {
   border-left: none;
+}
+
+#close-preview {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.9rem;
+  z-index: 5;
+  display: none;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+}
+
+#close-preview:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+#editor-panes.show-preview #close-preview {
+  display: inline-flex;
 }
 
 #markdown-input {
@@ -514,6 +534,7 @@ body.linked-mode #notes-app {
   #linked-banner,
   #notes-sidebar,
   #notes-sidebar-toggle,
+  #close-preview,
   #markdown-input {
     display: none !important;
   }
