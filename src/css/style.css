@@ -409,14 +409,11 @@ li {
   flex-direction: column;
   gap: var(--space-sm);
   padding: var(--space-lg);
-  border: var(--border-width-thick) solid var(--color-neutral-200);
-  border-radius: var(--border-radius-lg);
   background: var(--color-neutral-50);
   transition: all var(--transition);
 }
 
 .tool-card:hover {
-  border-color: var(--color-primary);
   box-shadow: var(--shadow-md);
 }
 
@@ -807,7 +804,6 @@ article .tool-card {
 }
 
 article .tool-card:hover {
-  border-color: var(--color-primary);
   box-shadow: var(--shadow-md);
 }
 
