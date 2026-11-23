@@ -10,6 +10,10 @@ if (typeof L === "undefined") {
   throw new Error("Leaflet indisponible");
 }
 
+function safeColor(color) {
+  return /^#[0-9a-fA-F]{3,8}$/.test(color || "") ? color : "#3b82f6";
+}
+
 function formatCoordValue(value) {
   const num = Number(value);
   return Number.isFinite(num) ? num.toFixed(5) : "0";
@@ -254,7 +258,7 @@ const getMarkerIcon = (color) => {
   if (!color) return null;
   return L.divIcon({
     className: "custom-marker",
-    html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
+    html: `<div style="background-color: ${safeColor(color)}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10],
   });
@@ -639,7 +643,7 @@ function updateCollectionsUI() {
 
     const badge = document.createElement("span");
     badge.className = "collection-badge";
-    badge.style.background = coll.color;
+    badge.style.background = safeColor(coll.color);
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = coll.name;
@@ -671,7 +675,7 @@ function updateCollectionSelect() {
     const opt = document.createElement("option");
     opt.value = coll.id;
     opt.textContent = coll.name;
-    opt.style.borderLeft = `4px solid ${coll.color}`;
+    opt.style.borderLeft = `4px solid ${safeColor(coll.color)}`;
     collectionSelect.appendChild(opt);
   });
 }
@@ -916,7 +920,7 @@ function formatPopupContent(
     ? collections.find((c) => c.id === point.collectionId)
     : null;
   const badgeHtml = collection
-    ? `<span class="popup-badge"><span class="popup-badge-dot" style="background:${collection.color}"></span>${escapeHtml(collection.name)}</span>`
+    ? `<span class="popup-badge"><span class="popup-badge-dot" style="background:${safeColor(collection.color)}"></span>${escapeHtml(collection.name)}</span>`
     : "";
 
   const weather = weatherData?.current_weather
@@ -1008,7 +1012,7 @@ function renderCollectionOptions(selectedId = null) {
           ${collections
             .map(
               (coll) =>
-                `<option value="${coll.id}" ${coll.id === selectedId ? "selected" : ""}>${escapeHtml(coll.name)}</option>`,
+                `<option value="${escapeAttr(coll.id)}" ${coll.id === selectedId ? "selected" : ""}>${escapeHtml(coll.name)}</option>`,
             )
             .join("")}
         `;
@@ -1162,7 +1166,7 @@ function updatePointsList() {
       const collection = collections.find((c) => c.id === point.collectionId);
       if (collection) {
         card.setAttribute("data-collection", point.collectionId);
-        card.style.setProperty("--collection-color", collection.color);
+        card.style.setProperty("--collection-color", safeColor(collection.color));
       }
     }
     fragment.appendChild(card);
@@ -1769,10 +1773,15 @@ function performImport(validPoints, collectionsData, mode) {
     // Importer les collections
     if (Array.isArray(collectionsData)) {
       collectionsData.forEach((importedColl) => {
-        const exists = collections.some((c) => c.id === importedColl.id);
-        if (!exists) {
-          collections.push(importedColl);
-        }
+        const id = typeof importedColl?.id === "string" ? importedColl.id : "";
+        const name =
+          typeof importedColl?.name === "string" ? importedColl.name.trim().substring(0, 100) : "";
+        if (!id || !name) return;
+        if (collections.some((c) => c.id === id)) return;
+        const color = /^#[0-9a-fA-F]{3,8}$/.test(importedColl?.color || "")
+          ? importedColl.color
+          : COLLECTION_COLORS[collections.length % COLLECTION_COLORS.length];
+        collections.push({ id, name, color });
       });
       saveCollections();
       updateCollectionsUI();
