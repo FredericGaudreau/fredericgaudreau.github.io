@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="referrer" content="no-referrer-when-downgrade" />
     <meta name="description" content="Carte avec météo et informations géographiques." />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
@@ -320,6 +319,23 @@
         font-family: monospace;
       }
 
+      .center-btn {
+        background: var(--border);
+        color: var(--text-primary);
+        border: 0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .center-btn:hover {
+        background: var(--primary);
+        color: white;
+      }
+
       .rename-btn {
         background: var(--primary);
         color: white;
@@ -506,6 +522,25 @@
         text-align: center;
       }
 
+      .map-load-error {
+        position: fixed;
+        inset: 1rem;
+        z-index: 3000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1.5rem;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--error);
+        background: #fff;
+        border: 2px solid var(--error);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
       .leaflet-popup-content-wrapper {
         border-radius: 14px;
         border: 2px solid var(--border);
@@ -519,7 +554,7 @@
         font-size: 0.84rem;
         color: var(--text-primary);
         line-height: 1.35;
-        max-width: 220px;
+        max-width: 360px;
         padding: 0;
         margin: 0;
         background: transparent;
@@ -540,51 +575,300 @@
         border-radius: 14px;
       }
 
-      .popup-close-btn {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: none;
-        border: none;
-        font-size: 1.1rem;
-        line-height: 1;
-        cursor: pointer;
+      .popup-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.4rem 0.4rem 0.35rem 0.6rem;
+        border-bottom: 2px solid var(--border);
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      }
+
+      .popup-header-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+      }
+
+      .popup-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        align-self: flex-start;
+        font-size: 0.7rem;
+        font-weight: 600;
         color: var(--text-secondary);
-        padding: 4px 6px;
-        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.04);
+        border-radius: 999px;
+        padding: 0.1rem 0.5rem;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      .popup-close-btn:hover {
-        background: rgba(0, 0, 0, 0.05);
-        color: var(--error);
+      .popup-badge-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        flex-shrink: 0;
       }
 
-      .popup-share-btn {
-        background: none;
-        border: none;
+      .popup-footer {
+        display: flex;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid var(--border);
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+      }
+
+      .popup-route-btn {
         font-size: 0.75rem;
         font-weight: 600;
         color: var(--primary);
+      }
+
+      .popup-route-btn:hover {
+        background: rgba(37, 99, 235, 0.08);
+      }
+
+      .popup-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.15rem;
+        flex-shrink: 0;
+      }
+
+      .popup-actions-btn {
+        background: none;
+        border: none;
         cursor: pointer;
-        padding: 2px 6px;
-        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        line-height: 1;
+        padding: 5px 7px;
+        border-radius: 6px;
+        color: var(--text-secondary);
+      }
+
+      .popup-actions-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      .popup-actions-btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+      }
+
+      .popup-close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 6px 8px;
+        border-radius: 6px;
+        color: var(--text-secondary);
+      }
+
+      .popup-close-btn:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--error);
+      }
+
+      .popup-close-btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+      }
+
+      .popup-coords {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 0.3rem 0.6rem;
+        margin: 0.15rem 0.25rem 0;
         border-radius: 6px;
         align-self: flex-start;
       }
 
-      .popup-share-btn:hover {
+      .popup-coords:hover {
         background: rgba(37, 99, 235, 0.08);
+        color: var(--primary);
+      }
+
+      .popup-coords:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+      }
+
+      .popup-note {
+        margin-top: 0.5rem;
+        padding: 0.5rem 0.6rem 0.25rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+
+      .popup-note-header {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.3rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+      }
+
+      .popup-note-header i {
+        color: var(--primary);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .popup-edit-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-left: auto;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .popup-note-content {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        word-break: break-word;
+      }
+
+      .popup-note-content > :first-child {
+        margin-top: 0;
+      }
+
+      .popup-note-content > :last-child {
+        margin-bottom: 0.25rem;
+      }
+
+      .popup-note-content p {
+        margin: 0.3rem 0;
+      }
+
+      .popup-note-content h1,
+      .popup-note-content h2,
+      .popup-note-content h3,
+      .popup-note-content h4,
+      .popup-note-content h5,
+      .popup-note-content h6 {
+        margin: 0.5rem 0 0.2rem;
+        line-height: 1.25;
+        font-size: 0.85rem;
+      }
+
+      .popup-note-content h1 {
+        font-size: 0.95rem;
+      }
+
+      .popup-note-content h2 {
+        font-size: 0.9rem;
+      }
+
+      .popup-note-content ul,
+      .popup-note-content ol {
+        margin: 0.25rem 0;
+        padding-left: 1.25rem;
+      }
+
+      .popup-note-content li {
+        margin-bottom: 0.15rem;
+      }
+
+      .popup-note-content .task-list {
+        list-style: none;
+        padding-left: 0.4rem;
+      }
+
+      .popup-note-content .task .checkbox {
+        display: inline-block;
+        width: 0.75rem;
+        height: 0.75rem;
+        margin-right: 0.4rem;
+        border: 2px solid #94a3b8;
+        border-radius: 4px;
+        vertical-align: middle;
+      }
+
+      .popup-note-content .task.done {
+        color: #64748b;
+        text-decoration: line-through;
+      }
+
+      .popup-note-content .task.done .checkbox {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+
+      .popup-note-content a {
+        color: var(--primary);
+      }
+
+      .popup-note-content img {
+        max-width: 100%;
+        border-radius: 6px;
+      }
+
+      .popup-note-content hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 0.4rem 0;
+      }
+
+      .popup-note-content blockquote {
+        margin: 0.35rem 0;
+        padding: 0.15rem 0.6rem;
+        border-left: 3px solid var(--primary);
+        color: var(--text-secondary);
+      }
+
+      .popup-note-content pre {
+        margin: 0.35rem 0;
+        padding: 0.5rem 0.6rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.75rem;
+      }
+
+      .popup-note-content code {
+        background: rgba(15, 23, 42, 0.08);
+        border-radius: 4px;
+        padding: 0.05rem 0.3rem;
+        font-size: 0.8em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .popup-share-btn {
+        color: var(--primary);
       }
 
       .popup-title {
         font-weight: 700;
         color: var(--text-primary);
         font-size: 1rem;
-        margin-bottom: 0.25rem;
-        padding: 0.45rem 0.6rem;
-        border-bottom: 2px solid var(--border);
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 0;
+        line-height: 1.25;
+        word-break: break-word;
+        padding: 0.15rem 0;
       }
 
       /* Boutons flottants */
@@ -623,18 +907,45 @@
         background-color: var(--primary-dark);
       }
 
-      #about-link {
+      #about-btn {
         background: var(--bg-glass);
         border: 2px solid var(--border);
         color: var(--text-primary);
-        text-decoration: none;
         backdrop-filter: blur(12px);
       }
 
-      #about-link:hover {
+      #about-btn:hover {
         background: var(--primary);
         color: white;
-        /* transform: scale(1.15) rotate(15deg); */
+      }
+
+      .about-modal-content {
+        text-align: left;
+        max-width: 420px;
+      }
+
+      .about-modal-content ul {
+        margin: 0.75rem 0;
+        padding-left: 1.25rem;
+        text-align: left;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .about-modal-content li {
+        margin-bottom: 0.3rem;
+      }
+
+      .about-modal-content .about-modal-note {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+      }
+
+      .about-modal-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #locate-btn {
@@ -881,6 +1192,19 @@
         font: inherit;
         transition: var(--transition);
         box-sizing: border-box;
+      }
+
+      #sort-points {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0 0;
+        padding: 0.45rem 0.6rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        background: #fff;
+        box-sizing: border-box;
+        cursor: pointer;
       }
 
       #search-points:focus {
@@ -1370,6 +1694,11 @@
   </head>
   <body>
     <div id="map"></div>
+    <noscript>
+      <p class="error-msg" style="margin: 1rem">
+        La carte nécessite JavaScript. Activez-le pour utiliser cet outil.
+      </p>
+    </noscript>
 
     <button
       id="toggle-nominatim"
@@ -1568,6 +1897,40 @@
       </div>
     </div>
 
+    <!-- Modal À propos -->
+    <div
+      id="about-modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+      style="display: none"
+    >
+      <div class="modal-content about-modal-content">
+        <h3 id="about-modal-title">À propos de la carte</h3>
+        <p>
+          Carte créée avec
+          <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet.js</a>.
+          Permet de créer, organiser et annoter des points d'intérêt.
+        </p>
+        <ul>
+          <li>Ajouter, modifier, supprimer des points</li>
+          <li>Organiser les points en collections avec couleurs</li>
+          <li>Voir les informations locales (météo, altitude, qualité de l'air)</li>
+          <li>Notes en Markdown reliées aux points</li>
+          <li>Itinéraires, partage et export JSON/CSV/Markdown</li>
+        </ul>
+        <p class="about-modal-note">
+          Les points et les notes sont sauvegardés dans votre navigateur seulement — aucune donnée
+          ne quitte votre appareil. Fonctionne hors ligne avec les données mises en cache.
+        </p>
+        <div class="modal-buttons">
+          <a href="/carte.html" class="btn-secondary about-modal-link">Plus de détails</a>
+          <button id="about-close" class="btn-primary">Fermer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Section des points -->
     <section id="points-section">
       <h3 class="panel-header">
@@ -1589,6 +1952,14 @@
           >
             <i class="fas fa-upload"></i>
           </button>
+          <button
+            id="export-notes-btn"
+            class="points-action-btn"
+            title="Exporter les notes en Markdown"
+            aria-label="Exporter les notes en Markdown"
+          >
+            <i class="fas fa-file-lines"></i>
+          </button>
           <button id="close-points" aria-label="Fermer">×</button>
         </div>
       </h3>
@@ -1596,12 +1967,17 @@
         <input
           type="text"
           id="search-points"
-          placeholder="🔍 Rechercher un point..."
+          placeholder="Rechercher un point…"
           autocomplete="off"
         />
         <button type="button" id="clear-search" aria-label="Effacer la recherche" title="Effacer">
           ×
         </button>
+        <select id="sort-points" aria-label="Trier les points" title="Trier les points">
+          <option value="recent">Récemment ajoutés</option>
+          <option value="name-asc">Nom A → Z</option>
+          <option value="name-desc">Nom Z → A</option>
+        </select>
       </div>
       <ul id="points-list"></ul>
     </section>
@@ -1614,7 +1990,9 @@
 
     <!-- Boutons flottants -->
     <div id="footer">
-      <a href="/carte.html" id="about-link" class="round-btn" title="À propos">?</a>
+      <button id="about-btn" type="button" class="round-btn" title="À propos" aria-label="À propos">
+        ?
+      </button>
       <button id="locate-btn" class="round-btn" title="Me localiser" aria-label="Me localiser">
         <i class="fas fa-location-arrow"></i>
       </button>
@@ -1663,6 +2041,7 @@
       crossorigin=""
     ></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="src/js/markdown.js" defer></script>
     <script src="src/js/map.js" defer></script>
   </body>
 </html>

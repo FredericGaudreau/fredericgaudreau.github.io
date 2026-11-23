@@ -1,5 +1,31 @@
 "use strict";
 
+if (typeof L === "undefined") {
+  const banner = document.createElement("div");
+  banner.className = "map-load-error";
+  banner.setAttribute("role", "alert");
+  banner.textContent =
+    "Impossible de charger la bibliothèque de carte (Leaflet). Vérifiez votre connexion et rechargez la page.";
+  document.body.appendChild(banner);
+  throw new Error("Leaflet indisponible");
+}
+
+function safeColor(color) {
+  return /^#[0-9a-fA-F]{3,8}$/.test(color || "") ? color : "#3b82f6";
+}
+
+function formatCoordValue(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num.toFixed(5) : "0";
+}
+
+function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return Promise.reject(new Error("Presse-papiers indisponible"));
+}
+
 const CONFIG = {
   defaultCenter: [45.8924, -74.1546],
   defaultZoom: 13,
@@ -46,11 +72,14 @@ class PersistentCache {
     const data = { key, value, timestamp: Date.now() };
 
     if (this.db) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = this.db.transaction(["cache"], "readwrite");
         const store = tx.objectStore("cache");
         const request = store.put(data);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+          console.warn("Échec d'écriture du cache (IndexedDB)");
+          resolve();
+        };
         request.onsuccess = () => resolve();
       });
     } else {
@@ -101,11 +130,11 @@ class PersistentCache {
   async clear() {
     await this.ready;
     if (this.db) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = this.db.transaction(["cache"], "readwrite");
         const store = tx.objectStore("cache");
         const request = store.clear();
-        request.onerror = () => reject(request.error);
+        request.onerror = () => resolve();
         request.onsuccess = () => resolve();
       });
     } else {
@@ -229,7 +258,7 @@ const getMarkerIcon = (color) => {
   if (!color) return null;
   return L.divIcon({
     className: "custom-marker",
-    html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
+    html: `<div style="background-color: ${safeColor(color)}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10],
   });
@@ -245,6 +274,7 @@ const toggleBtn = $("toggle-points");
 const locateBtn = $("locate-btn");
 const counterBadge = toggleBtn.querySelector(".counter-badge");
 const searchInput = $("search-points");
+const sortPointsSelect = $("sort-points");
 const addressSearchInput = $("search-address");
 const addressSearchResults = $("search-results");
 const nominatimSearch = $("nominatim-search");
@@ -270,6 +300,9 @@ const exportConfirm = $("export-confirm");
 const importModal = $("import-modal");
 const importCancel = $("import-cancel");
 const importConfirm = $("import-confirm");
+const aboutModal = $("about-modal");
+const aboutClose = $("about-close");
+const aboutBtn = $("about-btn");
 const routingBtn = $("routing-btn");
 const routingPanel = $("routing-panel");
 const routingStart = $("routing-start");
@@ -277,19 +310,6 @@ const routingEnd = $("routing-end");
 const routingCalculate = $("routing-calculate");
 const routingClose = $("routing-close");
 let pointEventsAttached = false;
-
-const escapeHtml = (str) =>
-  str.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
 
 const debounce = (fn, delay) => {
   let timeout;
@@ -623,7 +643,7 @@ function updateCollectionsUI() {
 
     const badge = document.createElement("span");
     badge.className = "collection-badge";
-    badge.style.background = coll.color;
+    badge.style.background = safeColor(coll.color);
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = coll.name;
@@ -655,12 +675,12 @@ function updateCollectionSelect() {
     const opt = document.createElement("option");
     opt.value = coll.id;
     opt.textContent = coll.name;
-    opt.style.borderLeft = `4px solid ${coll.color}`;
+    opt.style.borderLeft = `4px solid ${safeColor(coll.color)}`;
     collectionSelect.appendChild(opt);
   });
 }
 
-const formatCoords = (lat, lng) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+const formatCoords = (lat, lng) => `${formatCoordValue(lat)}, ${formatCoordValue(lng)}`;
 
 const formatDate = (dateStr) =>
   new Date(dateStr).toLocaleString("fr-FR", {
@@ -850,7 +870,6 @@ function renderGeoInfo(geoData, elevationData) {
   }
 
   const addr = geoData.address;
-  console.log("Données géographiques:", geoData);
   const elevation = elevationData?.results?.[0]?.elevation;
 
   const parts = [
@@ -889,11 +908,19 @@ function formatPopupContent(
   elevationData = null,
   airData = null,
 ) {
-  const title = `📍 ${escapeHtml(point.name)}`;
-  const coords = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
-  const note = point.note ? escapeHtml(point.note).replace(/\n/g, "<br>") : null;
+  const title = escapeHtml(point.name);
+  const coords = `${formatCoordValue(point.lat)}, ${formatCoordValue(point.lng)}`;
+  const note = point.note && point.note.trim() ? renderMarkdown(point.note.trim()) : null;
+  const noteEditUrl = `/notes.html#point=${formatCoordValue(point.lat)},${formatCoordValue(point.lng)}`;
   const noteHtml = note
-    ? `<div class="info-item"><i class="fas fa-sticky-note"></i><strong>Notes</strong><br> <span style="white-space: pre-wrap;">${note}</span></div>`
+    ? `<div class="popup-note"><div class="popup-note-header"><i class="fas fa-sticky-note" aria-hidden="true"></i> <strong>Notes</strong><a class="popup-edit-note" href="${noteEditUrl}"><i class="fas fa-pen" aria-hidden="true"></i> Éditer la note</a></div><div class="popup-note-content">${note}</div></div>`
+    : "";
+
+  const collection = point.collectionId
+    ? collections.find((c) => c.id === point.collectionId)
+    : null;
+  const badgeHtml = collection
+    ? `<span class="popup-badge"><span class="popup-badge-dot" style="background:${safeColor(collection.color)}"></span>${escapeHtml(collection.name)}</span>`
     : "";
 
   const weather = weatherData?.current_weather
@@ -922,17 +949,33 @@ function formatPopupContent(
 
   return `
           <div class="popup-card">
-            <button class="popup-close-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Fermer">×</button>
-            <div class="popup-title">${title}</div>
-            <button class="popup-share-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Partager ce point" title="Partager ce point">
-              <i class="fas fa-share" aria-hidden="true"></i> Partager
+            <div class="popup-header">
+              <div class="popup-header-main">
+                ${badgeHtml}
+                <div class="popup-title" title="${title}">${title}</div>
+              </div>
+              <div class="popup-header-actions">
+                <button class="popup-actions-btn popup-share-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Partager ce point" title="Partager ce point">
+                  <i class="fas fa-share" aria-hidden="true"></i>
+                </button>
+                <button class="popup-close-btn" data-lat="${point.lat}" data-lng="${point.lng}" aria-label="Fermer" title="Fermer">
+                  ×
+                </button>
+              </div>
+            </div>
+            <button class="popup-coords" data-lat="${point.lat}" data-lng="${point.lng}" title="Copier les coordonnées">
+              <i class="fas fa-location-dot" aria-hidden="true"></i> ${coords}
             </button>
-            
-            ${city || postal || country ? `<div class="info-item"><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
-            ${elevation != null ? `<div class="info-item"><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
-            ${weather ? `<div class="info-item"><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
+            ${city || postal || country ? `<div class="info-item"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><strong>Lieu:</strong> ${[city, postal, country].filter(Boolean).join(", ")}</div>` : ""}
+            ${elevation != null ? `<div class="info-item"><i class="fas fa-mountain" aria-hidden="true"></i><strong>Alt:</strong> ${elevation.toFixed(1)} m</div>` : ""}
+            ${weather ? `<div class="info-item"><i class="fas fa-cloud-sun" aria-hidden="true"></i><strong>Météo:</strong> ${weather.emoji} ${weather.text} ${temp != null ? `(${temp}°C)` : ""}</div>` : ""}
             ${airHTML}
             ${noteHtml}
+            <div class="popup-footer">
+              <button class="popup-actions-btn popup-route-btn" data-lat="${point.lat}" data-lng="${point.lng}" title="Itinéraire vers ce point">
+                <i class="fas fa-route" aria-hidden="true"></i> Itinéraire
+              </button>
+            </div>
           </div>
         `;
 }
@@ -969,7 +1012,7 @@ function renderCollectionOptions(selectedId = null) {
           ${collections
             .map(
               (coll) =>
-                `<option value="${coll.id}" ${coll.id === selectedId ? "selected" : ""}>${escapeHtml(coll.name)}</option>`,
+                `<option value="${escapeAttr(coll.id)}" ${coll.id === selectedId ? "selected" : ""}>${escapeHtml(coll.name)}</option>`,
             )
             .join("")}
         `;
@@ -987,6 +1030,9 @@ function createPointCard(point, index) {
                 <select class="card-collection-select" data-index="${index}">
                   ${renderCollectionOptions(point.collectionId)}
                 </select>
+              <button class="center-btn" data-index="${index}" aria-label="Centrer sur ${escapeHtml(point.name)}" title="Centrer sur ce point">
+                <i class="fas fa-crosshairs"></i>
+              </button>
               <button class="rename-btn" data-index="${index}" aria-label="Renommer ${escapeHtml(point.name)}" title="Renommer">
                 <i class="fas fa-edit"></i>
               </button>
@@ -1077,6 +1123,17 @@ function showPointCard(index) {
   }
 }
 
+function sortPointsForList(list) {
+  const mode = sortPointsSelect?.value || "recent";
+  const sorted = [...list];
+  if (mode === "name-asc") {
+    sorted.sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr"));
+  } else if (mode === "name-desc") {
+    sorted.sort((a, b) => (b.name || "").localeCompare(a.name || "", "fr"));
+  }
+  return sorted;
+}
+
 function updatePointsList() {
   pointsList.innerHTML = "";
 
@@ -1091,10 +1148,11 @@ function updatePointsList() {
     toggleBtn.style.display = "block";
   }
 
-  // Filtrer par collection si nécessaire
-  const filteredPoints = currentCollectionFilter
+  // Filtrer par collection si nécessaire, puis trier
+  const matchedPoints = currentCollectionFilter
     ? points.filter((p) => p.collectionId === currentCollectionFilter)
     : points;
+  const filteredPoints = sortPointsForList(matchedPoints);
 
   // Utiliser DocumentFragment pour améliorer les performances
   const fragment = document.createDocumentFragment();
@@ -1108,7 +1166,7 @@ function updatePointsList() {
       const collection = collections.find((c) => c.id === point.collectionId);
       if (collection) {
         card.setAttribute("data-collection", point.collectionId);
-        card.style.setProperty("--collection-color", collection.color);
+        card.style.setProperty("--collection-color", safeColor(collection.color));
       }
     }
     fragment.appendChild(card);
@@ -1135,10 +1193,11 @@ function attachPointEvents() {
     if (!Number.isInteger(index) || !points[index]) return;
     const point = points[index];
 
-    // Clic sur titre
-    if (e.target.closest(".point-title")) {
+    // Clic sur titre ou bouton de centrage
+    if (e.target.closest(".point-title") || e.target.closest(".center-btn")) {
       map.setView([point.lat, point.lng], CONFIG.focusZoom);
       point.marker?.openPopup?.();
+      return;
     }
     // Clic sur bouton suppression
     else if (e.target.closest(".delete-btn")) {
@@ -1279,6 +1338,42 @@ function attachPointEvents() {
     } else if (typeof map !== "undefined" && map && map.closePopup) {
       map.closePopup();
     }
+  });
+
+  // Délégation: préparer un itinéraire vers ce point depuis le popup
+  document.addEventListener("click", (e) => {
+    const routeBtn = e.target.closest(".popup-route-btn");
+    if (!routeBtn) return;
+
+    const lat = parseFloat(routeBtn.dataset.lat);
+    const lng = parseFloat(routeBtn.dataset.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    updateRoutingSelects();
+    const target = points.find(
+      (pt) => pt.lat.toFixed(5) === lat.toFixed(5) && pt.lng.toFixed(5) === lng.toFixed(5),
+    );
+    if (!target) {
+      showToast("Ce point ne peut pas servir de destination", "error");
+      return;
+    }
+
+    routingEnd.value = `${target.lat},${target.lng}`;
+    routingPanel.style.display = "block";
+    showToast(`Destination : ${target.name || "point"}`, "success");
+  });
+
+  // Délégation: copier les coordonnées depuis le popup
+  document.addEventListener("click", (e) => {
+    const coordsBtn = e.target.closest(".popup-coords");
+    if (!coordsBtn) return;
+
+    const lat = parseFloat(coordsBtn.dataset.lat);
+    const lng = parseFloat(coordsBtn.dataset.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    copyTextToClipboard(`${lat.toFixed(5)}, ${lng.toFixed(5)}`)
+      .then(() => showToast("Coordonnées copiées", "success"))
+      .catch(() => showToast("Copie impossible", "error"));
   });
 
   // Délégation pour changement de collection
@@ -1433,6 +1528,54 @@ function exportAsJSON(pointsToExport) {
     ? `${pointsToExport.length} point(s) de la collection exporté(s) en JSON`
     : `${pointsToExport.length} point(s) exporté(s) en JSON`;
   showToast(message, "success");
+}
+
+function exportNotesMarkdown() {
+  const filtered = currentCollectionFilter
+    ? points.filter((p) => p.collectionId === currentCollectionFilter)
+    : points;
+  const withNotes = filtered.filter((p) => (p.note || "").trim());
+
+  if (withNotes.length === 0) {
+    showToast("Aucune note à exporter", "error");
+    return;
+  }
+
+  const collectionName = currentCollectionFilter
+    ? collections.find((c) => c.id === currentCollectionFilter)?.name
+    : null;
+  const header = `# Notes${collectionName ? ` — ${collectionName}` : ""}\n\n${withNotes.length} note(s) — exportées le ${new Date().toLocaleDateString("fr-CA")}\n\n`;
+  const body = withNotes
+    .map((p) => {
+      const coll = p.collectionId
+        ? collections.find((c) => c.id === p.collectionId)?.name || ""
+        : "";
+      const meta = `## ${p.name}${coll ? ` · ${coll}` : ""}\n\n${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}\n`;
+      return `${meta}\n${p.note.trim()}\n\n---\n`;
+    })
+    .join("\n");
+
+  const dataBlob = new Blob([header + body], { type: "text/markdown" });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `notes_${collectionName ? slug(collectionName) : "carte"}_${new Date().toISOString().split("T")[0]}.md`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast(`${withNotes.length} note(s) exportée(s) en Markdown`, "success");
+}
+
+function slug(value) {
+  return (
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "carte"
+  );
 }
 
 function exportAsCSV(pointsToExport) {
@@ -1630,10 +1773,15 @@ function performImport(validPoints, collectionsData, mode) {
     // Importer les collections
     if (Array.isArray(collectionsData)) {
       collectionsData.forEach((importedColl) => {
-        const exists = collections.some((c) => c.id === importedColl.id);
-        if (!exists) {
-          collections.push(importedColl);
-        }
+        const id = typeof importedColl?.id === "string" ? importedColl.id : "";
+        const name =
+          typeof importedColl?.name === "string" ? importedColl.name.trim().substring(0, 100) : "";
+        if (!id || !name) return;
+        if (collections.some((c) => c.id === id)) return;
+        const color = /^#[0-9a-fA-F]{3,8}$/.test(importedColl?.color || "")
+          ? importedColl.color
+          : COLLECTION_COLORS[collections.length % COLLECTION_COLORS.length];
+        collections.push({ id, name, color });
       });
       saveCollections();
       updateCollectionsUI();
@@ -1673,7 +1821,7 @@ function createMarker(lat, lng, name, collectionId = null, note = "") {
   const options = icon ? { icon } : {};
   return L.marker([lat, lng], options)
     .addTo(map)
-    .bindPopup(formatPopupContent(popupPoint))
+    .bindPopup(formatPopupContent(popupPoint), { maxWidth: 360 })
     .on("click", () => {
       const index = points.findIndex((p) => p.lat === lat && p.lng === lng);
       if (index !== -1) showPointCard(index);
@@ -1793,8 +1941,9 @@ function clearRoute() {
   routingEnd.value = "";
 }
 
-// Event listener pour la recherche de points
+// Event listener pour la recherche et le tri des points
 searchInput.addEventListener("input", debounce(filterPoints, 150));
+sortPointsSelect?.addEventListener("change", updatePointsList);
 
 // Event listener pour export/import
 $("export-btn").addEventListener("click", exportPoints);
@@ -1993,6 +2142,20 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+aboutBtn.addEventListener("click", () => {
+  openModal(aboutModal);
+});
+
+aboutClose.addEventListener("click", () => {
+  closeModal(aboutModal);
+});
+
+aboutModal.addEventListener("click", (e) => {
+  if (e.target === aboutModal) {
+    closeModal(aboutModal);
+  }
+});
+
 window.addEventListener(
   "resize",
   debounce(() => map.invalidateSize(), 250),
@@ -2106,6 +2269,30 @@ importModal.addEventListener("click", (e) => {
   }
 });
 
+$("export-notes-btn").addEventListener("click", exportNotesMarkdown);
+
+window.addEventListener("storage", (e) => {
+  if (e.key !== CONFIG.storageKey && e.key !== CONFIG.collectionsKey && e.key !== null) {
+    return;
+  }
+
+  if (e.key === null || e.key === CONFIG.storageKey) {
+    points.forEach((p) => p.marker?.remove?.());
+    points.length = 0;
+    loadPoints();
+  }
+
+  if (e.key === null || e.key === CONFIG.collectionsKey) {
+    collections = [];
+    loadCollections();
+  }
+
+  updatePointsList();
+  updateCollectionSelect();
+  updateCollectionsUI();
+  updateRoutingSelects();
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => map.invalidateSize(), 100);
   loadCollections();
@@ -2135,7 +2322,7 @@ function updateNetworkStatus() {
 window.addEventListener("online", updateNetworkStatus);
 window.addEventListener("offline", updateNetworkStatus);
 
-const modals = [collectionModal, renameModal, exportModal, importModal];
+const modals = [collectionModal, renameModal, exportModal, importModal, aboutModal];
 let lastFocusedElement = null;
 
 function isModalOpen(modal) {
@@ -2191,7 +2378,7 @@ async function sharePoint(point) {
       await navigator.share({ title: point.name, url });
       return;
     }
-    await navigator.clipboard.writeText(url);
+    await copyTextToClipboard(url);
     showToast("Lien copié dans le presse-papiers", "success");
   } catch (error) {
     if (error?.name !== "AbortError") {

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Éditeur de notes en Markdown avec rendu en direct." />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Notes - Frédéric Gaudreau" />
+    <meta property="og:description" content="Éditeur de notes en Markdown avec rendu en direct." />
+    <meta property="og:url" content="https://fredericgaudreau.github.io/notes.html" />
+    <link rel="canonical" href="https://fredericgaudreau.github.io/notes.html" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+    />
+    <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
+    <link rel="icon" type="image/png" href="/src/images/favicon.png" />
+    <link rel="stylesheet" href="/src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/notes.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>Notes - Frédéric Gaudreau</title>
+  </head>
+  <body data-page="notes">
+    <div id="header"></div>
+    <main class="notes-main">
+      <div id="notes-app">
+        <aside id="notes-sidebar" aria-label="Liste des notes">
+          <div class="sidebar-header">
+            <h2>Notes</h2>
+            <button
+              type="button"
+              id="new-note"
+              class="tool-btn"
+              aria-label="Nouvelle note"
+              title="Nouvelle note"
+            >
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+          <input
+            type="search"
+            id="notes-search"
+            placeholder="Rechercher…"
+            aria-label="Rechercher dans les notes"
+            autocomplete="off"
+          />
+          <select id="sort-notes" aria-label="Trier les notes" title="Trier les notes">
+            <option value="recent">Récemment modifiées</option>
+            <option value="title">Titre A → Z</option>
+          </select>
+          <ul id="notes-list"></ul>
+          <div class="notes-sidebar-footer" id="notes-stats" aria-live="off"></div>
+        </aside>
+        <section id="notes-editor">
+          <div id="linked-banner" hidden>
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            <span
+              >Note du point « <strong id="linked-point-name"></strong> » —
+              <a href="/map.html">retour à la carte</a></span
+            >
+          </div>
+          <div class="editor-toolbar">
+            <input
+              type="text"
+              id="note-title"
+              placeholder="Titre de la note"
+              autocomplete="off"
+              aria-label="Titre de la note"
+            />
+            <div class="toolbar-actions">
+              <button
+                type="button"
+                id="toggle-sidebar"
+                class="tool-btn"
+                aria-label="Afficher les notes"
+                aria-expanded="false"
+              >
+                <i class="fas fa-list" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="toggle-preview"
+                class="tool-btn"
+                aria-label="Basculer l'aperçu seul"
+                aria-pressed="false"
+                title="Basculer l'aperçu seul"
+              >
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="fullscreen-btn"
+                class="tool-btn"
+                aria-label="Plein écran"
+                title="Plein écran"
+              >
+                <i class="fas fa-expand" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="copy-btn"
+                class="tool-btn"
+                aria-label="Copier le Markdown"
+                title="Copier le Markdown"
+              >
+                <i class="fas fa-copy" aria-hidden="true"></i>
+              </button>
+              <div class="toolbar-group">
+                <button
+                  type="button"
+                  id="export-menu-btn"
+                  class="tool-btn"
+                  aria-label="Options d'export"
+                  title="Options d'export"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <i class="fas fa-file-export" aria-hidden="true"></i>
+                </button>
+                <div id="export-menu" hidden>
+                  <button type="button" id="export-md-btn">
+                    <i class="fas fa-file-lines" aria-hidden="true"></i> Cette note (.md)
+                  </button>
+                  <button type="button" id="export-all-md-btn">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i> Toutes les notes (.md)
+                  </button>
+                  <button type="button" id="export-json-btn">
+                    <i class="fas fa-code" aria-hidden="true"></i> Sauvegarde (JSON)
+                  </button>
+                  <button type="button" id="import-json-btn">
+                    <i class="fas fa-upload" aria-hidden="true"></i> Restaurer (JSON)
+                  </button>
+                  <button type="button" id="copy-html-btn">
+                    <i class="fas fa-code-branch" aria-hidden="true"></i> Copier le HTML rendu
+                  </button>
+                  <button type="button" id="print-btn">
+                    <i class="fas fa-print" aria-hidden="true"></i> Imprimer / PDF
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="spellcheck-btn"
+                class="tool-btn"
+                aria-label="Vérification orthographique"
+                title="Vérification orthographique"
+                aria-pressed="true"
+              >
+                <i class="fas fa-spell-check" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="duplicate-btn"
+                class="tool-btn"
+                aria-label="Dupliquer la note"
+                title="Dupliquer la note"
+              >
+                <i class="fas fa-clone" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                id="delete-btn"
+                class="tool-btn danger"
+                aria-label="Supprimer la note"
+                title="Supprimer la note"
+              >
+                <i class="fas fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <div
+            id="format-bar"
+            class="format-bar"
+            role="toolbar"
+            aria-label="Mise en forme Markdown"
+          >
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="gras"
+              aria-label="Gras"
+              title="Gras (Ctrl+B)"
+            >
+              <i class="fas fa-bold" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="italique"
+              aria-label="Italique"
+              title="Italique (Ctrl+I)"
+            >
+              <i class="fas fa-italic" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="titre"
+              aria-label="Titre"
+              title="Titre"
+            >
+              <i class="fas fa-heading" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="liste"
+              aria-label="Liste à puces"
+              title="Liste à puces"
+            >
+              <i class="fas fa-list-ul" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="citation"
+              aria-label="Citation"
+              title="Citation"
+            >
+              <i class="fas fa-quote-left" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="code"
+              aria-label="Code"
+              title="Code"
+            >
+              <i class="fas fa-code" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="lien"
+              aria-label="Lien"
+              title="Lien"
+            >
+              <i class="fas fa-link" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="date"
+              aria-label="Date du jour"
+              title="Date du jour"
+            >
+              <i class="fas fa-calendar-day" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div id="editor-panes">
+            <label for="markdown-input" class="visually-hidden">Contenu Markdown</label>
+            <textarea
+              id="markdown-input"
+              placeholder="# Ma note&#10;&#10;Écrivez votre Markdown ici..."
+              spellcheck="true"
+            ></textarea>
+            <div id="markdown-preview" class="markdown-body" aria-label="Aperçu du rendu"></div>
+            <button
+              type="button"
+              id="close-preview"
+              class="tool-btn"
+              aria-label="Fermer l'aperçu"
+              title="Fermer l'aperçu"
+            >
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="statusbar">
+            <span id="char-count">0 caractère</span>
+            <span id="word-count">0 mot</span>
+            <span id="read-time"></span>
+            <span id="save-status" aria-live="polite"></span>
+            <span id="note-dates" class="note-dates"></span>
+          </div>
+        </section>
+      </div>
+    </main>
+    <div id="footer"></div>
+    <input type="file" id="import-notes-input" accept=".json,application/json" hidden />
+    <script src="/src/js/index.js" defer></script>
+    <script src="/src/js/markdown.js" defer></script>
+    <script src="/src/js/notes.js" defer></script>
+  </body>
+</html>

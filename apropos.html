@@ -5,16 +5,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="À propos de Frédéric Gaudreau." />
-    <meta name="referrer" content="no-referrer-when-downgrade" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com;"
+      content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
     />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="À propos - Frédéric Gaudreau" />
     <meta property="og:description" content="À propos de Frédéric Gaudreau." />
     <meta property="og:url" content="https://fredericgaudreau.github.io/apropos.html" />
     <link rel="canonical" href="https://fredericgaudreau.github.io/apropos.html" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+    />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
     <link rel="stylesheet" href="/src/css/style.css" />
@@ -35,6 +44,37 @@
         </p>
         <p>
           Je m'intéresse aux relations entre la technologie, l'être humain et son environnement.
+        </p>
+
+        <h2>Les outils</h2>
+        <p>
+          <a href="/map.html"><strong>Carte interactive</strong></a> — créez et organisez des points
+          d'intérêt en collections, annotez-les avec des notes en Markdown, consultez la météo,
+          l'altitude et la qualité de l'air, calculez des itinéraires et partagez un point par un
+          simple lien.
+        </p>
+        <p>
+          <a href="/notes.html"><strong>Notes Markdown</strong></a> — un éditeur avec rendu en
+          direct, des statistiques de lecture et un export en fichier .md. Chaque note peut être
+          reliée à un point de la carte directement depuis son popup.
+        </p>
+        <p>
+          Le rendu Markdown est assuré par un
+          <a
+            href="https://github.com/FredericGaudreau/fredericgaudreau.github.io/blob/master/src/js/markdown.js"
+            >petit parseur maison</a
+          >, écrit sans dépendance et pensé pour échapper le HTML par défaut.
+        </p>
+
+        <h2>Ce site</h2>
+        <p>
+          Tout est construit en HTML, CSS et JavaScript vanilla, sans framework ni étape de
+          construction. Les données (points, collections, notes) restent dans le stockage local de
+          votre navigateur — rien n'est envoyé sur un serveur.
+        </p>
+        <p>
+          Le site est installable et fonctionne hors ligne grâce à un service worker, et une petite
+          configuration de CI vérifie les tests, le formatage et le balisage à chaque modification.
         </p>
       </article>
     </main>
