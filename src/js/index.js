@@ -44,19 +44,6 @@
     }
   };
 
-  /**
-   * Basculer un attribut
-   */
-  const toggleAttr = (element, attr, value) => {
-    if (element) {
-      if (element.getAttribute(attr) === value) {
-        element.removeAttribute(attr);
-      } else {
-        element.setAttribute(attr, value);
-      }
-    }
-  };
-
   // ============================================
   // Chargement des composants HTML
   // ============================================
@@ -176,51 +163,66 @@
    * Initialise le menu mobile
    */
   function initMobileMenu() {
+    // Utiliser la délégation d'événement car le header est chargé dynamiquement
+    document.addEventListener('click', (e) => {
+      const menuBtn = e.target.closest('#mobile-menu-btn');
+      if (menuBtn) {
+        e.preventDefault();
+        toggleMobileMenu();
+        return;
+      }
+      
+      const mobileMenu = $('#mobile-menu');
+      if (mobileMenu && !mobileMenu.hidden && !e.target.closest('#mobile-menu')) {
+        closeMobileMenu();
+      }
+    });
+
+    // Fermer avec la touche Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        closeMobileMenu();
+      }
+    });
+  }
+
+  function toggleMobileMenu() {
     const menuBtn = $('#mobile-menu-btn');
     const mobileMenu = $('#mobile-menu');
     
     if (!menuBtn || !mobileMenu) return;
 
-    const toggleMenu = () => {
-      isMenuOpen = !isMenuOpen;
-      const isOpen = isMenuOpen;
-      
-      menuBtn.setAttribute('aria-expanded', isOpen);
-      mobileMenu.hidden = !isOpen;
-      
-      // Bloquer le scroll du body quand le menu est ouvert
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-      
-      // Focus sur le premier lien du menu
-      if (isOpen) {
-        const firstLink = mobileMenu.querySelector('a');
-        if (firstLink) {
-          firstLink.focus();
-        }
-      } else {
-        menuBtn.focus();
+    isMenuOpen = !isMenuOpen;
+    const isOpen = isMenuOpen;
+    
+    menuBtn.setAttribute('aria-expanded', isOpen);
+    mobileMenu.hidden = !isOpen;
+    
+    // Bloquer le scroll du body quand le menu est ouvert
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    
+    // Focus sur le premier lien du menu
+    if (isOpen) {
+      const firstLink = mobileMenu.querySelector('a');
+      if (firstLink) {
+        firstLink.focus();
       }
-    };
+    } else {
+      menuBtn.focus();
+    }
+  }
 
-    // Écouteur pour le bouton
-    on(menuBtn, 'click', toggleMenu);
+  function closeMobileMenu() {
+    const menuBtn = $('#mobile-menu-btn');
+    const mobileMenu = $('#mobile-menu');
+    
+    if (!menuBtn || !mobileMenu) return;
 
-    // Fermer le menu quand on clique sur un lien
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      on(link, 'click', () => {
-        isMenuOpen = false;
-        menuBtn.setAttribute('aria-expanded', false);
-        mobileMenu.hidden = true;
-        document.body.style.overflow = '';
-      });
-    });
-
-    // Fermer avec la touche Escape
-    on(document, 'keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        toggleMenu();
-      }
-    });
+    isMenuOpen = false;
+    menuBtn.setAttribute('aria-expanded', false);
+    mobileMenu.hidden = true;
+    document.body.style.overflow = '';
+    menuBtn.focus();
   }
 
   // ============================================
@@ -251,23 +253,20 @@
       includeHTML('footer', COMPONENTS.footer)
     ]);
 
+    // Attendre un peu pour que le DOM soit complètement mis à jour
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Initialiser le menu mobile (doit être avant markCurrentLink)
+    initMobileMenu();
+
     // Mettre à jour les liens actifs
     markCurrentLink();
 
     // Initialiser le header
     initHeaderScroll();
 
-    // Initialiser le menu mobile
-    initMobileMenu();
-
     // Mettre à jour l'année dans le footer
     updateCurrentYear();
-
-    // Ajouter un délai pour permettre au DOM de se mettre à jour
-    // avant de marquer les liens (pour le menu mobile)
-    setTimeout(() => {
-      markCurrentLink();
-    }, 100);
   }
 
   // ============================================
@@ -280,7 +279,4 @@
   } else {
     init();
   }
-
-  // Exporter pour les autres modules si nécessaire
-  window.__siteInit = init;
 })();
