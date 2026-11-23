@@ -4,133 +4,40 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Site personnel de Frédéric Gaudreau - Outils web pour la productivité : carte interactive et éditeur de notes Markdown fonctionnant entièrement dans le navigateur." />
+    <meta name="description" content="Outils personnels : carte interactive et notes Markdown." />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:;"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
-    
-    <!-- Open Graph / Social Media -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Frédéric Gaudreau - Outils web productifs" />
-    <meta property="og:description" content="Carte interactive et éditeur de notes Markdown fonctionnant entièrement dans le navigateur, sans serveur. Vos données restent sur votre appareil." />
-    <meta property="og:url" content="https://fredericgaudreau.github.io/" />
-    <meta property="og:site_name" content="Frédéric Gaudreau" />
-    <meta property="og:locale" content="fr_FR" />
-    
-    
-    <!-- Favicon -->
+    <meta name="theme-color" content="#2563eb" />
     <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg" />
     <link rel="icon" type="image/png" href="/src/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/src/images/favicon.png" />
-    
-    <!-- Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    
-    <!-- Theme -->
-    <meta name="theme-color" content="#2563eb" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    
-    <!-- Preconnect -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- Fonts -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
     />
-    
-    <!-- Styles -->
     <link rel="stylesheet" href="/src/css/style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    
-    <title>Frédéric Gaudreau - Outils web productifs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Outils - Frédéric Gaudreau</title>
   </head>
   <body data-page="home">
     <div id="header"></div>
-    
     <main id="main">
-      <article class="animate-fade-in">
-        <header class="page-header">
-          <h1>Frédéric Gaudreau</h1>
-          <p class="subtitle">
-            Des outils web puissants qui fonctionnent entièrement dans votre navigateur, 
-            sans serveur. Vos données restent sur votre appareil.
-          </p>
-        </header>
-
-        <section aria-labelledby="tools-heading">
-          <h2 id="tools-heading" class="visually-hidden">Mes outils</h2>
-          <div class="tools-grid">
-            <a class="tool-card" href="/map.html">
-              <i class="fas fa-map-location-dot" aria-hidden="true"></i>
-              <strong>Carte interactive</strong>
-              <span>
-                Créez et organisez des points d'intérêt en collections, annotez-les avec des notes en Markdown, 
-                consultez la météo, l'altitude et la qualité de l'air, calculez des itinéraires et partagez par lien.
-              </span>
-              <span class="tool-meta">
-                <i class="fas fa-check-circle" aria-hidden="true"></i> Fonctionne hors ligne
-              </span>
-            </a>
-            <a class="tool-card" href="/notes.html">
-              <i class="fas fa-pen-nib" aria-hidden="true"></i>
-              <strong>Notes Markdown</strong>
-              <span>
-                Éditeur avec aperçu en direct, recherche, statistiques de lecture, export .md 
-                et sauvegarde JSON. Chaque note peut être liée à un point sur la carte.
-              </span>
-              <span class="tool-meta">
-                <i class="fas fa-check-circle" aria-hidden="true"></i> Synchronisation avec la carte
-              </span>
-            </a>
-          </div>
-        </section>
-
-        <section class="highlight-section">
-          <div class="highlight-card">
-            <i class="fas fa-lock" aria-hidden="true"></i>
-            <div class="highlight-content">
-              <h3>Vos données, votre contrôle</h3>
-              <p>
-                Toutes vos données (points, collections, notes) sont stockées dans le stockage local 
-                de votre navigateur. Rien n'est envoyé sur un serveur. Fonctionne hors ligne.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section class="quote-section">
-          <blockquote cite="https://fr.wikiquote.org/wiki/Frank_Herbert">
-            <p>
-              «&nbsp;Highly organized research is guaranteed to produce nothing new.&nbsp;»
-            </p>
-            <footer>— Frank Herbert, <cite>Dune</cite></footer>
-          </blockquote>
-        </section>
-
-        <section class="cta-section">
-          <p>
-            <a href="/apropos.html" class="btn btn-primary">
-              <i class="fas fa-info-circle" aria-hidden="true"></i>
-              En savoir plus sur ces outils
-            </a>
-          </p>
-        </section>
-      </article>
+      <h1>Outils</h1>
+      <p>Carte interactive et éditeur de notes Markdown. Fonctionne dans le navigateur, sans serveur.</p>
+      <ul>
+        <li><a href="/map.html"><i class="fas fa-map-location-dot"></i> Carte</a></li>
+        <li><a href="/notes.html"><i class="fas fa-pen-nib"></i> Notes</a></li>
+        <li><a href="/apropos.html"><i class="fas fa-info-circle"></i> À propos</a></li>
+      </ul>
     </main>
-    
     <div id="footer"></div>
-    
     <script src="/src/js/index.js" defer></script>
   </body>
 </html>
