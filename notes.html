@@ -95,9 +95,9 @@
                 type="button"
                 id="toggle-preview"
                 class="tool-btn"
-                aria-label="Basculer aperçu"
-                aria-pressed="true"
-                title="Basculer l'aperçu"
+                aria-label="Basculer l'aperçu seul"
+                aria-pressed="false"
+                title="Basculer l'aperçu seul"
               >
                 <i class="fas fa-eye" aria-hidden="true"></i>
               </button>
@@ -144,8 +144,24 @@
                   <button type="button" id="import-json-btn">
                     <i class="fas fa-upload" aria-hidden="true"></i> Restaurer (JSON)
                   </button>
+                  <button type="button" id="copy-html-btn">
+                    <i class="fas fa-code-branch" aria-hidden="true"></i> Copier le HTML rendu
+                  </button>
+                  <button type="button" id="print-btn">
+                    <i class="fas fa-print" aria-hidden="true"></i> Imprimer / PDF
+                  </button>
                 </div>
               </div>
+              <button
+                type="button"
+                id="spellcheck-btn"
+                class="tool-btn"
+                aria-label="Vérification orthographique"
+                title="Vérification orthographique"
+                aria-pressed="true"
+              >
+                <i class="fas fa-spell-check" aria-hidden="true"></i>
+              </button>
               <button
                 type="button"
                 id="duplicate-btn"

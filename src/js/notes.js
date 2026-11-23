@@ -356,6 +356,22 @@ function copyMarkdown() {
     .catch(() => setStatus("Copie impossible", "error"));
 }
 
+function copyRenderedHtml() {
+  if (!currentNote()) return;
+  navigator.clipboard
+    .writeText(renderMarkdown(markdownInput.value))
+    .then(() => setStatus("HTML rendu copié"))
+    .catch(() => setStatus("Copie impossible", "error"));
+}
+
+function toggleSpellcheck() {
+  const enabled = markdownInput.spellcheck;
+  markdownInput.spellcheck = !enabled;
+  const btn = $("spellcheck-btn");
+  btn.setAttribute("aria-pressed", String(!enabled));
+  setStatus(!enabled ? "Orthographe activée" : "Orthographe désactivée");
+}
+
 function downloadFile(content, filename, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -649,6 +665,15 @@ $("import-json-btn").addEventListener("click", () => {
   toggleExportMenu(false);
   importNotesInput.click();
 });
+$("copy-html-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  copyRenderedHtml();
+});
+$("print-btn").addEventListener("click", () => {
+  toggleExportMenu(false);
+  window.print();
+});
+$("spellcheck-btn").addEventListener("click", toggleSpellcheck);
 importNotesInput.addEventListener("change", () => {
   const file = importNotesInput.files?.[0];
   importNotesInput.value = "";

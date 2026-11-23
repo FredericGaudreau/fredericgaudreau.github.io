@@ -1,16 +1,15 @@
 .notes-main {
-  max-width: 1400px;
+  max-width: none;
   display: flex;
   flex-direction: column;
-  padding-top: 1rem;
-  padding-bottom: 0.75rem;
+  padding: 0.5rem 1rem 0.25rem;
 }
 
 #notes-app {
   display: grid;
   grid-template-columns: 260px 1fr;
-  height: calc(100dvh - 8.75rem);
-  min-height: 26rem;
+  height: calc(100dvh - 8.25rem);
+  min-height: 24rem;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
@@ -261,6 +260,18 @@
   min-height: 0;
 }
 
+#editor-panes.show-preview {
+  grid-template-columns: 1fr;
+}
+
+#editor-panes.show-preview #markdown-input {
+  display: none;
+}
+
+#editor-panes.show-preview #markdown-preview {
+  border-left: none;
+}
+
 #markdown-input {
   border: none;
   padding: 1rem 1.25rem;
@@ -491,5 +502,44 @@ body.linked-mode #notes-app {
 
   #editor-panes:not(.show-preview) #markdown-preview {
     display: none;
+  }
+}
+
+@media print {
+  header,
+  footer,
+  .toolbar-actions,
+  .format-bar,
+  .statusbar,
+  #linked-banner,
+  #notes-sidebar,
+  #notes-sidebar-toggle,
+  #markdown-input {
+    display: none !important;
+  }
+
+  .notes-main {
+    max-width: none;
+    padding: 0;
+  }
+
+  #notes-app {
+    display: block;
+    height: auto;
+    border: none;
+    border-radius: 0;
+  }
+
+  .editor-area,
+  #editor-panes {
+    display: block;
+    grid-template-columns: 1fr;
+  }
+
+  #markdown-preview {
+    border-left: none;
+    display: block !important;
+    overflow: visible;
+    height: auto;
   }
 }
