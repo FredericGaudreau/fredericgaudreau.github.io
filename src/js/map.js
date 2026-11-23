@@ -270,6 +270,7 @@ const toggleBtn = $("toggle-points");
 const locateBtn = $("locate-btn");
 const counterBadge = toggleBtn.querySelector(".counter-badge");
 const searchInput = $("search-points");
+const sortPointsSelect = $("sort-points");
 const addressSearchInput = $("search-address");
 const addressSearchResults = $("search-results");
 const nominatimSearch = $("nominatim-search");
@@ -1025,6 +1026,9 @@ function createPointCard(point, index) {
                 <select class="card-collection-select" data-index="${index}">
                   ${renderCollectionOptions(point.collectionId)}
                 </select>
+              <button class="center-btn" data-index="${index}" aria-label="Centrer sur ${escapeHtml(point.name)}" title="Centrer sur ce point">
+                <i class="fas fa-crosshairs"></i>
+              </button>
               <button class="rename-btn" data-index="${index}" aria-label="Renommer ${escapeHtml(point.name)}" title="Renommer">
                 <i class="fas fa-edit"></i>
               </button>
@@ -1115,6 +1119,17 @@ function showPointCard(index) {
   }
 }
 
+function sortPointsForList(list) {
+  const mode = sortPointsSelect?.value || "recent";
+  const sorted = [...list];
+  if (mode === "name-asc") {
+    sorted.sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr"));
+  } else if (mode === "name-desc") {
+    sorted.sort((a, b) => (b.name || "").localeCompare(a.name || "", "fr"));
+  }
+  return sorted;
+}
+
 function updatePointsList() {
   pointsList.innerHTML = "";
 
@@ -1129,10 +1144,11 @@ function updatePointsList() {
     toggleBtn.style.display = "block";
   }
 
-  // Filtrer par collection si nécessaire
-  const filteredPoints = currentCollectionFilter
+  // Filtrer par collection si nécessaire, puis trier
+  const matchedPoints = currentCollectionFilter
     ? points.filter((p) => p.collectionId === currentCollectionFilter)
     : points;
+  const filteredPoints = sortPointsForList(matchedPoints);
 
   // Utiliser DocumentFragment pour améliorer les performances
   const fragment = document.createDocumentFragment();
@@ -1173,10 +1189,11 @@ function attachPointEvents() {
     if (!Number.isInteger(index) || !points[index]) return;
     const point = points[index];
 
-    // Clic sur titre
-    if (e.target.closest(".point-title")) {
+    // Clic sur titre ou bouton de centrage
+    if (e.target.closest(".point-title") || e.target.closest(".center-btn")) {
       map.setView([point.lat, point.lng], CONFIG.focusZoom);
       point.marker?.openPopup?.();
+      return;
     }
     // Clic sur bouton suppression
     else if (e.target.closest(".delete-btn")) {
@@ -1915,8 +1932,9 @@ function clearRoute() {
   routingEnd.value = "";
 }
 
-// Event listener pour la recherche de points
+// Event listener pour la recherche et le tri des points
 searchInput.addEventListener("input", debounce(filterPoints, 150));
+sortPointsSelect?.addEventListener("change", updatePointsList);
 
 // Event listener pour export/import
 $("export-btn").addEventListener("click", exportPoints);

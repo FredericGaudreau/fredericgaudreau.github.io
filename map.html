@@ -319,6 +319,23 @@
         font-family: monospace;
       }
 
+      .center-btn {
+        background: var(--border);
+        color: var(--text-primary);
+        border: 0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .center-btn:hover {
+        background: var(--primary);
+        color: white;
+      }
+
       .rename-btn {
         background: var(--primary);
         color: white;
@@ -1160,6 +1177,19 @@
         box-sizing: border-box;
       }
 
+      #sort-points {
+        display: block;
+        width: calc(100% - 2rem);
+        margin: 0.5rem 1rem 0;
+        padding: 0.45rem 0.6rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
+        background: #fff;
+        box-sizing: border-box;
+        cursor: pointer;
+      }
+
       #search-points:focus {
         outline: none;
         border-color: var(--primary);
@@ -1920,12 +1950,17 @@
         <input
           type="text"
           id="search-points"
-          placeholder="🔍 Rechercher un point..."
+          placeholder="Rechercher un point…"
           autocomplete="off"
         />
         <button type="button" id="clear-search" aria-label="Effacer la recherche" title="Effacer">
           ×
         </button>
+        <select id="sort-points" aria-label="Trier les points" title="Trier les points">
+          <option value="recent">Récemment ajoutés</option>
+          <option value="name-asc">Nom A → Z</option>
+          <option value="name-desc">Nom Z → A</option>
+        </select>
       </div>
       <ul id="points-list"></ul>
     </section>

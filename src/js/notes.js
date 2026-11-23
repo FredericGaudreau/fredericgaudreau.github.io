@@ -15,6 +15,7 @@ const readTime = $("read-time");
 const noteDates = $("note-dates");
 const notesStats = $("notes-stats");
 const notesSearch = $("notes-search");
+const sortNotesSelect = $("sort-notes");
 const formatBar = $("format-bar");
 const exportMenuBtn = $("export-menu-btn");
 const exportMenu = $("export-menu");
@@ -24,6 +25,12 @@ let notes = [];
 let linkedPoint = null;
 let currentId = null;
 let searchQuery = "";
+let sortMode = "recent";
+try {
+  if (localStorage.getItem("notesSort") === "title") sortMode = "title";
+} catch (error) {
+  console.warn("localStorage indisponible:", error);
+}
 let debounceTimer = null;
 let statusTimer = null;
 
@@ -118,6 +125,7 @@ function exitLinkedMode() {
   $("linked-banner").hidden = true;
   titleInput.readOnly = false;
   $("new-note").disabled = false;
+  $("duplicate-btn").disabled = false;
   $("delete-btn").disabled = false;
   loadNotes();
   currentId = notes.length > 0 ? [...notes].sort((a, b) => b.updatedAt - a.updatedAt)[0].id : null;
@@ -134,6 +142,7 @@ function enterLinkedMode(point) {
   titleInput.value = point.name || "";
   titleInput.readOnly = true;
   $("new-note").disabled = true;
+  $("duplicate-btn").disabled = true;
   $("delete-btn").disabled = true;
   markdownInput.value = point.note || "";
   currentId = null;
@@ -169,7 +178,11 @@ function noteTitle(note) {
 }
 
 function renderNotesList() {
-  const sorted = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
+  const sorted = [...notes].sort((a, b) =>
+    sortMode === "title"
+      ? noteTitle(a).localeCompare(noteTitle(b), "fr")
+      : b.updatedAt - a.updatedAt,
+  );
   const query = searchQuery.trim().toLowerCase();
   const filtered = query
     ? sorted.filter(
@@ -355,6 +368,23 @@ function downloadFile(content, filename, type) {
   URL.revokeObjectURL(url);
 }
 
+function duplicateCurrent() {
+  const note = currentNote();
+  if (!note) return;
+
+  const copy = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+    title: note.title ? `${note.title} (copie)`.substring(0, 120) : "",
+    content: note.content,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  notes.push(copy);
+  persist();
+  selectNote(copy.id);
+  setStatus("Note dupliquée");
+}
+
 function exportNote() {
   const note = currentNote();
   if (!note) return;
@@ -473,6 +503,14 @@ function applyFormat(type) {
     replacement = `\`${selected || "code"}\``;
     cursorFrom = start + 1;
     cursorTo = cursorFrom + (selected || "code").length;
+  } else if (type === "date") {
+    replacement = new Date().toLocaleDateString("fr-CA", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    cursorFrom = start;
+    cursorTo = start + replacement.length;
   } else if (type === "lien") {
     replacement = `[${selected || "texte du lien"}](https://)`;
     cursorFrom = start + 1;
@@ -589,6 +627,10 @@ document.addEventListener("keydown", (e) => {
     clearTimeout(debounceTimer);
     saveCurrent();
   }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    notesSearch.focus();
+  }
 });
 
 $("export-md-btn").addEventListener("click", () => {
@@ -613,12 +655,31 @@ importNotesInput.addEventListener("change", () => {
   if (file) importNotesJSON(file);
 });
 
-notesSearch.addEventListener("input", () => {
-  searchQuery = notesSearch.value;
-  renderNotesList();
-});
+if (notesSearch) {
+  notesSearch.addEventListener("input", () => {
+    searchQuery = notesSearch.value;
+    renderNotesList();
+  });
+}
 
-$("new-note").addEventListener("click", createNote);
+if (sortNotesSelect) {
+  sortNotesSelect.value = sortMode;
+  sortNotesSelect.addEventListener("change", () => {
+    sortMode = sortNotesSelect.value;
+    try {
+      localStorage.setItem("notesSort", sortMode);
+    } catch (error) {
+      console.warn("Préférence de tri non enregistrée:", error);
+    }
+    renderNotesList();
+  });
+}
+
+$("new-note").addEventListener("click", () => {
+  if (linkedPoint) return;
+  createNote();
+});
+$("duplicate-btn").addEventListener("click", duplicateCurrent);
 $("delete-btn").addEventListener("click", deleteCurrent);
 $("copy-btn").addEventListener("click", copyMarkdown);
 $("fullscreen-btn").addEventListener("click", toggleFullscreen);

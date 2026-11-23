@@ -37,6 +37,48 @@ footer {
   padding: 1rem;
 }
 
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.tool-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.tool-card i {
+  color: #2563eb;
+  font-size: 1.3rem;
+}
+
+.tool-card strong {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.tool-card span {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
 blockquote {
   margin: 1rem 0;
   padding: 0.5rem 1rem;

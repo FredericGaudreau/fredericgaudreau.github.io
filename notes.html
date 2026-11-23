@@ -58,6 +58,10 @@
             aria-label="Rechercher dans les notes"
             autocomplete="off"
           />
+          <select id="sort-notes" aria-label="Trier les notes" title="Trier les notes">
+            <option value="recent">Récemment modifiées</option>
+            <option value="title">Titre A → Z</option>
+          </select>
           <ul id="notes-list"></ul>
           <div class="notes-sidebar-footer" id="notes-stats" aria-live="off"></div>
         </aside>
@@ -144,6 +148,15 @@
               </div>
               <button
                 type="button"
+                id="duplicate-btn"
+                class="tool-btn"
+                aria-label="Dupliquer la note"
+                title="Dupliquer la note"
+              >
+                <i class="fas fa-clone" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
                 id="delete-btn"
                 class="tool-btn danger"
                 aria-label="Supprimer la note"
@@ -221,6 +234,15 @@
               title="Lien"
             >
               <i class="fas fa-link" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="tool-btn"
+              data-format="date"
+              aria-label="Date du jour"
+              title="Date du jour"
+            >
+              <i class="fas fa-calendar-day" aria-hidden="true"></i>
             </button>
           </div>
           <div id="editor-panes">
