@@ -3,6 +3,27 @@
    Utilise le design system défini dans style.css
    ============================================ */
 
+/* Variables spécifiques à notes.css */
+:root {
+  --color-primary-50: var(--color-neutral-100);
+  --color-primary-100: var(--color-neutral-200);
+  --color-primary-200: var(--color-neutral-300);
+  --color-primary-500: var(--color-primary);
+  --color-primary-600: var(--color-primary-dark);
+  --color-primary-700: var(--color-neutral-700);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary-50: var(--color-neutral-100);
+    --color-primary-100: var(--color-neutral-200);
+    --color-primary-200: var(--color-neutral-300);
+    --color-primary-500: var(--color-primary);
+    --color-primary-600: var(--color-primary-dark);
+    --color-primary-700: var(--color-neutral-700);
+  }
+}
+
 .notes-main {
   max-width: none;
   display: flex;
@@ -31,16 +52,16 @@
    ============================================ */
 .notes-sidebar-footer {
   padding: var(--space-md) var(--space-lg);
-  border-top: var(--border-width) solid var(--color-neutral-200);
+  border-top: var(--border-width) solid var(--color-neutral-300);
   font-size: 0.75rem;
-  color: var(--color-neutral-500);
+  color: var(--color-neutral-600);
 }
 
 #notes-sidebar {
   display: flex;
   flex-direction: column;
-  border-right: var(--border-width) solid var(--color-neutral-200);
-  background: var(--color-neutral-100);
+  border-right: var(--border-width) solid var(--color-neutral-300);
+  background: var(--color-neutral-50);
 }
 
 .sidebar-header {
@@ -587,7 +608,7 @@ body.linked-mode #notes-app {
     position: fixed;
     inset: 0;
     z-index: var(--z-modal);
-    background: var(--color-neutral-100);
+    background: var(--color-neutral-50);
   }
 
   body.show-sidebar #notes-sidebar {
