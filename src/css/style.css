@@ -283,12 +283,6 @@ li {
   text-decoration: underline;
 }
 
-.copyright {
-  font-size: 0.85rem;
-  color: var(--color-neutral-600);
-  text-align: center;
-}
-
 /* ============================================
    Skip Link
    ============================================ */
