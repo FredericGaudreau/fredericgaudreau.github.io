@@ -245,10 +245,6 @@ li {
   font-size: 1rem;
 }
 
-.home-link {
-  font-weight: 600;
-}
-
 /* Footer */
 .site-footer {
   width: 100%;
@@ -271,16 +267,6 @@ li {
   justify-content: center;
   gap: var(--space-md);
   flex-wrap: wrap;
-}
-
-.social-link {
-  color: var(--color-neutral-700);
-  transition: color var(--transition);
-}
-
-.social-link:hover {
-  color: var(--color-primary);
-  text-decoration: underline;
 }
 
 /* ============================================
